@@ -9,7 +9,8 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.append(str(ROOT_DIR))
 
 from ai.memory.user_profile_memory import UserProfileMemory
-from ai.services.chat_service import ChatService
+from database.chat_persistence_service import ChatPersistenceService
+
 
 try:
     from ai.services.chat_service import ChatService
@@ -232,11 +233,21 @@ label { color:#DCE4EC !important; font-size:14px !important; font-weight:600 !im
 # HELPERS
 # ==================================================
 def clean_response(text: str) -> str:
-    """Remove HTML/<br> e converte pipe-tables grandes em listas, caso o modelo ainda emita."""
+
     if not text:
         return text
+
     text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
     text = re.sub(r'<[^>]+>', '', text)
+
+    # remove blocos latex
+    text = text.replace("\\text", "")
+    text = text.replace("\\frac", "dividido por")
+    text = text.replace("\\approx", "aproximadamente")
+    text = text.replace("\\times", "x")
+
+    text = re.sub(r'\\[a-zA-Z]+', '', text)
+
     return text.strip()
 
 
@@ -275,10 +286,14 @@ def new_chat_id():
 # SESSION STATE INIT
 # ==================================================
 defaults = {
-    "stage": "login",       # login -> register -> welcome -> chat
+    "stage": "login",
     "profile": {},
-    "chats": {},             # {id: {"title":.., "messages":[...]}}
+    "chats": {},
     "active_chat": None,
+
+    # banco
+    "db_user_id": None,
+    "db_chat_id": None,
 }
 for k, v in defaults.items():
     if k not in st.session_state:
@@ -337,6 +352,13 @@ elif st.session_state.stage == "register":
                 "apartment": apartment,
                 "persona": persona,
             })
+
+            persistence = ChatPersistenceService()
+            user_id = persistence.create_user_if_not_exists(
+                st.session_state.profile
+            )
+
+            st.session_state.db_user_id = user_id
             st.session_state.stage = "welcome"
             st.rerun()
         else:
@@ -401,9 +423,19 @@ else:
 
         if st.button("+ Novo bate-papo", use_container_width=True):
             cid = new_chat_id()
+
+            persistence = ChatPersistenceService()
+
+            db_chat_id = persistence.create_chat(
+                st.session_state.db_user_id,
+                "Nova Conversa"
+            )
+
+            st.session_state.db_chat_id = db_chat_id
             st.session_state.chats[cid] = {
                 "title": None,
                 "messages": [],
+                "db_chat_id": db_chat_id,
                 "service": make_chat_service(
                     system_context,
                     profile_context
@@ -445,9 +477,18 @@ else:
     # Garante chat ativo
     if st.session_state.active_chat is None or st.session_state.active_chat not in st.session_state.chats:
         cid = new_chat_id()
+        persistence = ChatPersistenceService()
+        db_chat_id = persistence.create_chat(
+            st.session_state.db_user_id,
+            "Nova Conversa"
+        )
+
+        st.session_state.db_chat_id = db_chat_id
+        
         st.session_state.chats[cid] = {
             "title": None,
             "messages": [],
+            "db_chat_id": db_chat_id,
             "service": make_chat_service(
                 system_context,
                 profile_context,
@@ -455,7 +496,11 @@ else:
         }
         st.session_state.active_chat = cid
 
-    chat = st.session_state.chats[st.session_state.active_chat]
+    chat = st.session_state.chats[
+        st.session_state.active_chat
+    ]
+
+    db_chat_id = chat["db_chat_id"]
 
     # Histórico
     for message in chat["messages"]:
@@ -466,7 +511,22 @@ else:
     user_input = st.chat_input("Pergunte algo sobre carregamento, potência, filas ou carregadores...")
 
     if user_input:
-        chat["messages"].append({"role": "user", "content": user_input})
+
+        persistence = ChatPersistenceService()
+
+        # salva usuário no banco
+        persistence.save_user_message(
+            db_chat_id,
+            user_input
+        )
+
+        chat["messages"].append(
+            {
+                "role": "user",
+                "content": user_input
+            }
+        )
+
         with st.chat_message("user"):
             st.markdown(user_input)
 
@@ -474,10 +534,32 @@ else:
             chat["title"] = generate_chat_title(user_input)
 
         with st.chat_message("assistant"):
-            with st.spinner("Consultando ChargeOps AI..."):
-                raw = chat["service"].send_message(user_input)
-                response = clean_response(raw)
+
+            with st.spinner(
+                "Consultando ChargeOps AI..."
+            ):
+                
+                raw = chat["service"].send_message(
+                    user_input
+                )
+
+                response = clean_response(
+                    raw
+                )
+
                 st.markdown(response)
 
-        chat["messages"].append({"role": "assistant", "content": response})
+        # salva resposta IA no banco
+        persistence.save_assistant_message(
+            db_chat_id,
+            response
+        )
+
+        chat["messages"].append(
+            {
+                "role": "assistant",
+                "content": response
+            }
+        )
+
         st.rerun()

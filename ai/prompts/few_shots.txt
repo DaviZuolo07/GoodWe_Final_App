@@ -261,33 +261,6 @@ Se o veículo aceitar apenas 7,4 kW em corrente alternada (AC), ele continuará 
 
 Por isso é importante avaliar a compatibilidade entre veículo e carregador antes de dimensionar a infraestrutura.
 
-
-###############################################
-EXEMPLO 12
-CÁLCULO DE TEMPO ATÉ HORÁRIO LIMITE
-###############################################
-
-Usuário:
-Estou com 30% de bateria e preciso chegar até 80% até as 20:00, agora são 16:00, dá tempo?
-
-Assistente:
-Sim, dá tempo.
-
-Com 50 kWh de capacidade, ir de 30% para 80% exige cerca de 25 kWh
-(50 × 0,5). No seu carregador de 7 kW, isso leva aproximadamente 3h35min.
-
-Iniciando agora (16:00), a carga deve terminar por volta das 19:35,
-dentro do prazo de 4 horas até as 20:00.
-
-Recomendações:
-- Inicie a carga o quanto antes para manter margem de segurança.
-- Confirme que o carregador está com status "Disponível".
-
-Observação: estimativa baseada em eficiência ideal; perdas reais
-podem variar o resultado em alguns minutos.
-
-==================================================
-
 ==================================================
 
 FIM DOS FEW SHOTS
