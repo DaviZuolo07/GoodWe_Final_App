@@ -11,6 +11,12 @@ if str(ROOT_DIR) not in sys.path:
 from ai.memory.user_profile_memory import UserProfileMemory
 from database.chat_persistence_service import ChatPersistenceService
 
+import base64
+def _img64(path):
+    with open(ROOT_DIR / path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+LOGO_B64 = _img64("assets/goodwe_logo.png")
+
 
 try:
     from ai.services.chat_service import ChatService
@@ -304,7 +310,7 @@ for k, v in defaults.items():
 # STAGE: LOGIN
 # ==================================================
 if st.session_state.stage == "login":
-    st.markdown("<div class='login-card'>", unsafe_allow_html=True)
+    st.markdown(f"<div class='login-card'><img src='data:image/png;base64,{LOGO_B64}' style='width:180px;display:block;margin:0 auto 20px;'>", unsafe_allow_html=True)
     st.markdown("<h2>⚡ GoodWe ChargeOps</h2>", unsafe_allow_html=True)
     st.markdown("<div class='sub'>Acesse sua conta para continuar</div>", unsafe_allow_html=True)
 
@@ -325,7 +331,7 @@ if st.session_state.stage == "login":
 # STAGE: CADASTRO
 # ==================================================
 elif st.session_state.stage == "register":
-    st.markdown("<div class='login-card'>", unsafe_allow_html=True)
+    st.markdown(f"<div class='login-card'><img src='data:image/png;base64,{LOGO_B64}' style='width:180px;display:block;margin:0 auto 20px;'>", unsafe_allow_html=True)
     st.markdown(f"<h2>Olá, {st.session_state.profile['name']} 👋</h2>", unsafe_allow_html=True)
     st.markdown("<div class='sub'>Complete seu cadastro para personalizarmos sua experiência</div>", unsafe_allow_html=True)
 
