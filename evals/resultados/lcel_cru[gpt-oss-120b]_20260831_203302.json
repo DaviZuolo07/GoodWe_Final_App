@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "adaptador": "lcel_cru[gpt-oss:120b]",
+    "executado_em": "2026-08-31T20:33:02",
+    "eval_set_versao": "1.0",
+    "total_casos": 5,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": null,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 20.0,
+    "tokens_por_turno_media": 495,
+    "latencia_media_ms": 4564,
+    "latencia_mediana_ms": 4565,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 5,
+      "conformes": 1,
+      "nota_media": null,
+      "conformidade_pct": 20.0
+    }
+  },
+  "casos": [
+    {
+      "id": "HP-01",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Minha bateria é de 60 kWh e está em 20%. Quanto tempo leva para carregar num carregador de 7,4 kW?",
+      "resposta": "Para estimar o tempo de carga, vamos considerar:\n\n| Item | Cálculo |\n|------|----------|\n| Capacidade total da bateria | **60 kWh** |\n| Estado atual (20 %) | 0,20 × 60 kWh = **12 kWh** armazenados |\n| Energia que falta para 100 % | 60 kWh – 12 kWh = **48 kWh** |\n| Potência do carregador | **7,4 kW** |\n| Tempo ideal (sem perdas) | 48 kWh ÷ 7,4 kW ≈ **6,49 h** → **6 h 30 min** |\n\n### Ajustando para perdas reais\nOs carregadores de corrente alternada (CA) e as próprias baterias não são 100 % eficientes. Uma perda típica fica entre 5 % e 15 % (dependendo do modelo, temperatura, estado da bateria etc.).  \n\n- **Perda de 10 % (valor médio):**  \n  Energia efetivamente entregue = 48 kWh × 1,10 = **52,8 kWh**  \n  Tempo = 52,8 kWh ÷ 7,4 kW ≈ **7,13 h** → **7 h 08 min**\n\n### Resumo rápido\n- **Tempo ideal (sem perdas):** ~6 h 30 min  \n- **Tempo esperado na prática (≈10 %",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "h"
+        ],
+        "frases": 4
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 75,
+      "tokens_resposta": 392,
+      "tokens_turno": 467,
+      "latencia_ms": 4565,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-02",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "visitante",
+      "peso": 1,
+      "pergunta": "Qual a diferença entre carregamento AC e DC?",
+      "resposta": "**Carregamento AC (corrente alternada) vs. Carregamento DC (corrente contínua)**  \n\n| Característica | Carregamento AC | Carregamento DC |\n|----------------|----------------|-----------------|\n| **Onde a conversão acontece** | A conversão de **AC → DC** ocorre dentro do próprio veículo, no *on‑board charger* (carregador interno). | A conversão de **AC → DC** já é feita na estação de recarga ( *off‑board charger* ), enviando energia já em corrente contínua para o carro. |\n| **Potência típica** | 3,7 kW (nível 1) a 22 kW (nível 2), dependendo do carregador interno e da tomada. | 50 kW, 150 kW, 350 kW ou mais (nível 3), dependendo do modelo da estação. |\n| **Tempo de carga** | Mais lento: de 4 h a 12 h para carregar totalmente um carro residencial típico (30–80 kWh). | Muito rápido: 20 min a 1 h para chegar a 80 % da bateria, dependendo da potência e da capacidade da bateria. |\n| **Equipamento necessário** | - Tomada residencial (Tipo 2, Schuko, etc.)<br>- Cabo de carregamento compatível com o veículo.<br>- Opcional: wallbox residencial (nível 2) para melhorar a potência e segurança. | - Estação de recarga rápida (DCFC – *Direct Current Fast Charger*).<br>- Conector específico (CCS, CHAdeMO, Tesla Supercharger).<br>- Geralmente instalada em áreas comerciais, postos de serviço ou em condomínios com infraestrutura dedicada. |\n",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:14>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "corrente continua",
+          "corrente alternada",
+          "rapid"
+        ],
+        "frases": 14
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 54,
+      "tokens_resposta": 444,
+      "tokens_turno": 498,
+      "latencia_ms": 4587,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-03",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Por que a recarga fica mais lenta depois dos 80%?",
+      "resposta": "A desaceleração da carga a partir de aproximadamente 80 % de SOC (State‑of‑Charge – estado de carga) não é um “problema” do carregador, e sim um comportamento intencional do próprio **sistema de gerenciamento da bateria (BMS)** e da química das células de íons‑lítio (ou de outras químicas usadas em veículos elétricos).  \n\nAbaixo estão os principais motivos que explicam por que a velocidade de recarga diminui depois desse ponto:\n\n---\n\n## 1. **Proteção da bateria – controle de tensão e corrente**\n\n| Etapa da carga | O que acontece | Por quê isso reduz a velocidade |\n|----------------|----------------|---------------------------------|\n| **Carga constante de corrente (CC)** – até ~ 70‑80 % SOC | O carregador fornece uma corrente fixa (ex.: 30 A). A tensão da bateria sobe gradualmente. | A bateria aceita a corrente máxima sem risco de sobre‑aquecimento ou sobre‑tensão. |\n| **Carga constante de tensão (CV)** – a partir de ~ 80 % SOC | O carregador fixa a tensão (ex.: 400 V para um pack de 400 V) e a corrente começa a cair progressivamente. | Quando a tensão de cada célula se aproxima do seu limite (≈ 4,2 V por célula), o BMS reduz a corrente para evitar que a tensão ultrapasse esse valor. |\n\n**Resultado:** a corrente que chega à bateria vai de sua máxima (CC) para valores cada vez menores (CV), o que faz a taxa de carregamento cair.\n\n---\n\n## 2. **Química da bateria – “tapering” natural**\n\n- **Reações de intercalamento**: Nos estágios iniciais",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:12>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "bms",
+          "celula",
+          "reduz"
+        ],
+        "frases": 12
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 56,
+      "tokens_resposta": 456,
+      "tokens_turno": 512,
+      "latencia_ms": 5453,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-04",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como eu organizo o uso do carregador entre vários moradores?",
+      "resposta": "**Organizar o uso do carregador entre vários moradores** pode ser feito de forma simples, justa e transparente. Abaixo segue um passo‑a‑passo prático, além de algumas ferramentas e boas práticas que a GoodWe recomenda para condomínios residenciais.\n\n---\n\n## 1️⃣ Defina as regras básicas do condomínio\n\n| Item | Pergunta que você deve responder | Exemplo de decisão |\n|------|--------------------------------|--------------------|\n| **Horário de uso** | Qual a janela de tempo em que o carregador pode ser usado? (ex.: 18 h – 23 h) | 18 h – 23 h (para evitar pico de demanda) |\n| **Tempo máximo por carga** | Quanto tempo cada morador pode ocupar o ponto antes de liberar? | 2 h por sessão |\n| **Prioridade** | Há moradores com necessidades especiais (ex.: mobilidade reduzida) ou veículos que precisam de carga urgente? | Prioridade para vagas 1 e 2 |\n| **Custo** | Como será rateado o consumo de energia? (por kWh, por sessão, tarifa fixa) | Rateio por kWh consumido + taxa fixa de manutenção |\n| **Penalidades** | O que acontece se alguém ultrapassar o tempo ou usar fora do horário? | Aviso, multa de R$ 50, suspensão temporária |\n\n> **Dica:** Formalize tudo em uma *Portaria de Uso do Carregador* e anexe ao regulamento interno. Assim, todos têm acesso ao documento e sabem o que é esperado.\n\n---\n\n## 2️⃣ Escolha um método de agendamento\n\n### a) **Planilha compartilhada (Google Sheets / Excel Online)**\n- **Prós:** Gratuita, fácil de usar, visualização em tempo real.\n- **Con",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:13>5"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "agenda",
+          "horario",
+          "rateio",
+          "janela"
+        ],
+        "frases": 13
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 57,
+      "tokens_resposta": 458,
+      "tokens_turno": 515,
+      "latencia_ms": 4079,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-05",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "operador",
+      "peso": 1,
+      "pergunta": "O que significa kWh e como ele vira valor na conta?",
+      "resposta": "**kWh – quilowatt‑hora**\n\n- **Quilowatt (kW)**: unidade de potência. 1 kW = 1 000 W. É a taxa de energia que um equipamento consome a cada segundo.  \n- **Hora (h)**: unidade de tempo.  \n\nQuando juntamos as duas unidades, **kWh (quilowatt‑hora)** passa a ser a medida de **energia**. Ela indica quantos quilowatts foram consumidos durante uma hora.  \n\n> **Exemplo prático**  \n> - Um carregador de 7 kW ligado por 2 horas consome: 7 kW × 2 h = **14 kWh**.  \n> - Se o mesmo carregador ficar ligado 30 min (0,5 h), o consumo será 7 kW × 0,5 h = **3,5 kWh**.\n\n---\n\n## Como o kWh se transforma em valor na conta de energia\n\n1. **Tarifa de energia (R$/kWh)**  \n   Cada concessionária (ou geradora, no caso de energia solar) define um preço por quilowatt‑hora. Esse preço pode variar de acordo com:\n   - Faixa de consumo (tarifa residencial, comercial, tarifação horária, etc.)  \n   - Horário (tarifa branca, horário de ponta vs. fora de ponta)  \n   - Tributos e encargos (ICMS, PIS/COFINS, CIDE, etc.)\n\n2. **Cálculo básico**  \n   \\[\n   \\text{Valor da energia} = \\text{Consumo (kWh)} \\times \\text{Tarifa (R\\$/kWh)}\n   \\]\n\n   **Exemplo:**  \n   - Consumo mensal do seu",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:15>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "energia",
+          "tarifa",
+          "kwh"
+        ],
+        "frases": 15
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 54,
+      "tokens_resposta": 430,
+      "tokens_turno": 484,
+      "latencia_ms": 4134,
+      "structured_output_valido": null
+    }
+  ]
+}

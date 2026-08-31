@@ -170,9 +170,10 @@ section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] > div:nth-of
     border-radius: 16px !important;
 }
 [data-testid="stChatInput"] textarea {
-    background: transparent !important; color:#111 !important;
+    background: transparent !important; color:#FFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
 }
-[data-testid="stChatInput"] textarea::placeholder { color:#888 !important; }
+[data-testid="stChatInput"] textarea::placeholder { color:#B0B0B0 !important; }
 [data-testid="stBottomBlockContainer"] {
     background: #0d1520 !important;
 }

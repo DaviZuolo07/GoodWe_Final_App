@@ -1,0 +1,31 @@
+# Sprint 03 - stack LangChain
+# Arquivo SEPARADO do requirements.txt de propósito: o requirements original é
+# o que faz a versão legada (ai/) rodar, e ela é o grupo de controle do
+# comparativo antes/depois. Misturar os dois arruína o experimento.
+#
+#     pip install -r requirements-sprint3.txt
+#
+# Versões FIXADAS. O LangChain 1.x publica release quase toda semana; sem pin,
+# uma atualização no dia 20/09 quebra a entrega do dia 21. Se precisar subir
+# alguma versão, suba, rode o eval e registre no relatório - isso é iteração
+# documentada, que a rubrica pede.
+
+langchain==1.3.18
+langchain-core==1.6.1
+langchain-ollama==1.1.0
+
+# ConversationTokenBufferMemory mora aqui desde o LangChain 1.x (saiu de
+# langchain.memory). Necessário porque o item 2 do escopo pede exatamente essa
+# classe. Ver docs/problemas_encontrados.md.
+langchain-classic==1.0.8
+
+# LangGraph: NÃO é exigido pela Sprint 03 (pertence aos Módulos 3/4). Entra
+# como camada extra, por cima das chains LCEL, nunca no lugar delas.
+langgraph==1.2.11
+
+pydantic==2.13.5
+
+# Medição de tokens do bloco B (context engineering).
+tiktoken==0.14.0
+
+python-dotenv==1.1.1
