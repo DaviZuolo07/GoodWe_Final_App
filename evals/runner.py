@@ -79,14 +79,18 @@ def carregar_casos(incluir_pendentes: bool) -> tuple:
 
 
 def executar(nome_adaptador: str, modelo: str | None, usar_juiz: bool,
-             limite: int | None, incluir_pendentes: bool) -> dict:
+             limite: int | None, incluir_pendentes: bool,
+             versao: str = "v1") -> dict:
 
     if nome_adaptador not in ADAPTADORES:
         raise SystemExit(f"adaptador desconhecido: {nome_adaptador}. "
                          f"Use um de {list(ADAPTADORES)}")
 
     classe = ADAPTADORES[nome_adaptador]
-    adaptador = classe(model=modelo) if nome_adaptador == "lcel_cru" else classe()
+    if nome_adaptador in ("lcel", "lcel_guard"):
+        adaptador = classe(model=modelo, versao=versao)
+    else:
+        adaptador = classe(model=modelo)
 
     meta, casos = carregar_casos(incluir_pendentes)
     if limite:
@@ -107,18 +111,19 @@ def executar(nome_adaptador: str, modelo: str | None, usar_juiz: bool,
     for i, caso in enumerate(casos, 1):
         pergunta = caso["pergunta"]
         persona = caso.get("persona", "morador")
+        perfil = caso.get("perfil")
 
         print(f"[{i:>2}/{len(casos)}] {caso['id']:<7} {caso['categoria']:<17} ", end="", flush=True)
 
         try:
-            prompt_txt = adaptador.prompt_renderizado(pergunta, persona)
+            prompt_txt = adaptador.prompt_renderizado(pergunta, persona, perfil)
         except Exception:
             prompt_txt = pergunta
 
         inicio = time.perf_counter()
         erro = None
         try:
-            resposta = adaptador.responder(pergunta, persona)
+            resposta = adaptador.responder(pergunta, persona, perfil)
         except Exception as e:
             resposta, erro = "", f"{type(e).__name__}: {e}"
         latencia_ms = round((time.perf_counter() - inicio) * 1000)
@@ -171,6 +176,15 @@ def executar(nome_adaptador: str, modelo: str | None, usar_juiz: bool,
     return montar_resumo(adaptador, meta, registros)
 
 
+def _compatibilidade() -> dict:
+    """O que a execução descobriu sobre cada modelo (ver src/chain/execucao.py)."""
+    try:
+        from src.chain.execucao import relatorio_compatibilidade
+        return relatorio_compatibilidade()
+    except Exception:
+        return {}
+
+
 def montar_resumo(adaptador, meta, registros: list) -> dict:
     validos = [r for r in registros if not r["erro"]]
     com_nota = [r for r in validos if r["nota_juiz"] is not None]
@@ -215,6 +229,7 @@ def montar_resumo(adaptador, meta, registros: list) -> dict:
             "divergencias_juiz_checador": sum(1 for r in registros if r["divergencia_juiz_checador"]),
         },
         "por_categoria": por_categoria,
+        "compatibilidade_modelos": _compatibilidade(),
         "casos": registros,
     }
 
@@ -225,12 +240,13 @@ def main():
     ap.add_argument("--modelo", default=None, help="sobrescreve o modelo (só lcel_cru)")
     ap.add_argument("--sem-juiz", action="store_true", help="pula o juiz LLM (mais rápido, sem cota)")
     ap.add_argument("--limite", type=int, default=None, help="roda só os N primeiros casos")
+    ap.add_argument("--versao", default="v1", help="versao do system prompt (so lcel)")
     ap.add_argument("--incluir-pendentes", action="store_true",
                     help="inclui os casos ainda com PREENCHER")
     args = ap.parse_args()
 
     resultado = executar(args.adaptador, args.modelo, not args.sem_juiz,
-                         args.limite, args.incluir_pendentes)
+                         args.limite, args.incluir_pendentes, args.versao)
 
     PASTA_RESULTADOS.mkdir(parents=True, exist_ok=True)
     carimbo = datetime.now().strftime("%Y%m%d_%H%M%S")

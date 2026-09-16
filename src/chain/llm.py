@@ -30,17 +30,25 @@ load_dotenv()
 # dicionário — e o porquê está no comentário de cada linha.
 
 PERFIS = {
+    # NOTA DE JUSTIÇA DA COMPARAÇÃO (ajustado em 09/09):
+    # num_predict do redator era 400 e cortava as respostas no meio - o caso
+    # S12-02 terminou em "\approx 5,3 \text{ h}", sem fechar a conta. O legado
+    # NÃO define num_predict, então roda com o padrão do Ollama, sem corte.
+    # Comparar um lado truncado com um lado inteiro produziria um "ganho"
+    # falso. 1200 dá folga para os dois lados responderem completo; a redução
+    # de verbosidade tem que vir do prompt (passo 8), não de corte forçado.
+
     # Classificação de intenção: precisa ser reprodutível. A mesma pergunta tem
     # que cair na mesma intenção sempre, senão o eval não mede nada, mede sorte.
     "classificador": {"temperature": 0.0, "top_p": 1.0, "num_predict": 160},
 
     # Redação para o usuário: um pouco de variação deixa o texto menos robótico
     # sem soltar a mão do modelo. Acima de ~0.4 ele começa a florear número.
-    "redator": {"temperature": 0.2, "top_p": 0.9, "num_predict": 400},
+    "redator": {"temperature": 0.2, "top_p": 0.9, "num_predict": 1200},
 
     # Saída estruturada (Pydantic): zero criatividade. Queremos JSON válido no
     # primeiro try, não uma interpretação artística do schema.
-    "estruturado": {"temperature": 0.0, "top_p": 1.0, "num_predict": 500},
+    "estruturado": {"temperature": 0.0, "top_p": 1.0, "num_predict": 900},
 }
 
 PERFIL_PADRAO = "redator"

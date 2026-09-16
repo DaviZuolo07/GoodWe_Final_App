@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "adaptador": "lcel_cru[gpt-oss:120b]",
+    "executado_em": "2026-09-05T11:40:20",
+    "eval_set_versao": "1.0",
+    "total_casos": 5,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": null,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 0.0,
+    "tokens_por_turno_media": 487,
+    "latencia_media_ms": 2476,
+    "latencia_mediana_ms": 2530,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 5,
+      "conformes": 0,
+      "nota_media": null,
+      "conformidade_pct": 0.0
+    }
+  },
+  "casos": [
+    {
+      "id": "HP-01",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Minha bateria é de 60 kWh e está em 20%. Quanto tempo leva para carregar num carregador de 7,4 kW?",
+      "resposta": "Para estimar o tempo de carregamento, vamos considerar:\n\n| Item | Valor |\n|------|-------|\n| Capacidade da bateria | **60 kWh** |\n| Estado de carga atual | **20 %** |\n| Energia que falta para 100 % | 60 kWh × (100 % − 20 %) = **48 kWh** |\n| Potência do carregador | **7,4 kW** |\n\n### Cálculo básico (sem perdas)\n\n\\[\n\\text{Tempo (h)} = \\frac{\\text{Energia necessária (kWh)}}{\\text{Potência do carregador (kW)}} = \\frac{48\\;\\text{kWh}}{7,4\\;\\text{kW}} \\approx 6,49\\;\\text{h}\n\\]\n\n**≈ 6 h 30 min**.\n\n### Considerando perdas típicas\n\nOs carregadores de veículos elétricos não são 100 % eficientes. Em geral, há perdas de 5 % a 15 % (devido ao conversor AC‑DC, temperatura da bateria, etc.). Se adotarmos um fator de eficiência de **≈ 90 %**:\n\n\\[\n\\text{Tempo real} = \\frac{48\\;\\text{kWh}}{7,4\\;\\text{kW} \\times 0,90} \\approx 7,2\\;\\text{h}\n\\]\n\n**≈ 7 h** (entre 6 h ",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:5>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "h"
+        ],
+        "frases": 5
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 75,
+      "tokens_resposta": 374,
+      "tokens_turno": 449,
+      "latencia_ms": 1897,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-02",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "visitante",
+      "peso": 1,
+      "pergunta": "Qual a diferença entre carregamento AC e DC?",
+      "resposta": "**Carregamento AC (corrente alternada) vs. Carregamento DC (corrente contínua)**  \n\n| Característica | Carregamento AC | Carregamento DC |\n|----------------|----------------|-----------------|\n| **Onde a conversão acontece** | A conversão de **AC → DC** ocorre dentro do próprio veículo, no *on‑board charger* (OBC). | A conversão de **AC → DC** já é feita na estação de carga (ou em um *converter* externo) e o carro recebe energia já em DC. |\n| **Velocidade de carga** | Mais lenta. Em geral, 3,7 kW (nível 1) a 22 kW (nível 2) para residências e condomínios. O tempo típico para um carro de 60 kWh varia de 4 h a 12 h, dependendo da potência. | Muito mais rápida. Estações de 50 kW, 100 kW ou até 350 kW (nível 3) podem carregar 80 % da bateria em 20 min a 1 h, dependendo da capacidade da bateria e da aceitação do veículo. |\n| **Equipamento necessário** | - Tomada ou ponto de carga AC (NEMA 5‑15, NEMA 6‑20, Tipo 2, etc.)<br>- Cabo de carregamento com conector AC (Tipo 1 ou Tipo 2).<br>- O veículo precisa de um *on‑board charger* com potência compatível (geralmente 3,3 kW a 22 kW). | - Estação de carga DC (conhecida como “fast charger” ou “rapid charger”).<br>- Cabo com conector DC (",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:13>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "corrente continua",
+          "corrente alternada",
+          "rapid"
+        ],
+        "frases": 13
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 54,
+      "tokens_resposta": 422,
+      "tokens_turno": 476,
+      "latencia_ms": 2517,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-03",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Por que a recarga fica mais lenta depois dos 80%?",
+      "resposta": "A desaceleração da carga a partir de aproximadamente 80 % de estado de carga (SoC) não é um problema do carregador ou da infraestrutura do condomínio, e sim uma característica intrínseca das baterias de íons‑lítio (e de outras químicas usadas em veículos elétricos).  \n\n## 1. Como funciona a curva de carga de uma bateria de íons‑lítio  \n\nA maioria dos EVs utiliza um **ciclo de carga em duas fases**:\n\n| Fase | Corrente | O que acontece na bateria | Por que a velocidade muda |\n|------|----------|---------------------------|---------------------------|\n| **CC (Constant Current – Corrente constante)** | Corrente alta (geralmente 0,5 – 1 C, onde 1 C = capacidade da bateria) | O eletrodo de lítio aceita íons rapidamente; a tensão da célula sobe de forma controlada. | A bateria aceita energia rapidamente porque há “espaço” químico para os íons se inserirem nos materiais do eletrodo. |\n| **CV (Constant Voltage – Tensão constante)** | Tensão fixa (geralmente 3,6 – 4,2 V por célula, dependendo do fabricante) | A tensão já está próxima do limite máximo permitido; a corrente começa a cair gradualmente à medida que a bateria se aproxima da saturação. | A diferença de potencial entre o carregador e a bateria diminui, reduzindo a corrente que pode ser empurrada sem ultrapassar a tensão de segurança. |\n\n### Onde entra o “80 %”  \n\n- **Até ~80 % de SoC**: a bateria ainda está na fase CC. A corrente permanece quase constante, então o tempo de carga é quase linear (ex.:",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:9>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "curva",
+          "celula",
+          "reduz"
+        ],
+        "frases": 9
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 56,
+      "tokens_resposta": 456,
+      "tokens_turno": 512,
+      "latencia_ms": 2530,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-04",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como eu organizo o uso do carregador entre vários moradores?",
+      "resposta": "**Organizar o uso do carregador entre vários moradores**  \n(Guia prático para condomínios residenciais)\n\n---\n\n## 1️⃣ Defina as regras básicas\n\n| Item | Pergunta que você deve responder | Exemplo de decisão |\n|------|--------------------------------|--------------------|\n| **Horário de uso** | Quem pode carregar em quais períodos? | 18 h – 23 h (pico residencial) ou 22 h – 06 h (tarifa baixa). |\n| **Tempo máximo por carga** | Quanto tempo cada carro pode ficar conectado? | 4 h por sessão (ou até a carga completa, o que acontecer primeiro). |\n| **Prioridade** | Como lidar com emergências ou veículos de visitantes? | Prioridade para residentes com necessidade comprovada (ex.: pessoa com mobilidade reduzida) e, depois, para visitantes mediante reserva. |\n| **Custo** | Como será rateado o valor da energia? | Por kWh consumido (medição individual) ou por tempo de uso (ex.: R$ 0,80/h). |\n| **Penalidades** | O que acontece se alguém ultrapassar o tempo? | Aviso, bloqueio temporário do ponto ou cobrança extra. |\n\n---\n\n## 2️⃣ Escolha a tecnologia de controle\n\n| Tecnologia | Vantagens | Quando usar |\n|------------|-----------|--------------|\n| **Relógio de horário (timer)** | Barato, fácil de instalar. | Condomínios pequenos (≤ 5 pontos). |\n| **Módulo de comunicação (Wi‑Fi / Zigbee)** | Permite reservas via app ou portal web. | Condomínios médios (5‑15 pontos). |\n| **Gestor de energia (EMS) com medição individual** | Rateio preciso por kWh",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:17>5"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "horario",
+          "rateio"
+        ],
+        "frases": 17
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 57,
+      "tokens_resposta": 444,
+      "tokens_turno": 501,
+      "latencia_ms": 2727,
+      "structured_output_valido": null
+    },
+    {
+      "id": "HP-05",
+      "categoria": "happy_path",
+      "origem": "sprint_3",
+      "persona": "operador",
+      "peso": 1,
+      "pergunta": "O que significa kWh e como ele vira valor na conta?",
+      "resposta": "**kWh – quilowatt‑hora**\n\n- **O que é?**  \n  O quilowatt‑hora (kWh) é a unidade de energia que as concessionárias de energia elétrica usam para medir o quanto de energia foi consumido.  \n  - **1 kW** = 1 000 watts (potência).  \n  - **1 kWh** = 1 kW de potência usado durante 1 hora.  \n  Exemplo: se um carregador de carro elétrico funciona a 7 kW e fica ligado por 2 horas, ele consumirá 7 kW × 2 h = **14 kWh**.\n\n---\n\n## Como o kWh vira valor na conta de energia?\n\n1. **Leitura do consumo**  \n   O medidor do condomínio registra quantos kWh foram consumidos em cada período de faturamento (geralmente mensal). Esse número inclui tudo que foi ligado na rede comum: iluminação das áreas comuns, elevadores, bombas, e, se houver, a carga dos veículos elétricos (EVs) nas vagas do condomínio.\n\n2. **Tarifa de energia (R$/kWh)**  \n   Cada concessionária define uma tarifa que pode variar de acordo:\n   - **Tarifa residencial** (para áreas comuns residenciais).  \n   - **Tarifa comercial/industrial** (para áreas de serviços).  \n   - **Tarifa horária** (ponta, fora de ponta, etc.) – em alguns estados há diferentes preços dependendo do horário de consumo.  \n   A tarifa é divulgada na conta de energia da sua distribuidora (ex.: R$ 0,78/kWh, R$ 0,95/kWh, etc.).\n\n3. **Cálculo básico**  \n   \\[\n   \\text{Valor do consumo",
+      "erro": null,
+      "conforme": false,
+      "falhas": [
+        "prolixo:19>4"
+      ],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "energia",
+          "tarifa",
+          "kwh"
+        ],
+        "frases": 19
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 54,
+      "tokens_resposta": 443,
+      "tokens_turno": 497,
+      "latencia_ms": 2708,
+      "structured_output_valido": null
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "adaptador": "lcel_cru[gpt-oss:120b]",
+    "executado_em": "2026-09-09T08:28:41",
+    "eval_set_versao": "1.0",
+    "total_casos": 3,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": null,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 100.0,
+    "tokens_por_turno_media": 467,
+    "latencia_media_ms": 2777,
+    "latencia_mediana_ms": 2679,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 3,
+      "conformes": 3,
+      "nota_media": null,
+      "conformidade_pct": 100.0
+    }
+  },
+  "compatibilidade_modelos": {
+    "aceita_raciocinio": {
+      "gpt-oss:120b": true
+    },
+    "eventos": {
+      "glm-5.3-flash": [
+        "erro com raciocinio: ResponseError: this model requires a subscription or usage credits, upgrade for access at https://ollama.com/upgrade or add usage credits at https://ollama.com/setti",
+        "erro sem raciocinio: ResponseError: this model requires a subscription or usage credits, upgrade for access at https://ollama.com/upgrade or add usage credits at https://ollama.com/setti"
+      ]
+    }
+  },
+  "casos": [
+    {
+      "id": "S12-01",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Quem é você e qual seu objetivo aqui no condomínio?",
+      "resposta": "Olá, Morador! Eu sou o **ChargeOps AI**, o assistente virtual da GoodWe especializado em recarga de veículos elétricos aqui no condomínio.  \n\n**Meu objetivo** é ajudar você e os demais moradores a:\n\n- Planejar e otimizar o uso das estações de carregamento disponíveis;\n- Garantir que seu BYD Dolphin (bateria de 44,9 kWh) seja carregado de forma segura, eficiente e econômica;\n- Fornecer informações sobre horários de pico, tarifas de energia, disponibilidade de vagas de carregamento e boas práticas de carregamento;\n- Resolver dúvidas técnicas sobre o carregador de 7,4 kW, agendar manutenção ou solicitar suporte quando necessário;\n- Promover a sustentabilidade e o uso inteligente da energia elétrica no condomínio.\n\nEstou à disposição para responder suas perguntas, dar dicas de carregamento e ajudar no que for preciso para que seu carro esteja sempre pronto para rodar. 🚗⚡️ Como posso ajudar você hoje?",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "chargeops",
+          "goodwe",
+          "assistente"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError: this model requires a subscription or usage credits, upgrade for access at https://ollama.com/upgrade or add usage credits at https://ollama.com/settings (ref: 32464021-68f1-45b1-b77f-64458cffd7b1) (status code: 402)",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 104,
+      "tokens_resposta": 261,
+      "tokens_turno": 365,
+      "latencia_ms": 1921,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-02",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 2,
+      "pergunta": "Se meu carro estiver com 20% de bateria, quanto tempo aproximadamente ele leva para carregar até 100% no meu carregador?",
+      "resposta": "Olá, Morador!\n\nVamos calcular o tempo aproximado de carga para o seu BYD Dolphin usando o carregador de **7,4 kW** que está instalado no condomínio.\n\n### 1. Quantidade de energia que falta\n- **Capacidade total da bateria:** 44,9 kWh  \n- **Estado atual:** 20 %  \n- **Energia necessária para chegar a 100 %:**  \n\n\\[\n\\text{Energia faltante} = 44,9 \\text{ kWh} \\times (100\\% - 20\\%) = 44,9 \\times 0,80 = 35,92 \\text{ kWh}\n\\]\n\n### 2. Tempo teórico (sem perdas)\n\\[\n\\text{Tempo} = \\frac{\\text{Energia faltante}}{\\text{Potência do carregador}} = \\frac{35,92 \\text{ kWh}}{7,4 \\text{ kW}} \\approx 4,85 \\text{ h}\n\\]\n\nIsso equivale a **4 horas e 51 minutos**.\n\n### 3. Considerando perdas típicas de carregamento\nOs carregadores residenciais costumam ter uma eficiência entre 85 % e 95 %. Usando um valor conservador de **90 %**:\n\n\\[\n\\text{Tempo real} \\approx \\frac{4,85 \\text{ h}}{0,90} \\approx 5,4 \\text",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "hora",
+          "aproximad"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError: this model requires a subscription or usage credits, upgrade for access at https://ollama.com/upgrade or add usage credits at https://ollama.com/settings (ref: 19af01ea-11e7-485c-ba46-e7148cdc9ca2) (status code: 402)",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 123,
+      "tokens_resposta": 350,
+      "tokens_turno": 473,
+      "latencia_ms": 2679,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-03",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como síndico, quais regras eu deveria estabelecer para o uso justo dos carregadores entre os moradores?",
+      "resposta": "**Regras de uso justo dos carregadores de veículos elétricos – Condomínio Residencial (Bloco B)**  \n\n---\n\n### 1️⃣ Objetivo da norma  \nGarantir que todos os moradores tenham acesso equitativo, seguro e eficiente aos pontos de recarga, preservando a infraestrutura elétrica do condomínio e evitando conflitos.\n\n---\n\n## 2️⃣ Diretrizes gerais\n\n| Nº | Diretriz | Detalhamento |\n|----|----------|--------------|\n| **2.1** | **Cadastro prévio** | Todo morador que pretende usar o carregador deve se cadastrar na administração (nome, apartamento, placa do veículo, modelo da bateria e potência do carregador). O cadastro gera um **código de acesso** (RFID, QR‑code ou app). |\n| **2.2** | **Limite de vagas** | Cada unidade pode ter **máximo 1 (uma) vaga de recarga** simultânea. Caso haja mais de um carro elétrico, o morador deve solicitar a liberação de vagas adicionais, que serão avaliadas pela comissão de energia. |\n| **2.3** | **Tempo máximo de carga** | **4 h contínuas** por sessão (ou 8 h em períodos noturnos de baixa demanda, de 22 h a 06 h). Após esse tempo, o usuário deve liberar a vaga para o próximo morador. |\n| **2.4** | **Horário de pico** | Entre **18 h e 22 h** (horário de maior consumo residencial) o uso deve ser **intermitente**: 30 min de carga / 30 min de pausa, ou o morador pode optar por carregar fora desse intervalo. |\n| **2.5** | **Tarifação** | O consumo será medido por **medidor individual",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "tempo",
+          "reserva",
+          "regra"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz indisponivel: ResponseError: this model requires a subscription or usage credits, upgrade for access at https://ollama.com/upgrade or add usage credits at https://ollama.com/settings (ref: 7352b501-27a3-4191-87a5-1d63b65868cc) (status code: 402)",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 90,
+      "tokens_resposta": 474,
+      "tokens_turno": 564,
+      "latencia_ms": 3731,
+      "structured_output_valido": null
+    }
+  ]
+}
