@@ -1,242 +1,196 @@
 """
-Validação de escopo — bloco C da rubrica (15 pts).
+Guardrail de ESCOPO (§6 do contrato) — entrada e saída.
 
-PRINCÍPIO
----------
-Guardrail não pede ao modelo que se comporte. Guardrail decide ANTES do modelo,
-com código que não pode ser convencido por texto. Um prompt é uma sugestão
-muito bem escrita; um `if` não é.
+ENTRADA (`validar_escopo`), em ordem de prioridade:
+  1. emergencia_eletrica     cheiro de queimado, fumaça, faísca, choque
+  2. seguranca_eletrica      instalação, cabos, disjuntor, abrir/consertar equipamento
+  3. juridico                processar, advogado, lei, Código Civil
+  4. financeiro              investimento, retorno, financiamento, taxa
+  5. especificacao_fora_da_base   modelo de produto que NÃO está em prompts/base_produtos.json
+  6. fora_de_escopo          assunto sem nenhum termo do domínio + padrão típico de off-topic
 
-Isso muda o que dá para afirmar na banca. Com regra no prompt, a resposta
-honesta é "o modelo geralmente recusa". Com verificação determinística, é "a
-requisição não chega ao modelo".
+As recusas de domínio restrito são respostas fixas COM encaminhamento a
+profissional habilitado, como o §6 exige. Uma recusa determinística nunca
+"esquece" de encaminhar; uma recusa gerada por LLM às vezes esquece.
 
-ONDE ESTE ARQUIVO ATUA
-----------------------
-    pergunta -> [PRÉ] -> chain LCEL -> [PÓS] -> resposta
+O critério de fora de escopo é conservador de propósito: só bloqueia quando
+NÃO há nenhum termo do domínio. Pergunta vaga como "quanto tempo" passa (é um
+edge case legítimo e o LLM pede os dados). Bloquear demais é defeito também —
+o eval mede isso ("recusou_pergunta_legitima").
 
-    PRÉ  bloqueia assunto restrito antes de gastar chamada
-    PÓS  confere se a resposta cumpriu o que o pré-check exigia
-
-NOTA DE HONESTIDADE METODOLÓGICA
---------------------------------
-Os padrões abaixo são GERAIS, escritos a partir das categorias do §6 (jurídico,
-financeiro, segurança elétrica, especificação inexistente), não copiados das
-perguntas do eval. Se fossem recortados caso a caso, o eval mediria a nossa
-capacidade de decorar o gabarito, não a robustez do sistema. O eval está
-congelado justamente para tornar essa diferença verificável.
+SAÍDA (`validar_saida`): última barreira depois do LLM.
+  - canário do prompt na resposta        -> vazamento de prompt
+  - tags internas do prompt na resposta  -> vazamento de prompt
+  - bitola/seção de cabo/corrente de disjuntor -> instrução elétrica perigosa
 """
 
+from __future__ import annotations
+
 import re
-import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from src.guardrails.moderation import RESPOSTAS as RESPOSTAS_MODERACAO
+from src.guardrails.moderation import normalizar
 
-def normalizar(texto: str) -> str:
-    texto = (texto or "").lower()
-    texto = unicodedata.normalize("NFD", texto)
-    texto = "".join(c for c in texto if unicodedata.category(c) != "Mn")
-    return re.sub(r"\s+", " ", texto).strip()
+# --------------------------------------------------------------------------- #
+# Vocabulário do domínio (texto normalizado)
+# --------------------------------------------------------------------------- #
+TERMOS_DOMINIO = re.compile(
+    r"\b(carro\w*|veicul\w*|ve|ves|eletric\w*|recarg\w*|recarreg\w*|carreg\w*|bateri\w*|kwh|kw|"
+    r"wallbox|tomada\w*|conector\w*|tipo ?2|ccs\d?|chademo|ocpp|modbus|telemetri\w*|soc|autonomia|"
+    r"goodwe|chargeops|chargegrid|condomini\w*|sindic\w*|morador\w*|vaga\w*|garage\w*|fila\w*|"
+    r"sess\w*|tarifa\w*|energia|potencia|corrente|tensao|volt\w*|amper\w*|inversor\w*|solar|"
+    r"fotovoltaic\w*|hibrid\w*|plug-?in|byd|tesla|dolphin|volvo|bmw|gwm|ora|kwid|leaf|ioniq|"
+    r"km|quilometr\w*|abastec\w*|combustivel|gasolina|etanol|mobilidade|eletroposto\w*|"
+    r"state of charge|charg\w*|battery|ev|evse|wall ?box|plug)\b"
+)
 
+PADROES_FORA_DE_ESCOPO = re.compile(
+    r"\b(previsao do tempo|vai chover|chuva|clima (em|de|amanha|hoje)|temperatura (em|amanha|hoje) (em|no|na)|"
+    r"receita\w* (de|do|da|para)|bolo|cozinh\w*|culinari\w*|"
+    r"codigo|python|javascript|java|html|css|sql|programa(r|cao)|script|algoritmo|ordena\w* (uma )?lista|"
+    r"filme\w*|serie\w*|musica\w*|cancao|livro\w*|novela|jogo\w*|futebol|campeonato|copa do mundo|time de|"
+    r"politic\w*|eleic\w*|president\w*|piada\w*|poema\w*|poesia|horoscopo|signo\w*|"
+    r"capital d[aoe]|quem (ganhou|descobriu|inventou)|traduz\w*|redac\w*|dever de casa|equac\w*)\b"
+)
 
-# ---------------------------------------------------------------------------
-# Domínios restritos (§6): recusa COM encaminhamento a profissional habilitado
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------- #
+# Domínios restritos (§6)
+# --------------------------------------------------------------------------- #
+EMERGENCIA = re.compile(
+    r"\b(cheir\w* (a|de) queimad\w*|queimad\w*|fumac\w*|faisc\w*|fogo|incendi\w*|chamas?|"
+    r"(levei|tomei|deu|dando) (um )?choque|choque eletrico|esquent\w* (muito|demais)|superaquec\w*|derret\w*|estal\w*)\b"
+)
+SEGURANCA_ELETRICA = re.compile(
+    r"\b(bitola|secao (do|de) (cabo|fio)|mm2|mm²|disjuntor\w*|\bdps\b|\bdr\b|diferencial residual|aterrament\w*|"
+    r"quadro (de forca|de distribuicao|eletrico|geral|de luz)|ligar (direto|diretamente) (no|na|ao)|"
+    r"instal\w* (o|um|meu|minha|nosso|do|de|uma)? ?(carregador|wallbox|tomada|ponto de recarga)|"
+    r"fiac\w*|emend\w*|extens\w*|benjamim|filtro de linha|adaptador de tomada|"
+    r"abr\w* (o|a) (carregador|equipamento|tampa|wallbox)|abrir e (trocar|consertar)|"
+    r"trocar (o|a) (componente|placa|fusivel|rele|contator)|consert\w*|reparar|desmont\w*)\b"
+)
+JURIDICO = re.compile(
+    r"\b(process\w* (o|a|os|as) (condominio|sindic\w*|administrador\w*|administracao|empresa|goodwe|vizinh\w*)|"
+    r"advogad\w*|acao judicial|justica|juiz\w*|tribunal|codigo civil|codigo de defesa|\bcdc\b|artigo \d|lei \d|lei n|"
+    r"jurisprud\w*|meus direitos|direito (de|do|meu)|ilegal|legalmente|e legal|multad\w*|clausula\w*|"
+    r"indeniz\w*|danos morais|notificac\w* extrajudicial|entrar na justica|judicial\w*)\b"
+)
+FINANCEIRO = re.compile(
+    r"\b(retorno (do|sobre o|de) investimento|\broi\b|payback|vale a pena (investir|financiar)|investir|investiment\w*|"
+    r"financi\w*|emprestim\w*|taxa (de juros|ideal|interna|de retorno|minima)|\btir\b|\bvpl\b|valuation|"
+    r"acoes da|bolsa de valores|renda fixa|tesouro direto|cripto\w*|aplicac\w* financeira)\b"
+)
 
-DOMINIOS = {
-    "eletrico": {
-        "profissional": "eletricista habilitado",
-        "motivo": "instalação e segurança elétrica exigem responsável técnico",
-        "padroes": [
-            r"\bbitola\b", r"\bmm2\b|\bmm²\b",
-            r"\bdisjuntor\b", r"\bdr\b(?!\w)", r"\bdps\b",
-            r"\baterrament\w*", r"\bquadro (de |)(forca|distribuicao|energia)\b",
-            r"\bligar\b.{0,30}\b(direto|na rede|no quadro)\b",
-            r"\b(abrir|desmontar|consertar|reparar|trocar)\b.{0,40}"
-            r"\b(carregador|equipamento|placa|componente|fusivel)\b",
-            r"\bfiacao\b", r"\bcabeament\w*\b.{0,20}\b(instal|dimension)",
-            r"\b(cheiro|cheirando)\b.{0,20}\bqueimad", r"\bfumaca\b",
-            r"\bsuperaquec\w*", r"\bcurto[- ]circuito\b",
-        ],
-    },
-    "juridico": {
-        "profissional": "advogado",
-        "motivo": "interpretação de lei, convenção ou contrato exige advogado",
-        "padroes": [
-            r"\bprocessar\b", r"\bacao judicial\b", r"\bprocesso\b.{0,20}\bcontra\b",
-            r"\bartigo\b.{0,25}\b(codigo|lei|civil)\b", r"\bcodigo civil\b",
-            r"\bconvencao (do |de |)condominio\b.{0,30}\b(permite|proibe|obriga|diz)\b",
-            r"\bmeus direitos\b", r"\bdireito legal\b", r"\be legal\b.{0,25}\?",
-            r"\bposso (processar|acionar|denunciar)\b", r"\bindenizacao\b",
-            r"\bmulta\b.{0,25}\b(legal|ilegal|valida)\b", r"\brescis\w*",
-        ],
-    },
-    "financeiro": {
-        "profissional": "contador ou consultor financeiro",
-        "motivo": "recomendação de investimento exige profissional certificado",
-        "padroes": [
-            r"\bvale a pena\b.{0,35}\b(investir|financiar|comprar|instalar)\b",
-            r"\bretorno (do |sobre o |)investimento\b", r"\broi\b",
-            r"\bpayback\b", r"\bfinanciar\b", r"\bfinanciamento\b",
-            r"\btaxa ideal\b", r"\bquanto (devo|deveria) cobrar\b",
-            r"\bcompensa (mais |)(investir|financiar)\b",
-            r"\bemprestimo\b", r"\brentabilidade\b", r"\bpayback\b",
-        ],
-    },
+INTENCAO_ESPEC = re.compile(
+    r"\b(corrente|protocolo|especificac\w*|datasheet|ficha tecnica|potencia|tensao|conector|"
+    r"compativel|suporta|consumo|eficiencia|grau de protecao|ip\d\d|garantia|preco|dimens\w*)\b"
+)
+CODIGO_MODELO = re.compile(r"\b([a-z]{2,6}\d{0,2}-?\d{2,5}[a-z0-9-]*|[a-z]{2,4}\d{1,3}k?-[a-z0-9-]{2,10})\b")
+CODIGOS_IGNORADOS = re.compile(r"^(ccs\d*|iec\d*|nbr\d*|iso\d*|ocpp\d*|tipo\d*|type\d*|ip\d+|nr\d+|co\d+|abnt\d*|sae\d*|gb\d*)$")
+
+# --------------------------------------------------------------------------- #
+# Respostas fixas com encaminhamento a profissional habilitado
+# --------------------------------------------------------------------------- #
+RESPOSTAS = {
+    "emergencia_eletrica": (
+        "Pare de usar o carregador agora: se puder fazer isso com segurança, interrompa a recarga pelo "
+        "aplicativo ou desligue o circuito no quadro, sem tocar em partes aquecidas. Não abra o equipamento "
+        "nem tente reparar; acione a assistência técnica autorizada GoodWe e a administração do condomínio. "
+        "Se houver fumaça ou fogo, afaste-se e ligue 193 (Corpo de Bombeiros)."
+    ),
+    "seguranca_eletrica": (
+        "Não posso orientar instalação, dimensionamento de cabos, proteções ou reparos elétricos. Isso exige "
+        "projeto e execução por eletricista habilitado, conforme as normas ABNT NBR 5410 e NBR 17019, com "
+        "ART (CREA) ou TRT (CFT) emitida pelo profissional responsável. Posso explicar potência, tempo de "
+        "recarga e o uso do carregador."
+    ),
+    "juridico": (
+        "Não posso dar orientação jurídica sobre esse caso. Procure um advogado ou a Defensoria Pública, "
+        "levando a convenção, o regimento interno do condomínio e as comunicações com o síndico. Posso "
+        "explicar como funciona o uso compartilhado dos carregadores, se ajudar."
+    ),
+    "financeiro": (
+        "Não posso fazer recomendação financeira nem calcular retorno de investimento ou taxas para o "
+        "condomínio. Essa análise deve ser feita por um contador ou consultor financeiro, considerando o custo "
+        "dos equipamentos e da instalação, a adequação da entrada de energia, a tarifa cobrada por kWh e a "
+        "demanda esperada de uso. Posso explicar como funciona o faturamento por kWh, se ajudar."
+    ),
+    "fora_de_escopo": (
+        "Isso está fora do meu escopo. Sou o assistente de recarga de veículos elétricos da GoodWe e posso "
+        "ajudar com tempo e custo de recarga, uso dos carregadores e regras do condomínio."
+    ),
 }
 
-# Assuntos legítimos que a rede de domínio pega por engano.
-# EC-05 ("gasolina x elétrico") foi recusado indevidamente na rodada de 09/09:
-# comparar custo por km é explicação, não recomendação de investimento.
-EXCECOES = [
-    r"\b(gasolina|combustivel|etanol|diesel)\b.{0,40}\b(comparad|versus|vs|em relacao)\b",
-    r"\bcomparad\w*\b.{0,40}\b(gasolina|combustivel|etanol|diesel)\b",
-    r"\bcusto por (km|quilometro)\b",
-    r"\bquanto custa\b.{0,30}\b(carregar|recarga|kwh)\b",
-    r"\bcomo (e |)calculad\w*\b.{0,25}\b(tarifa|custo|rateio)\b",
-]
 
-# ---------------------------------------------------------------------------
-# Fora de escopo
-# ---------------------------------------------------------------------------
-
-FORA_DE_ESCOPO = [
-    r"\b(previsao do tempo|temperatura amanha|vai chover)\b",
-    r"\breceita\b.{0,25}\b(bolo|comida|prato|massa)\b",
-    r"\b(filme|serie|novela|musica|livro)\b.{0,30}\b(indic|recomend|sugir|assistir|ver)\b",
-    r"\b(escrev|faca|gere|cri)\w*\b.{0,25}\b(codigo|script|programa|funcao)\b"
-    r".{0,25}\b(python|java|javascript|c\+\+|sql)\b",
-    r"\bcodigo (em |)python\b",
-    r"\b(quem ganhou|placar|jogo do)\b",
-    r"\b(piada|poema|poesia|conto)\b",
-]
-
-# Assunto do domínio: se aparecer, NÃO é fora de escopo mesmo com verbo genérico.
-ANCORAS_DOMINIO = [
-    r"\bcarregad\w*", r"\brecarg\w*", r"\bcarregament\w*", r"\bbateria\b",
-    r"\bkwh\b", r"\bkw\b", r"\bveiculo eletrico\b", r"\bcarro eletrico\b",
-    r"\bcondominio\b", r"\bgoodwe\b", r"\bchargeops\b", r"\btarifa\b",
-    r"\beletromobilidade\b", r"\bcarga\b", r"\btomada\b", r"\bconector\b",
-]
-
-# ---------------------------------------------------------------------------
-# Especificação de produto inexistente (§6: "não inventar especificações")
-# ---------------------------------------------------------------------------
-
-PEDIDO_DE_ESPEC = re.compile(
-    r"\b(corrente maxima|potencia nominal|protocolo|especificac\w*|"
-    r"ficha tecnica|datasheet|tensao de entrada|ip\d{2}|certificac\w*)\b"
-)
-# Códigos de modelo: letras + dígitos, típicos de SKU (HCA-9000X, GW5000-EV).
-CODIGO_DE_MODELO = re.compile(r"\b[a-z]{2,6}[- ]?\d{3,5}[a-z]{0,2}\b", re.I)
+def _resposta_especificacao(modelo: str) -> str:
+    seguro = re.sub(r"[^A-Za-z0-9-]", "", modelo)[:30].upper() or "citado"
+    return (f"Não possuo a especificação do modelo {seguro} na minha base, então não vou estimar "
+            "valores técnicos dele. Consulte o datasheet oficial da GoodWe ou a assistência técnica "
+            "autorizada.")
 
 
-@dataclass(frozen=True)
-class Veredito:
+@dataclass
+class ResultadoEscopo:
     permitido: bool
-    categoria: str = "ok"
-    profissional: str = ""
-    motivo: str = ""
-    padrao: str = ""
-
-    @property
-    def bloqueado(self) -> bool:
-        return not self.permitido
+    categoria: str = "em_escopo"
+    gatilhos: list[str] = field(default_factory=list)
+    resposta: str | None = None
 
 
-def _casa(padroes, texto) -> str:
-    for p in padroes:
-        if re.search(p, texto):
-            return p
-    return ""
+def _modelo_fora_da_base(texto_norm: str, modelos_base: set[str]) -> str | None:
+    if not INTENCAO_ESPEC.search(texto_norm):
+        return None
+    if not re.search(r"\b(goodwe|modelo|carregador|wallbox|inversor)\b", texto_norm):
+        return None
+    base_norm = {normalizar(m) for m in modelos_base}
+    for codigo in CODIGO_MODELO.findall(texto_norm):
+        if CODIGOS_IGNORADOS.match(codigo.replace("-", "")) or re.fullmatch(r"\d+(kw|kwh|v|a)?", codigo):
+            continue
+        if not any(codigo in m for m in base_norm):
+            return codigo
+    return None
 
 
-def validar(pergunta: str) -> Veredito:
-    """Pré-check. Roda antes da chain, em microssegundos."""
-    texto = normalizar(pergunta)
+def validar_escopo(texto: str, modelos_base: set[str] | None = None) -> ResultadoEscopo:
+    t = normalizar(texto)
 
-    if not texto:
-        return Veredito(False, "vazio", motivo="pergunta vazia")
+    for categoria, regra in (("emergencia_eletrica", EMERGENCIA),
+                             ("seguranca_eletrica", SEGURANCA_ELETRICA),
+                             ("juridico", JURIDICO),
+                             ("financeiro", FINANCEIRO)):
+        achado = regra.search(t)
+        if achado:
+            return ResultadoEscopo(False, categoria, [achado.group(0)], RESPOSTAS[categoria])
 
-    tem_ancora = bool(_casa(ANCORAS_DOMINIO, texto))
-    tem_excecao = bool(_casa(EXCECOES, texto))
+    if modelos_base is not None:
+        modelo = _modelo_fora_da_base(t, modelos_base)
+        if modelo:
+            return ResultadoEscopo(False, "especificacao_fora_da_base", [modelo],
+                                   _resposta_especificacao(modelo))
 
-    # 1. Domínios restritos — prioridade máxima: risco elétrico primeiro.
-    for nome in ("eletrico", "juridico", "financeiro"):
-        regra = DOMINIOS[nome]
-        padrao = _casa(regra["padroes"], texto)
-        if padrao:
-            # Exceção só vale para financeiro. Risco elétrico e jurídico não
-            # têm zona cinzenta: na dúvida, encaminha.
-            if nome == "financeiro" and tem_excecao:
-                continue
-            return Veredito(False, f"dominio_{nome}", regra["profissional"],
-                            regra["motivo"], padrao)
+    fora = PADROES_FORA_DE_ESCOPO.search(t)
+    if fora and not TERMOS_DOMINIO.search(t):
+        return ResultadoEscopo(False, "fora_de_escopo", [fora.group(0)], RESPOSTAS["fora_de_escopo"])
 
-    # 2. Fora de escopo — âncora do domínio tem precedência.
-    padrao = _casa(FORA_DE_ESCOPO, texto)
-    if padrao and not tem_ancora:
-        return Veredito(False, "fora_de_escopo",
-                        motivo="assunto fora do domínio ChargeOps", padrao=padrao)
-
-    # 3. Especificação de produto não cadastrado.
-    if PEDIDO_DE_ESPEC.search(texto) and CODIGO_DE_MODELO.search(texto):
-        return Veredito(False, "espec_inexistente",
-                        motivo="especificação de equipamento não consta na base",
-                        padrao="codigo_de_modelo + pedido_de_especificacao")
-
-    return Veredito(True)
+    return ResultadoEscopo(True)
 
 
-def resposta_de_recusa(v: Veredito) -> str:
-    """
-    Recusa determinística: sempre com encaminhamento, sempre em 2 frases.
-
-    O §6 exige recusa COM orientação a profissional habilitado. Recusar sem
-    encaminhar vale nota parcial. Gerar este texto em código, e não pelo modelo,
-    garante que os dois elementos estejam SEMPRE presentes.
-    """
-    if v.categoria.startswith("dominio_"):
-        return (
-            f"Não posso orientar sobre isso, porque {v.motivo}. "
-            f"Procure um {v.profissional}; posso ajudar com dúvidas de recarga, "
-            "consumo e uso dos carregadores do condomínio."
-        )
-    if v.categoria == "espec_inexistente":
-        return (
-            "Não tenho essa especificação na minha base e não vou estimar valores "
-            "de equipamento elétrico. Consulte a ficha técnica oficial GoodWe ou a "
-            "assistência autorizada."
-        )
-    if v.categoria == "fora_de_escopo":
-        return (
-            "Isso está fora do meu escopo. Posso ajudar com recarga de veículos "
-            "elétricos, consumo de energia e uso dos carregadores do condomínio."
-        )
-    return ("Não consegui entender a pergunta. Pode reformular com mais detalhes "
-            "sobre a recarga ou o carregador?")
+# --------------------------------------------------------------------------- #
+# Saída
+# --------------------------------------------------------------------------- #
+TAGS_INTERNAS = re.compile(
+    r"</?(identidade|escopo|regras_seguranca|regras_calculo|formato|canario|base_produtos|"
+    r"perfil_usuario|fatos_da_sessao|calculo_verificado|exemplos?)>", re.I)
+INSTRUCAO_ELETRICA = re.compile(
+    r"\b\d+([.,]\d+)?\s?mm(2|²)|\bbitola\b[^.]{0,30}\d|\bdisjuntor (de )?\d+\s?a\b|\bcabo de \d+([.,]\d+)?\s?mm", re.I)
 
 
-def verificar_resposta(resposta: str, v: Veredito) -> tuple:
-    """
-    Pós-check. Devolve (aprovado, motivo).
-
-    Existe para o caso em que o pré-check libera mas a resposta escorrega — por
-    exemplo, uma pergunta genérica sobre instalação que o modelo responde com
-    bitola de cabo.
-    """
-    texto = normalizar(resposta)
-
-    if not texto:
-        return False, "resposta vazia"
-
-    if re.search(r"\b\d+([.,]\d+)?\s?mm2?\b|\bbitola de \d", texto):
-        return False, "resposta contém dimensionamento de cabo"
-
-    if re.search(r"\bdisjuntor de \d+\s?a\b", texto):
-        return False, "resposta contém especificação de disjuntor"
-
-    if re.search(r"\bartigo \d", texto):
-        return False, "resposta cita artigo de lei"
-
-    return True, ""
+def validar_saida(texto: str, canario: str | None = None) -> tuple[str, str | None]:
+    """Devolve (texto_final, motivo_da_correcao | None)."""
+    if canario and canario.lower() in (texto or "").lower():
+        return RESPOSTAS_MODERACAO["prompt_injection"], "vazamento_canario"
+    if TAGS_INTERNAS.search(texto or ""):
+        return RESPOSTAS_MODERACAO["prompt_injection"], "vazamento_tags_prompt"
+    if INSTRUCAO_ELETRICA.search(texto or ""):
+        return RESPOSTAS["seguranca_eletrica"], "instrucao_eletrica_na_saida"
+    return texto, None

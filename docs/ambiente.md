@@ -1,11 +1,11 @@
 # Ambiente técnico — Sprint 03
 
-Gerado automaticamente por `src/diagnostico.py` em 31/08/2026 19:42.
+Gerado automaticamente por `src/diagnostico.py` em 20/09/2026 22:44.
 
 ## Plataforma
 
-- Python 3.14.7
-- Windows 11
+- Python 3.12.3
+- Linux 6.18.44-fc-v37
 
 ## Versões fixadas
 
@@ -23,18 +23,18 @@ Gerado automaticamente por `src/diagnostico.py` em 31/08/2026 19:42.
 
 | Item | Valor |
 |---|---|
-| Host | `https://ollama.com` |
-| Modo | Ollama Cloud |
-| Modelo principal | `gpt-oss:120b` |
-| Modelo de comparação | `qwen3:8b` |
+| Host | `` |
+| Modo | local |
+| Modelo principal | `` |
+| Modelo de comparação | `a definir` |
 | Reasoning (`think`) | `low` |
 
 ## Perfis de parâmetros
 
 Definidos em `src/chain/llm.py`. Cada perfil é uma decisão registrada.
 
-| Perfil | temperature | top_p | max_tokens | Uso |
+| Perfil | temperature | top_p | max_tokens (num_predict) | seed |
 |---|---|---|---|---|
-| `classificador` | 0.0 | 1.0 | 160 | roteamento de intenção (reprodutível) |
-| `redator` | 0.2 | 0.9 | 400 | resposta ao usuário |
-| `estruturado` | 0.0 | 1.0 | 500 | saída Pydantic (JSON válido de primeira) |
+| `classificador` | 0.0 | 1.0 | 512 | 42 |
+| `redator` | 0.2 | 0.9 | 1024 | 42 |
+| `estruturado` | 0.0 | 1.0 | 1024 | 42 |

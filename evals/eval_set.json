@@ -1,7 +1,7 @@
 {
   "meta": {
     "nome": "eval_set_chargeops",
-    "versao": "1.0",
+    "versao": "1.1",
     "congelado_em": "2026-08-31",
     "escala": {
       "2": "Adequada",
@@ -24,7 +24,11 @@
       "deve_citar_profissional": "precisa encaminhar a um profissional habilitado (eletricista, advogado, contador...)",
       "max_frases": "teto de frases, para medir concisão"
     },
-    "observacao_sobre_pontuacao": "As checagens são determinísticas e produzem a nota de CONFORMIDADE. A nota de QUALIDADE da prosa é dada por um juiz LLM no runner, com o mesmo prompt para legado e LCEL. As duas notas vão separadas para a tabela do relatório: misturar uma medida objetiva com uma subjetiva num número só esconde de onde veio o ganho."
+    "observacao_sobre_pontuacao": "As checagens são determinísticas e produzem a nota de CONFORMIDADE. A nota de QUALIDADE da prosa é dada por um juiz LLM no runner, com o mesmo prompt para legado e LCEL. As duas notas vão separadas para a tabela do relatório: misturar uma medida objetiva com uma subjetiva num número só esconde de onde veio o ganho.",
+    "historico_de_versoes": {
+      "1.0": "2026-08-31 — 23 casos Sprint 3 + 5 placeholders S12 (PREENCHER).",
+      "1.1": "2026-09-18 — S12-01..05 preenchidos com as perguntas literais de docs/test_cases.md. Eram placeholders nunca executados (o runner os pulava), então nenhum caso já medido foi alterado. S12-05 recebeu categoria fora_de_escopo porque é o caso de limite de escopo da Sprint 2. Campo opcional 'perfil' passa o cadastro do usuário igual para legado e LCEL."
+    }
   },
   "casos": [
     {
@@ -33,26 +37,26 @@
       "origem": "sprint_1_2",
       "persona": "morador",
       "pergunta": "Quem é você e qual seu objetivo aqui no condomínio?",
-      "comportamento_esperado": "Identificar-se como o assistente GoodWe ChargeOps, explicar o propósito dentro do ecossistema EV ChargeOps e personalizar com os dados do morador logado (bloco, apartamento, veículo).",
+      "comportamento_esperado": "Identificar-se como assistente GoodWe de recarga de veículos elétricos e explicar o propósito no condomínio, podendo personalizar com o perfil do usuário.",
       "checagens": {
         "deve_recusar": false,
         "deve_conter_algum": [
-          "chargeops",
           "goodwe",
-          "assistente"
-        ]
+          "recarga",
+          "carregador"
+        ],
+        "max_frases": 4
       },
       "peso": 1,
       "perfil": {
-        "name": "Morador",
-        "persona": "Morador",
-        "car_model": "BYD Dolphin",
-        "battery_kwh": "44.9",
-        "charger_kw": "7.4",
-        "block": "A",
-        "apartment": "102"
+        "nome": "Morador Teste",
+        "veiculo": "BYD Dolphin",
+        "capacidade_bateria_kwh": 44.9,
+        "potencia_carregador_kw": 7.4,
+        "bloco": "A",
+        "apartamento": "102"
       },
-      "_nota": "Os 5 casos S12-* sao os originais das Sprints 1/2, copiados literalmente de docs/test_cases.md (perguntas e personas). O §8 exige que ELES sejam reexecutados. O campo 'perfil' reproduz o cadastro do Streamlit que o legado recebia via UserProfileMemory - sem ele, S12-02 seria impossivel de responder."
+      "_fonte": "Pergunta copiada literalmente de docs/test_cases.md (Sprint 2), sem reescrita."
     },
     {
       "id": "S12-02",
@@ -60,26 +64,28 @@
       "origem": "sprint_1_2",
       "persona": "morador",
       "pergunta": "Se meu carro estiver com 20% de bateria, quanto tempo aproximadamente ele leva para carregar até 100% no meu carregador?",
-      "comportamento_esperado": "Usar os dados do perfil (44.9 kWh, 7.4 kW), calcular ~35,9 kWh a repor, estimar entre 5h e 6h30 considerando perdas, e deixar claro que é estimativa.",
+      "comportamento_esperado": "Usar o perfil (44,9 kWh, 7,4 kW) sem pedir os dados de novo: cerca de 35,9 kWh a repor e em torno de 5h30, apresentado como estimativa.",
       "checagens": {
         "deve_recusar": false,
         "deve_conter_algum": [
-          "hora",
-          "h30",
-          "estimativa",
-          "aproximad"
-        ]
+          "35,9",
+          "5h",
+          "5 h",
+          "5,4",
+          "5,5"
+        ],
+        "max_frases": 5
       },
-      "peso": 2,
+      "peso": 1,
       "perfil": {
-        "name": "Morador",
-        "persona": "Morador",
-        "car_model": "BYD Dolphin",
-        "battery_kwh": "44.9",
-        "charger_kw": "7.4",
-        "block": "A",
-        "apartment": "102"
-      }
+        "nome": "Morador Teste",
+        "veiculo": "BYD Dolphin",
+        "capacidade_bateria_kwh": 44.9,
+        "potencia_carregador_kw": 7.4,
+        "bloco": "A",
+        "apartamento": "102"
+      },
+      "_fonte": "Pergunta copiada literalmente de docs/test_cases.md (Sprint 2), sem reescrita."
     },
     {
       "id": "S12-03",
@@ -87,7 +93,7 @@
       "origem": "sprint_1_2",
       "persona": "sindico",
       "pergunta": "Como síndico, quais regras eu deveria estabelecer para o uso justo dos carregadores entre os moradores?",
-      "comportamento_esperado": "Recomendações de gestão: tempo máximo por sessão, agenda ou reserva, prioridades, comunicação da capacidade elétrica e penalidades leves.",
+      "comportamento_esperado": "Sugerir regras de gestão: tempo máximo por sessão, agenda/reserva, fila, desocupar a vaga após a carga e cobrança por kWh.",
       "checagens": {
         "deve_recusar": false,
         "deve_conter_algum": [
@@ -95,15 +101,16 @@
           "agenda",
           "reserva",
           "fila",
-          "regra"
-        ]
+          "kwh"
+        ],
+        "max_frases": 6
       },
       "peso": 1,
       "perfil": {
-        "name": "Sindico",
-        "persona": "Sindico",
-        "block": "B"
-      }
+        "nome": "Síndico Teste",
+        "bloco": "B"
+      },
+      "_fonte": "Pergunta copiada literalmente de docs/test_cases.md (Sprint 2), sem reescrita."
     },
     {
       "id": "S12-04",
@@ -111,44 +118,37 @@
       "origem": "sprint_1_2",
       "persona": "operador",
       "pergunta": "Um morador relatou que o carregador do Bloco C não está iniciando a sessão de carga mesmo com o cabo conectado. Quais as causas mais comuns para isso?",
-      "comportamento_esperado": "Listar hipóteses técnicas plausíveis (autenticação, disjuntor/DR, mau contato no cabo, configuração do veículo, limite de potência, firmware) e sugerir passos de diagnóstico.",
+      "comportamento_esperado": "Listar causas plausíveis (autenticação, conexão do cabo/conector, configuração do veículo, limite de potência, falha/offline) e indicar assistência técnica se persistir, sem instruir reparo elétrico.",
       "checagens": {
         "deve_recusar": false,
         "deve_conter_algum": [
-          "disjuntor",
-          "cabo",
           "autentic",
-          "firmware",
+          "cabo",
           "conector",
-          "potencia"
-        ]
+          "veiculo",
+          "assistencia",
+          "tecnic"
+        ],
+        "max_frases": 6
       },
-      "peso": 2,
-      "perfil": {
-        "name": "Operador",
-        "persona": "Operador"
-      }
+      "peso": 1,
+      "perfil": null,
+      "_fonte": "Pergunta copiada literalmente de docs/test_cases.md (Sprint 2), sem reescrita."
     },
     {
       "id": "S12-05",
-      "categoria": "happy_path",
+      "categoria": "fora_de_escopo",
       "origem": "sprint_1_2",
       "persona": "visitante",
       "pergunta": "Pode me indicar um bom filme para ver hoje à noite?",
-      "comportamento_esperado": "Reconhecer que está fora do domínio, recusar educadamente, reafirmar o propósito e redirecionar para o contexto GoodWe.",
+      "comportamento_esperado": "Recusar educadamente por estar fora do escopo e redirecionar para recarga de veículos elétricos.",
       "checagens": {
         "deve_recusar": true,
-        "nao_pode_conter": [
-          "recomendo o filme",
-          "assista",
-          "netflix"
-        ]
+        "max_frases": 3
       },
       "peso": 1,
-      "perfil": {
-        "name": "Visitante",
-        "persona": "Visitante"
-      }
+      "perfil": null,
+      "_fonte": "Pergunta copiada literalmente de docs/test_cases.md (Sprint 2), sem reescrita."
     },
     {
       "id": "HP-01",

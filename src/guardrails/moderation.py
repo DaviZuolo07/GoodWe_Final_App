@@ -1,167 +1,183 @@
 """
-Moderação — prompt injection, jailbreak e extração de prompt.
+Guardrail de ENTRADA — moderação (prompt injection, jailbreak, abuso).
 
-Complementa o `scope_validator`: aquele decide SOBRE O QUE se pode falar; este
-decide se a mensagem está tentando reescrever as regras do sistema.
+Roda ANTES de qualquer chamada ao LLM. Se bloquear, o modelo nem é chamado:
+custo zero, latência de microssegundos, resposta idêntica em toda execução.
 
-POR QUE ANTES DO MODELO
------------------------
-Uma instrução maliciosa que chega ao modelo já venceu metade da batalha: a
-partir dali, a defesa depende de o modelo escolher obedecer o system prompt em
-vez da mensagem. Às vezes escolhe, às vezes não — e "às vezes" não é postura de
-segurança. Detectando antes, a instrução nunca é lida.
+Por que regras determinísticas e não "perguntar ao LLM se é ataque":
+  1. Um classificador LLM é, ele mesmo, suscetível a injection.
+  2. Recusa de segurança precisa ser auditável ("por que bloqueou?" -> a
+     regra X casou com o trecho Y). Ver `ResultadoModeracao.gatilhos`.
+  3. O prompt v2 continua sendo a SEGUNDA camada (defesa em profundidade,
+     OWASP Top 10 for LLM Applications 2025 — LLM01 Prompt Injection).
 
-O QUE ISTO NÃO É
-----------------
-Isto não substitui o prompt: um atacante criativo escreve o que nenhum regex
-prevê. É uma camada, não uma garantia. A defesa real é a soma das três:
-detecção determinística aqui, instrução no system prompt (v1/v2), e o fato de
-o assistente simplesmente não ter acesso a dados de terceiros para vazar.
+Limite honesto: regras não pegam paráfrase criativa infinita. Por isso o
+prompt v2 isola a entrada em <pergunta_usuario> (spotlighting, Hines et al.,
+2024, arXiv:2403.14720) e a saída passa pelo validador de `scope_validator`.
 
-Escrever isso no relatório vale mais que fingir cobertura total.
+Técnicas de evasão tratadas na normalização:
+  - acentos/maiúsculas         "IGNORE", "instruções"
+  - caracteres invisíveis      zero-width space entre letras
+  - letras espaçadas           "i g n o r e"
+  - leetspeak                  "1gn0r3", "r3v3l3"
+  - payload em base64          "aWdub3JlIHN1YXMgcmVncmFz"
 """
 
+from __future__ import annotations
+
+import base64
+import binascii
 import re
-from dataclasses import dataclass
+import unicodedata
+from dataclasses import dataclass, field
 
-from src.guardrails.scope_validator import normalizar
+# --------------------------------------------------------------------------- #
+# Normalização
+# --------------------------------------------------------------------------- #
+_INVISIVEIS = re.compile(r"[\u200b-\u200f\u2060-\u2064\ufeff\u00ad]")
+_LETRAS_ESPACADAS = re.compile(r"\b(?:[a-z]\s){3,}[a-z]\b")
+_LEET = str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "5": "s",
+                       "7": "t", "@": "a", "$": "s", "!": "i"})
+_BASE64 = re.compile(r"(?:[A-Za-z0-9+/]{4}){5,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")
 
-# ---------------------------------------------------------------------------
-# 1. Sobrescrita de instrução
-# ---------------------------------------------------------------------------
-SOBRESCRITA = [
-    r"\bignor\w*\b.{0,30}\b(instruc\w*|regras|orientac\w*|prompt|comandos|anterior\w*)\b",
-    r"\b(esqueca|desconsidere|apague|anule|descarte)\b.{0,30}"
-    r"\b(instruc\w*|regras|prompt|contexto|tudo)\b",
-    r"\ba partir de agora voce (e|sera|vai ser)\b",
-    r"\bde agora em diante voce\b",
-    r"\bvoce (nao |)tem mais\b.{0,25}\b(restric\w*|regras|limites)\b",
-    r"\bsem (nenhuma |qualquer |)(restric\w*|censura|limite|filtro)\b",
-    r"\bnovas instruc\w*\b", r"\bsobrescrev\w*\b.{0,20}\bregras\b",
-    r"\bmodo (desenvolvedor|dev|debug|admin|deus|livre|irrestrito)\b",
-    r"\bdevmode\b", r"\bdan\b(?!\w)", r"\bjailbreak\b",
-]
 
-# ---------------------------------------------------------------------------
-# 2. Extração do prompt
-# ---------------------------------------------------------------------------
-EXTRACAO = [
-    r"\b(qual|mostre|revele|exiba|imprima|repita|copie|liste)\b.{0,40}"
-    r"\b(system prompt|prompt do sistema|suas instruc\w*|suas regras|"
-    r"seu prompt|prompt inicial|configurac\w* inicial)\b",
-    r"\bsystem prompt\b.{0,25}\b(completo|inteiro|na integra|literal)\b",
-    r"\brepita\b.{0,25}\b(tudo|acima|o texto)\b.{0,25}\bantes\b",
-    r"\bquais (sao |)(as |)suas (regras|instruc\w*|diretrizes)\b",
-    r"\bo que (esta |foi )escrito\b.{0,25}\b(antes|acima|no seu)\b",
-]
+def normalizar(texto: str) -> str:
+    """NFKC -> sem invisíveis -> minúsculas -> sem acento -> espaços colapsados."""
+    t = unicodedata.normalize("NFKC", texto or "")
+    t = _INVISIVEIS.sub("", t).lower()
+    t = unicodedata.normalize("NFD", t)
+    t = "".join(c for c in t if unicodedata.category(c) != "Mn")
+    return re.sub(r"\s+", " ", t).strip()
 
-# ---------------------------------------------------------------------------
-# 3. Troca de identidade / persona por texto
-# ---------------------------------------------------------------------------
-# O papel vem do sistema autenticado, nunca da mensagem. Afirmar um papel na
-# conversa para obter dado de terceiro é escalação de privilégio — o ataque
-# mais provável num sistema multi-persona e o mais fácil de passar batido.
-IDENTIDADE = [
-    r"\b(sou|eu sou|aqui e)\b.{0,15}\b(o |a |)(sindic\w*|administrador\w*|"
-    r"operador\w*|tecnic\w*|zelador\w*|gerente|dono|proprietari\w*)\b",
-    r"\bfinja que (voce |eu |)\b", r"\bfaca de conta que\b",
-    r"\bfinja ser\b", r"\bassuma o papel\b", r"\bincorpor\w*\b.{0,20}\bpersonagem\b",
-    r"\bvoce agora e\b", r"\bcomo se voce fosse\b",
-    r"\bautorizad\w* pel\w*\b.{0,25}\b(sindic|administrac|goodwe)\b",
-]
 
-# ---------------------------------------------------------------------------
-# 4. Injeção indireta: pedido malicioso embrulhado em tarefa inofensiva
-# ---------------------------------------------------------------------------
-INDIRETA = [
-    r"\b(traduza|traduzir|converta)\b.{0,80}\b(execute|obedeca|siga|cumpra|"
-    r"faca o que|aplique)\b",
-    r"\b(roteiro|filme|cena|historia|conto|ficcao|romance|livro)\b.{0,80}"
-    r"\b(burlar|contornar|fraudar|hackear|adulterar|sem restric\w*|"
-    r"ignorar as regras)\b",
-    r"\b(hipoteticamente|em teoria|se voce pudesse|imagine que)\b.{0,60}"
-    r"\b(sem (as |)regras|ignorar|burlar|revelar)\b",
-    r"\bpara fins (educacionais|academicos|de pesquisa)\b.{0,50}"
-    r"\b(burlar|contornar|fraudar|adulterar)\b",
-    r"\bresponda (em |)(base64|rot13|codigo|cifra)\b",
-]
+def _variantes(texto: str) -> list[str]:
+    """Texto normalizado + versão sem letras espaçadas + versão sem leetspeak."""
+    base = normalizar(texto)
+    colado = _LETRAS_ESPACADAS.sub(lambda m: m.group(0).replace(" ", ""), base)
+    leet = colado.translate(_LEET)
+    return list(dict.fromkeys([base, colado, leet]))
 
-# ---------------------------------------------------------------------------
-# 5. Fraude operacional
-# ---------------------------------------------------------------------------
-FRAUDE = [
-    r"\b(burlar|contornar|fraudar|adulterar|manipular|enganar|driblar)\b.{0,40}"
-    r"\b(medic\w*|medidor|cobranca|faturamento|leitura|consumo|sistema|tarifa)\b",
-    r"\b(nao pagar|deixar de pagar|carregar de graca|energia gratis)\b",
-    r"\bacesso\b.{0,25}\b(sem autorizac\w*|indevido|de outro)\b",
-]
 
-CATEGORIAS = {
-    "sobrescrita_de_instrucao": SOBRESCRITA,
-    "extracao_de_prompt": EXTRACAO,
-    "troca_de_identidade": IDENTIDADE,
-    "injecao_indireta": INDIRETA,
-    "fraude_operacional": FRAUDE,
+def _decodificar_base64(texto: str) -> list[str]:
+    achados = []
+    for trecho in _BASE64.findall(texto or ""):
+        try:
+            bruto = base64.b64decode(trecho, validate=True).decode("utf-8")
+        except (binascii.Error, UnicodeDecodeError, ValueError):
+            continue
+        if sum(c.isprintable() for c in bruto) / max(len(bruto), 1) > 0.9:
+            achados.append(bruto)
+    return achados
+
+
+# --------------------------------------------------------------------------- #
+# Regras (sobre texto normalizado: minúsculo e sem acento)
+# --------------------------------------------------------------------------- #
+_ALVOS_INSTRUCAO = r"(instruc\w*|regras?|orientac\w*|diretrizes?|prompt|comandos?|restric\w*|politicas?|limites?|configurac\w*)"
+
+REGRAS: dict[str, list[tuple[str, str]]] = {
+    "prompt_injection": [
+        ("ignorar_regras",
+         rf"\b(ignor\w*|desconsider\w*|esquec\w*|esquece\w*|descart\w*|anul\w*|sobrescrev\w*|desobedec\w*)\b.{{0,40}}\b{_ALVOS_INSTRUCAO}"),
+        ("ignorar_regras_en",
+         r"\b(ignore|disregard|forget|override|bypass)\b.{0,40}\b(instructions?|rules?|prompt|guidelines|system|policy)"),
+        ("revelar_prompt",
+         r"\b(revel\w*|mostr\w*|exib\w*|imprim\w*|repit\w*|diga|conte|copie|vaz\w*|cole|liste|reveal|show|print|repeat|leak|dump)\b"
+         r".{0,50}\b(system ?prompt|prompt (do|de) sistema|seu prompt|suas instruc\w*|instruc\w* (inicia|origina|intern|ocult|secret)\w*"
+         r"|regras (internas|ocultas|secretas)|configurac\w* (interna|oculta)|your (instructions|prompt))"),
+        ("mencao_system_prompt", r"\b(system ?prompt|prompt (do|de) sistema)\b"),
+        ("delimitador_injetado",
+         r"</?\s*(pergunta_usuario|system|sistema|regras\w*|identidade|canario|instruc\w*|assistant)\s*>"
+         r"|\[/?inst\]|<\|(im_start|im_end|start|end|system)\|>|#{2,}\s*(system|sistema)\b"),
+        ("traduzir_e_executar",
+         r"\b(traduz\w*|translate|decodifi\w*|decode)\b.{0,160}\b(execut\w*|obedec\w*|cumpr\w*|aplique|siga|seguir|run|execute|follow|obey)\b"),
+    ],
+    "jailbreak": [
+        ("troca_de_identidade",
+         r"\b(a partir de agora|de agora em diante|daqui pra frente|from now on)\b.{0,60}"
+         r"\b(voce e|voce sera|voce vai ser|seja|atue|aja|comporte|you are|act as|be)\b"),
+        ("modo_irrestrito",
+         r"\b(dev ?mode|modo (desenvolvedor|dev|deus|irrestrito|livre|sem (filtro|restric\w*))|developer mode|jailbreak"
+         r"|do anything now|\bdan\b|sem (nenhuma |qualquer )?(restric\w*|filtros?|censura|limites)|without (any )?restrictions|unfiltered|uncensored)"),
+        ("roleplay_de_ia",
+         r"\b(finja|fingir|finge|imagine|roleplay|role play|interprete|encene|pretend|vamos (brincar|fingir)|roteiro|personagem)\b"
+         r".{0,80}\b(ia|inteligencia artificial|assistente|chatbot|bot|modelo de linguagem|ai)\b"),
+        ("confirmacao_de_modo", r"\bconfirm\w* (dizendo|com|escrevendo)\b.{0,30}\b(ativ\w*|liberad\w*|on)\b"),
+    ],
+    "dados_de_terceiros": [
+        ("dados_de_outra_unidade",
+         r"\b(historic\w*|saldo|dados|sessoes|recargas|consumo|cpf|placa|telefone|e-?mail|senha|cadastro|extrato|fatura)\b"
+         r".{0,40}\b(do|da|de|dos|das)\s+(apartamento|apto|ap|unidade|bloco|morador\w*|vizinh\w*|outros?|todos)\b"),
+        ("unidade_especifica_com_dado",
+         r"\b(apartamento|apto|unidade)\s*\d+.{0,40}\b(saldo|historic\w*|consumo|recargas|dados|fatura|extrato)\b"),
+        ("alegacao_de_papel",
+         r"\b(eu sou|sou|falo como|aqui e|sendo)\s+(o |a )?(sindic\w*|administrador\w*|admin|operador\w*|zelador\w*|gerente|desenvolvedor\w*|suporte|dono do sistema)\b"
+         r".{0,80}\b(mostre|me de|libere|acesse|exib\w*|list\w*|quero ver|preciso ver|abra)\b"),
+    ],
+    "conduta_indevida": [
+        ("fraude_medicao",
+         r"\b(burl\w*|fraud\w*|adulter\w*|manipul\w*|contorn\w*|engan\w*|dribl\w*|hacke\w*|bypass|desativ\w*)\b"
+         r".{0,50}\b(medi\w*|medidor\w*|cobranc\w*|tarifa\w*|pagamento\w*|consumo|leitura|contador|rfid|cartao|autentic\w*|protec\w*|\bdr\b|diferencial|aterramento)"),
+        ("fraude_medicao_inversa",
+         r"\b(medic\w*|medidor\w*|cobranc\w*|leitura)\b.{0,30}\b(burl\w*|fraud\w*|adulter\w*|engan\w*)"),
+        ("furto_de_energia",
+         r"\b(gato de energia|fazer (um )?gato|furt\w* (de )?energia|roub\w* (de )?energia|carregar (de gra[cç]a|sem pagar))"),
+    ],
 }
 
+_COMPILADAS = {cat: [(nome, re.compile(p)) for nome, p in regras] for cat, regras in REGRAS.items()}
 
-@dataclass(frozen=True)
-class Deteccao:
-    seguro: bool
-    categoria: str = "ok"
-    padrao: str = ""
+# --------------------------------------------------------------------------- #
+# Respostas fixas (curtas, sem ecoar o pedido, sem lição de moral)
+# --------------------------------------------------------------------------- #
+RESPOSTAS = {
+    "prompt_injection": (
+        "Não posso atender esse pedido. Sigo como assistente de recarga de veículos elétricos "
+        "da GoodWe e posso ajudar com tempo e custo de recarga, uso dos carregadores ou regras do condomínio."
+    ),
+    "jailbreak": (
+        "Não posso atender esse pedido. Sigo como assistente de recarga de veículos elétricos "
+        "da GoodWe e posso ajudar com tempo e custo de recarga, uso dos carregadores ou regras do condomínio."
+    ),
+    "dados_de_terceiros": (
+        "Não posso acessar nem exibir dados de outros moradores ou unidades, e o seu perfil é definido "
+        "pelo sistema, não pela mensagem. Para relatórios de uso do condomínio, use o painel "
+        "administrativo com o seu login ou fale com a administração."
+    ),
+    "conduta_indevida": (
+        "Não posso ajudar com isso, nem em cenário fictício. Se houver suspeita de erro na medição ou "
+        "na cobrança, registre a ocorrência com a administração do condomínio para verificação técnica."
+    ),
+}
 
-    @property
-    def bloqueado(self) -> bool:
-        return not self.seguro
-
-
-def analisar(mensagem: str) -> Deteccao:
-    """Pré-check de moderação. Roda antes de qualquer chamada ao modelo."""
-    texto = normalizar(mensagem)
-    for categoria, padroes in CATEGORIAS.items():
-        for p in padroes:
-            if re.search(p, texto):
-                return Deteccao(False, categoria, p)
-    return Deteccao(True)
-
-
-def resposta_de_recusa(d: Deteccao) -> str:
-    """
-    Recusa curta e sem eco.
-
-    Duas regras deliberadas: não repetir o texto do usuário (evita que a
-    injeção apareça na resposta) e não explicar QUAL padrão disparou (isso
-    ensinaria a contorná-lo na tentativa seguinte).
-    """
-    if d.categoria == "troca_de_identidade":
-        return ("Seu perfil de acesso vem do sistema, não da conversa, então não "
-                "posso atender pedidos baseados em outro papel. Posso ajudar com "
-                "recarga, consumo e uso dos carregadores.")
-    if d.categoria == "extracao_de_prompt":
-        return ("Não compartilho minhas instruções internas. Posso ajudar com "
-                "dúvidas sobre recarga de veículos elétricos no condomínio.")
-    if d.categoria == "fraude_operacional":
-        return ("Não posso ajudar com isso. Posso explicar como o consumo é medido "
-                "e como a tarifa é calculada, se for útil.")
-    return ("Não posso atender esse pedido. Sigo como assistente de recarga da "
-            "GoodWe — posso ajudar com carregadores, consumo e tempo de recarga.")
+ORDEM = ("conduta_indevida", "dados_de_terceiros", "prompt_injection", "jailbreak")
 
 
-def verificar_resposta(resposta: str) -> tuple:
-    """
-    Pós-check: a resposta vazou o prompt do sistema?
+@dataclass
+class ResultadoModeracao:
+    bloqueado: bool
+    categoria: str | None = None
+    gatilhos: list[str] = field(default_factory=list)
+    resposta: str | None = None
 
-    Procura marcadores estruturais do nosso próprio prompt. Se aparecerem, algo
-    passou pelo pré-check e o conteúdo não pode sair.
-    """
-    texto = normalizar(resposta)
-    marcadores = [
-        "# identidade", "# escopo", "# limites de dominio", "# personas",
-        "esta identidade e fixa", "regras de conteudo",
-        "system prompt", "minhas instrucoes sao",
-    ]
-    for m in marcadores:
-        if m in texto:
-            return False, f"possivel vazamento de prompt: {m!r}"
-    return True, ""
+
+def moderar(texto: str, _profundidade: int = 0) -> ResultadoModeracao:
+    variantes = _variantes(texto)
+    achados: dict[str, list[str]] = {}
+    for categoria, regras in _COMPILADAS.items():
+        for nome, rx in regras:
+            if any(rx.search(v) for v in variantes):
+                achados.setdefault(categoria, []).append(nome)
+
+    # Payload escondido em base64: decodifica e modera o conteúdo.
+    if _profundidade == 0:
+        for decodificado in _decodificar_base64(texto):
+            interno = moderar(decodificado, _profundidade=1)
+            if interno.bloqueado:
+                achados.setdefault("prompt_injection", []).append(
+                    f"base64->{interno.categoria}")
+
+    for categoria in ORDEM:
+        if categoria in achados:
+            return ResultadoModeracao(True, categoria, achados[categoria], RESPOSTAS[categoria])
+    return ResultadoModeracao(False)

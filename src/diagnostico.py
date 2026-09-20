@@ -193,16 +193,18 @@ else:
 titulo("6. TIKTOKEN (medição de tokens do bloco B)")
 # ---------------------------------------------------------------------------
 try:
-    import tiktoken
+    from src.chain import tokens as _tk
 
-    codificador = tiktoken.get_encoding("cl100k_base")
-    amostra = "Quanto tempo falta para minha recarga terminar?"
-    n = len(codificador.encode(amostra))
-    ok(f"encoding carregado - {n} tokens na frase de teste")
-    print("       (cl100k_base é aproximação: o gpt-oss usa outro tokenizador,")
-    print("        mas serve para comparar prompt v1 x v2 na MESMA régua)")
+    regua = _tk.nome_regua()
+    n = _tk.contar("Quanto tempo falta para minha recarga terminar?")
+    if regua == "sem_tiktoken":
+        falha("tiktoken sem encoding disponível - precisa de internet no primeiro uso")
+    else:
+        ok(f"régua {regua} - {n} tokens na frase de teste")
+        print("       (o200k_harmony é o tokenizador do gpt-oss: contagem exata para o")
+        print("        modelo principal e régua única para comparar todas as colunas)")
 except Exception as e:
-    falha(f"tiktoken falhou: {e} - precisa de internet no primeiro uso")
+    falha(f"tiktoken falhou: {e}")
 
 
 # ---------------------------------------------------------------------------
@@ -295,13 +297,13 @@ linhas += [
     "",
     "Definidos em `src/chain/llm.py`. Cada perfil é uma decisão registrada.",
     "",
-    "| Perfil | temperature | top_p | max_tokens | Uso |",
+    "| Perfil | temperature | top_p | max_tokens (num_predict) | seed |",
     "|---|---|---|---|---|",
-    "| `classificador` | 0.0 | 1.0 | 160 | roteamento de intenção (reprodutível) |",
-    "| `redator` | 0.2 | 0.9 | 400 | resposta ao usuário |",
-    "| `estruturado` | 0.0 | 1.0 | 500 | saída Pydantic (JSON válido de primeira) |",
-    "",
 ]
+from src.chain.llm import PERFIS as _PERFIS  # noqa: E402
+linhas += [f"| `{k}` | {v['temperature']} | {v['top_p']} | {v['num_predict']} | {v['seed']} |"
+           for k, v in _PERFIS.items()]
+linhas.append("")
 
 destino.write_text("\n".join(linhas), encoding="utf-8")
 print(f"\n  Tabela de versões gravada em: {destino.relative_to(RAIZ)}")

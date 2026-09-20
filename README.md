@@ -1,5 +1,56 @@
 # 🔋 GoodWe ChargeOps AI Assistant
 
+> Chatbot de recarga de veículos elétricos em condomínios — **EV Challenge 2026 · FIAP × GoodWe**.
+
+## ⚡ Sprint 03 — Refactory conversacional em LangChain
+
+O núcleo do chatbot foi reconstruído em **LangChain LCEL**, cobrindo os itens do contrato:
+
+| # | Item do escopo | Onde está |
+|---|---|---|
+| 1 | Chain LCEL `ChatPromptTemplate \| ChatOllama(gpt-oss:120b) \| parser` | `src/chain/builder.py`, `src/chain/llm.py` |
+| 2 | Memória por sessão: `RunnableWithMessageHistory` + `ConversationTokenBufferMemory` (1200 tokens), demonstrada em 6 turnos | `src/chain/memoria.py`, `evals/memoria_demo.py` |
+| 3 | Structured output Pydantic v2 `ConsultaRecarga` com `field_validator` | `src/schemas/consulta_recarga.py` |
+| 4 | Context engineering: prompt versionado com XML tagging + tiktoken | `prompts/`, `src/chain/prompts.py`, `src/chain/tokens.py` |
+| 5 | Guardrails: jailbreak/injection, escopo GoodWe, recusas com profissional habilitado | `src/guardrails/` |
+| 6 | Eval reexecutado + relatório de evolução (PDF) + relatório de modelos | `evals/`, `docs/` |
+| + | Bônus: multi-provider (vários modelos × vários prompts) | `src/chain/multi_provider.py` |
+
+### Arquitetura de um turno
+
+```
+pergunta ─► moderação ─► validação de escopo ─► RunnableBranch
+                                                  ├─ bloqueado ─► resposta fixa (0 chamadas ao LLM)
+                                                  └─ segue ─► extração Pydantic ─► cálculo determinístico
+                                                             ─► [prompt v2 | ChatOllama | parser] + memória
+                                                             ─► validação de saída (canário, instrução elétrica)
+```
+
+O LLM **extrai** os dados; o **Python calcula** tempo, energia e custo (eficiência AC de 89,4%,
+Sears et al., IEEE 2014 — ver `docs/fundamentacao_calculos.md`). O legado `ai/` não foi alterado:
+é o grupo de controle do comparativo antes/depois.
+
+### Como rodar
+
+```bash
+pip install -r requirements-sprint3.txt
+cp .env.example .env              # cole a OLLAMA_API_KEY
+python -m pytest tests -q          # 111 testes offline
+python -m src.app --detalhes       # conversar
+python -m evals.executar_tudo      # eval completo + todos os relatórios + PDF
+```
+
+Validação: `python -m evals.validar_entrega` · Guia de validação: [`docs/VALIDACAO.md`](docs/VALIDACAO.md)
+
+Fluxo de teste completo: **[`docs/COMO_TESTAR.md`](docs/COMO_TESTAR.md)** ·
+Mudanças da sprint: **[`docs/RELATORIO_MUDANCAS.md`](docs/RELATORIO_MUDANCAS.md)** ·
+Tabela antes/depois: `docs/tabela_antes_depois.md` · Modelos: `docs/relatorio_modelos.md` ·
+Versões de prompt: `prompts/README.md`
+
+---
+
+# Documentação das Sprints 1 e 2 (versão legada, `ai/`)
+
 > Chatbot inteligente contextualizado para o ecossistema **ChargeGrid Intelligence / EV ChargeOps**, desenvolvido para o **EV Challenge 2026**.
 
 ---

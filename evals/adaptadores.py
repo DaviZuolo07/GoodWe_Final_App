@@ -5,250 +5,233 @@ O runner conhece só esta interface:
 
     adaptador.nome
     adaptador.responder(pergunta, persona, perfil) -> str
-    adaptador.prompt_renderizado(pergunta, persona, perfil) -> str
+    adaptador.ultima_execucao -> dict   (tokens, chamadas, rota...)
 
-Ele não sabe se está falando com o chatbot manual da Sprint 2 ou com a chain
-LCEL. Um único laço, uma única medição de tempo, uma única contagem de tokens.
-A ÚNICA coisa que muda entre as colunas "antes" e "depois" é o que está dentro
-do `responder`. É isso que transforma a tabela do §8 numa evidência.
+Existe um único caminho de execução, uma única medição de tempo e uma única
+régua de tokens. A ÚNICA coisa que muda entre as colunas "antes" e "depois" é
+o que está dentro do `responder`.
+
+    legado    ->  lcel_cru          ->  lcel (v1 / v2)
+    Sprint 2      efeito do             efeito do prompt, do
+                  framework sozinho     structured output e dos guardrails
 """
+
+from __future__ import annotations
 
 import os
 import sys
+import types
+import uuid
 from pathlib import Path
-
-import requests
 
 RAIZ = Path(__file__).resolve().parent.parent
 if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
+from src.chain import tokens  # noqa: E402
 
-# ===========================================================================
-# LEGADO — a coluna "antes"
-# ===========================================================================
 
-class _RequestsComAuth:
-    """
-    Substituto do módulo `requests` DENTRO do módulo do legado.
+def _vazio() -> dict:
+    return {"chamadas_llm": 0, "tokens_prompt": 0, "tokens_resposta": 0,
+            "tokens_servidor_entrada": 0, "tokens_servidor_saida": 0,
+            "rota": "llm", "categoria_guardrail": None,
+            "estruturado_valido": None, "estruturado_tentativas": 0,
+            "prompt_enviado": ""}
 
-    O PROBLEMA: `ai/services/llm_provider.py` faz
 
-        requests.post(self.api_url, json=payload, timeout=180)
-
-    sem nenhum cabeçalho. Isso funcionava na Sprint 2 porque o alvo era um
-    Ollama local já autenticado (`gpt-oss:120b-cloud` em localhost:11434).
-    Falando direto com a ollama.com, a mesma chamada leva 401.
-
-    A TENTAÇÃO: abrir o llm_provider.py e acrescentar o header. Isso destrói o
-    grupo de controle. A partir do momento em que o legado é editado, ele deixa
-    de ser "a versão das Sprints 1/2" e a tabela antes/depois vira ficção.
-
-    A SOLUÇÃO: trocar o objeto `requests` que o módulo legado enxerga, em tempo
-    de execução. O arquivo em disco continua byte a byte idêntico. O que muda é
-    só o transporte da credencial — infraestrutura, não comportamento. Montagem
-    do prompt, ordem das mensagens, parâmetros do modelo: tudo intacto, e é
-    exatamente isso que o eval está medindo.
-    """
-
-    def __init__(self, chave: str):
-        self._chave = chave
-
-    def post(self, url, **kwargs):
-        headers = dict(kwargs.pop("headers", None) or {})
-        if self._chave:
-            headers["Authorization"] = f"Bearer {self._chave}"
-        return requests.post(url, headers=headers, **kwargs)
-
-    def __getattr__(self, nome):
-        return getattr(requests, nome)
+# --------------------------------------------------------------------------- #
+# LEGADO — Sprint 2, código de ai/ executado SEM alteração
+# --------------------------------------------------------------------------- #
+def _build_system_context(profile: dict) -> str:
+    """Cópia literal de ai/ui/streamlit_app.py::build_system_context.
+    (Importar o streamlit_app executaria a interface inteira.)"""
+    return (
+        f"Usuário: {profile['name']} | Persona: {profile['persona']} | "
+        f"Carro: {profile['car_model']} | Bateria: {profile['battery_kwh']} kWh | "
+        f"Carregador preferido: {profile['charger_kw']} kW | "
+        f"Bloco/Apto: {profile['block']}/{profile['apartment']}. "
+        f"Use esses dados para calcular tempo de carga, % de bateria e estimativas sem perguntar ao usuário."
+    )
 
 
 class AdaptadorLegado:
     """
-    Versão manual das Sprints 1/2 — a coluna "antes" da tabela obrigatória.
+    Coluna "antes" da tabela obrigatória.
 
-    NOTA DE HONESTIDADE PARA O RELATÓRIO: o legado não define temperature,
-    top_p nem think, então roda com os padrões do Ollama (temperatura ~0.8). O
-    LCEL usa 0.2 com seed fixa. Essa diferença NÃO é um truque para inflar o
-    ganho: é literalmente uma das coisas que o refactory trouxe — controle de
-    parâmetros. Mas precisa estar escrito no relatório, senão a comparação
-    parece manipulada.
+    REGRA INEGOCIÁVEL: nenhum arquivo de ai/ é alterado. O que o adaptador faz
+    é só TRANSPORTE:
+      - aponta a instância do LLMProvider para o mesmo host/modelo do .env
+        (atributos da instância, não o código);
+      - substitui o `requests` do módulo por um proxy que acrescenta o header
+        Authorization quando o host é a nuvem — o legado foi escrito para o
+        Ollama local e não envia credencial — e registra o payload real para
+        a contagem de tokens.
+    A montagem do prompt, o histórico e os parâmetros (nenhum: o legado usa os
+    padrões do modelo) continuam exatamente os da Sprint 2.
     """
 
-    nome = "legado"
+    def __init__(self, papel: str = "principal", model: str | None = None, **_):
+        import requests
 
-    def __init__(self, model: str | None = None):
-        chave = (os.getenv("OLLAMA_API_KEY") or "").strip().strip('"').strip("'")
-        host = (os.getenv("OLLAMA_HOST") or "http://127.0.0.1:11434").strip().rstrip("/")
+        from src.chain.llm import _limpo, nome_do_modelo, resolver_provedor
 
-        # O legado lê OLLAMA_API_URL (endpoint completo), não OLLAMA_HOST.
-        # Injetar a variável é configuração, não alteração de código.
-        os.environ["OLLAMA_API_URL"] = f"{host}/api/chat"
+        os.chdir(RAIZ)   # PromptLoader do legado usa caminho relativo "ai/prompts"
+        provedor, host, nome = resolver_provedor(model or nome_do_modelo(papel))
+        if provedor == "nuvem" and nome.endswith("-cloud"):
+            nome = nome[:-len("-cloud")]
+        self.api_url = os.getenv("LEGADO_API_URL") or f"{host}/api/chat"
+        self.modelo = nome
+        self.nome = f"legado[{nome}]"
+        self._chave = _limpo("OLLAMA_API_KEY") if provedor == "nuvem" else ""
+        self._requests = requests
+        self.ultima_execucao = _vazio()
 
-        import ai.services.llm_provider as provider_legado
-        from ai.prompts.prompt_loader import PromptLoader
-
-        provider_legado.requests = _RequestsComAuth(chave)
-
-        # BASE_PATH é relativo ("ai/prompts"): quebra se o runner for chamado
-        # de outra pasta. Resolver para absoluto não muda o conteúdo lido.
-        PromptLoader.BASE_PATH = RAIZ / "ai" / "prompts"
-
-        self.modelo = (model or os.getenv("OLLAMA_MODEL") or "gpt-oss:120b").strip()
-        os.environ["OLLAMA_MODEL"] = self.modelo
-        self.nome = f"legado[{self.modelo}]"
-
-        from ai.services.chat_service import ChatService
-        self._ChatService = ChatService
-
-    def _contexto_usuario(self, persona: str, perfil: dict | None) -> str:
-        from ai.memory.user_profile_memory import UserProfileMemory
-        dados = dict(perfil or {})
-        dados.setdefault("persona", persona)
-        return UserProfileMemory(dados).build_context()
+    def _post(self, url, json=None, timeout=None, **kw):
+        cab = dict(kw.pop("headers", {}) or {})
+        if self._chave:
+            cab["Authorization"] = f"Bearer {self._chave}"
+        r = self._requests.post(url, json=json, headers=cab, timeout=timeout, **kw)
+        ex = self.ultima_execucao
+        ex["chamadas_llm"] += 1
+        msgs = (json or {}).get("messages", [])
+        ex["tokens_prompt"] += tokens.contar_mensagens(msgs)
+        ex["prompt_enviado"] = "\n".join(f"[{m['role']}] {m['content']}" for m in msgs)
+        try:
+            dados = r.json()
+            ex["tokens_servidor_entrada"] += int(dados.get("prompt_eval_count") or 0)
+            ex["tokens_servidor_saida"] += int(dados.get("eval_count") or 0)
+        except Exception:
+            pass
+        return r
 
     def prompt_renderizado(self, pergunta, persona="morador", perfil=None) -> str:
-        """Reconstrói o texto que o legado envia — é o que a contagem mede."""
-        from ai.context.goodwe_context import GOODWE_CONTEXT
-        from ai.prompts.prompt_loader import PromptLoader
-        return "\n".join([
-            PromptLoader.load_system_prompt(),
-            GOODWE_CONTEXT,
-            self._contexto_usuario(persona, perfil),
-            PromptLoader.load_few_shots(),
-            pergunta,
-        ])
+        return self.ultima_execucao.get("prompt_enviado") or pergunta
 
-    def responder(self, pergunta, persona="morador", perfil=None) -> str:
-        # ChatService NOVO a cada caso. O legado tem ConversationMemory em RAM;
-        # reaproveitar a instância deixaria o caso 5 contaminado pelos 4
-        # anteriores. Os casos do eval são independentes por definição — e o
-        # adaptador LCEL cru também não tem memória, então isolar aqui é o que
-        # mantém os dois lados na mesma condição.
-        servico = self._ChatService(
-            system_context="",
-            user_context=self._contexto_usuario(persona, perfil),
-        )
-        return servico.send_message(pergunta)
+    def responder(self, pergunta: str, persona: str = "morador", perfil: dict | None = None) -> str:
+        from ai.memory.user_profile_memory import UserProfileMemory
+        from ai.services import llm_provider as modulo_provider
+        from ai.services.chat_service import ChatService
+
+        self.ultima_execucao = _vazio()
+        system_context = user_context = ""
+        if perfil:
+            profile = {
+                "name": perfil.get("nome", ""), "persona": persona.capitalize(),
+                "car_model": perfil.get("veiculo", ""), "battery_kwh": perfil.get("capacidade_bateria_kwh", ""),
+                "charger_kw": perfil.get("potencia_carregador_kw", ""),
+                "block": perfil.get("bloco", ""), "apartment": perfil.get("apartamento", ""),
+            }
+            system_context = _build_system_context(profile)
+            user_context = UserProfileMemory(profile).build_context()
+
+        servico = ChatService(system_context=system_context, user_context=user_context)
+        servico.agent.provider.api_url = self.api_url
+        servico.agent.provider.model = self.modelo
+
+        original = modulo_provider.requests
+        modulo_provider.requests = types.SimpleNamespace(post=self._post)
+        try:
+            resposta = servico.send_message(pergunta)
+        finally:
+            modulo_provider.requests = original
+        self.ultima_execucao["tokens_resposta"] = tokens.contar(resposta)
+        return resposta
 
 
-# ===========================================================================
-# LCEL CRU — o piso da medição
-# ===========================================================================
-
+# --------------------------------------------------------------------------- #
+# LCEL CRU — piso: só o framework, prompt genérico, sem guardrails
+# --------------------------------------------------------------------------- #
 class AdaptadorLCELCru:
-    """
-    Chain LCEL mínima: prompt genérico, sem prompt versionado, sem guardrails,
-    sem memória.
+    def __init__(self, papel: str = "principal", model: str | None = None, **_):
+        from langchain_core.output_parsers import StrOutputParser
+        from langchain_core.prompts import ChatPromptTemplate
 
-    Sem esta coluna, se o LCEL sair melhor que o legado não dá para saber se o
-    ganho veio do LangChain ou do trabalho de prompt e guardrails:
+        from src.chain.llm import get_llm, nome_do_modelo
 
-        legado  ->  LCEL cru  ->  LCEL completo
-                    (efeito do    (efeito do prompt
-                     framework)    e dos guardrails)
-    """
-
-    nome = "lcel_cru"
-
-    SISTEMA = (
-        "Você é o ChargeOps AI, assistente da GoodWe especializado em recarga "
-        "de veículos elétricos em condomínios residenciais. Responda em "
-        "português do Brasil."
-    )
-
-    def __init__(self, model: str | None = None, papel: str = "principal"):
-        from src.chain.llm import nome_do_modelo
         self.modelo = model or nome_do_modelo(papel)
         self.nome = f"lcel_cru[{self.modelo}]"
-
-    def _perfil_texto(self, persona: str, perfil: dict | None) -> str:
-        # O legado recebe o perfil do usuário; o LCEL cru precisa receber o
-        # mesmo, ou casos como "quanto tempo leva no MEU carregador" ficariam
-        # impossíveis de responder só num dos lados.
-        dados = dict(perfil or {})
-        dados.setdefault("persona", persona)
-        linhas = [f"{k}: {v}" for k, v in dados.items() if v not in (None, "")]
-        return "Dados do usuário atual:\n" + "\n".join(linhas)
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", "Você é o ChargeOps AI, assistente da GoodWe especializado em recarga de "
+                       "veículos elétricos em condomínios residenciais. Responda em português do Brasil."),
+            ("human", "{pergunta}"),
+        ])
+        self.llm = get_llm(perfil="redator", model=self.modelo)
+        self.chain = self.prompt | self.llm | StrOutputParser()
+        self.ultima_execucao = _vazio()
 
     def prompt_renderizado(self, pergunta, persona="morador", perfil=None) -> str:
-        return "\n".join([self.SISTEMA, self._perfil_texto(persona, perfil), pergunta])
+        return "\n".join(str(m.content) for m in self.prompt.format_messages(pergunta=pergunta))
 
-    def responder(self, pergunta, persona="morador", perfil=None) -> str:
-        from src.chain.execucao import invocar
-        return invocar(
-            [
-                {"role": "system", "content": self.SISTEMA},
-                {"role": "system", "content": self._perfil_texto(persona, perfil)},
-                {"role": "user", "content": pergunta},
-            ],
-            model=self.modelo,
-            perfil="redator",
-            seed=42,
-            # 1200 ainda cortou o S12-03 no meio (resposta de 1394 tokens).
-            # O legado não define teto nenhum; comparar um lado truncado com um
-            # lado inteiro produziria ganho falso. Aqui a folga é generosa de
-            # propósito: a verbosidade do cru é um ACHADO a ser medido, não um
-            # defeito a ser escondido com corte.
-            num_predict=2200,
-        )
+    def responder(self, pergunta: str, persona: str = "morador", perfil: dict | None = None) -> str:
+        from langchain_core.callbacks import UsageMetadataCallbackHandler
+
+        uso = UsageMetadataCallbackHandler()
+        resposta = self.chain.invoke({"pergunta": pergunta}, config={"callbacks": [uso]})
+        msgs = self.prompt.format_messages(pergunta=pergunta)
+        ex = _vazio()
+        ex.update(chamadas_llm=1, tokens_prompt=tokens.contar_mensagens(msgs),
+                  tokens_resposta=tokens.contar(resposta),
+                  tokens_servidor_entrada=sum(u.get("input_tokens", 0) for u in uso.usage_metadata.values()),
+                  tokens_servidor_saida=sum(u.get("output_tokens", 0) for u in uso.usage_metadata.values()),
+                  prompt_enviado=self.prompt_renderizado(pergunta))
+        self.ultima_execucao = ex
+        return resposta
 
 
-# ===========================================================================
-# LCEL COMPLETO — a coluna "depois"
-# ===========================================================================
-
+# --------------------------------------------------------------------------- #
+# LCEL — versão final da Sprint 3 (builder.py)
+# --------------------------------------------------------------------------- #
 class AdaptadorLCEL:
-    """
-    Chain LCEL com prompt versionado. É a versão que a rubrica avalia.
+    def __init__(self, papel: str = "principal", model: str | None = None,
+                 versao_prompt: str = "v2", guardrails: bool = True, **_):
+        from src.chain.builder import ChatbotChargeOps
+        from src.chain.llm import nome_do_modelo
 
-    A diferença para o `lcel_cru` é UMA coisa só: o system prompt versionado.
-    Mesmo framework, mesmo modelo, mesma seed, mesmos parâmetros. Isolar assim
-    é o que permite dizer, com número, quanto do ganho veio do LangChain e
-    quanto veio do trabalho de prompt.
-    """
-
-    nome = "lcel"
-
-    def __init__(self, model: str | None = None, versao: str = "v1",
-                 guardrails: bool = False):
-        from src.chain.builder import ChargeOpsChain
-        self.versao = versao
-        self._chat = ChargeOpsChain(versao=versao, model=model,
-                                    guardrails=guardrails)
-        self.modelo = self._chat.modelo
-        sufixo = "_guard" if guardrails else ""
-        self.nome = f"lcel_{versao}{sufixo}[{self.modelo}]"
+        self.modelo = model or nome_do_modelo(papel)
+        sufixo = "" if guardrails else ",sem_guardrails"
+        self.nome = f"lcel_{versao_prompt}[{self.modelo}{sufixo}]"
+        self.bot = ChatbotChargeOps(versao_prompt=versao_prompt, model=self.modelo, guardrails=guardrails)
+        self.ultima_execucao = _vazio()
 
     def prompt_renderizado(self, pergunta, persona="morador", perfil=None) -> str:
-        return self._chat.prompt_renderizado(pergunta, persona, perfil)
+        return self.ultima_execucao.get("prompt_enviado", "")
 
-    def responder(self, pergunta, persona="morador", perfil=None) -> str:
-        return self._chat.responder(pergunta, persona, perfil)
+    def responder(self, pergunta: str, persona: str = "morador", perfil: dict | None = None) -> str:
+        # Sessão nova por caso: casos do eval são independentes.
+        r = self.bot.responder(pergunta, session_id=uuid.uuid4().hex, persona=persona, perfil=perfil)
+        self.ultima_execucao = {
+            "chamadas_llm": r.chamadas_llm, "tokens_prompt": r.tokens_prompt,
+            "tokens_resposta": r.tokens_resposta,
+            "tokens_servidor_entrada": r.tokens_servidor_entrada,
+            "tokens_servidor_saida": r.tokens_servidor_saida,
+            "rota": r.rota, "categoria_guardrail": r.categoria_guardrail,
+            "estruturado_valido": r.estruturado_valido,
+            "estruturado_tentativas": r.estruturado_tentativas,
+            "saida_corrigida": r.saida_corrigida_por_guardrail,
+            "prompt_enviado": r.prompt_enviado,
+        }
+        return r.texto
 
 
-# ===========================================================================
-# FALSO — teste de encanamento, sem rede
-# ===========================================================================
-
+# --------------------------------------------------------------------------- #
+# FALSO — respostas fixas, sem rede. Testa o runner sem gastar cota.
+# --------------------------------------------------------------------------- #
 class AdaptadorFalso:
     nome = "falso"
 
-    def __init__(self, model: str | None = None):
-        pass
+    def __init__(self, **_):
+        self.ultima_execucao = _vazio()
 
     def prompt_renderizado(self, pergunta, persona="morador", perfil=None) -> str:
         return f"[system generico]\n{pergunta}"
 
-    def responder(self, pergunta, persona="morador", perfil=None) -> str:
+    def responder(self, pergunta: str, persona: str = "morador", perfil: dict | None = None) -> str:
         p = pergunta.lower()
-        if any(t in p for t in ("ignore", "devmode", "finja", "traduza")):
+        if any(t in p for t in ("ignore", "devmode", "finja", "síndico", "sindico")):
             return "Não posso ajudar com isso. Posso falar sobre recarga do seu veículo."
-        if any(t in p for t in ("processar", "investir", "quadro de", "queimado")):
-            return ("Não posso orientar sobre isso. Procure um eletricista ou "
-                    "profissional habilitado para avaliar o caso.")
-        if any(t in p for t in ("tempo para amanhã", "previsão", "receita", "python", "filme")):
+        if any(t in p for t in ("processar", "investir", "quadro de força", "queimado")):
+            return "Não posso orientar sobre isso. Procure um profissional habilitado para avaliar o caso."
+        if any(t in p for t in ("tempo", "previsão", "receita", "python", "filme")):
             return "Isso está fora do meu escopo. Posso ajudar com recarga de veículos elétricos."
         return "Com um carregador de 7,4 kW a recarga leva cerca de 6 horas. Acima de 80% a potência cai."
 
@@ -257,7 +240,5 @@ ADAPTADORES = {
     "legado": AdaptadorLegado,
     "lcel_cru": AdaptadorLCELCru,
     "lcel": AdaptadorLCEL,
-    "lcel_guard": lambda model=None, versao="v1": AdaptadorLCEL(
-        model=model, versao=versao, guardrails=True),
     "falso": AdaptadorFalso,
 }
