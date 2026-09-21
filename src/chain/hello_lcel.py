@@ -1,28 +1,5 @@
 """
 A primeira chain LCEL do projeto.
-
-    python -m src.chain.hello_lcel        (rodar da RAIZ do repositório)
-
-Este arquivo não vai para a entrega final - ele é o "hello world" que prova
-que o ambiente está de pé e serve para entender o que o `|` faz antes de a
-chain de verdade nascer no builder.py.
-
-O QUE O `|` FAZ
----------------
-Não é gambiarra de sintaxe. Cada peça é um Runnable: um objeto com `invoke`,
-`stream`, `batch` e as versões async. O `|` compõe dois Runnables num terceiro,
-que também é Runnable. Três consequências práticas que a versão manual da
-Sprint 2 não tem de graça:
-
-  chain.stream(...)   streaming token a token na UI, sem escrever código de
-                      streaming nenhum
-  chain.batch([...])  o eval inteiro em paralelo (isto vai economizar horas
-                      no passo 8)
-  trocar uma peça     StrOutputParser -> PydanticOutputParser muda UMA linha e
-                      a chain passa a devolver objeto validado
-
-É exatamente esse ganho que vai para a coluna "Sprint 03 (LCEL)" da tabela
-antes/depois obrigatória do relatório.
 """
 
 import time

@@ -1,18 +1,5 @@
 """
 Fábrica de LLMs da Sprint 3.
-
-Único lugar do projeto que sabe COMO falar com o modelo. Todo o resto
-(`builder.py`, guardrails, eval, multi-provider) recebe um objeto pronto e não
-faz ideia se ele é gpt-oss, gemma ou qwen.
-
-    from src.chain.llm import get_llm
-    principal  = get_llm()                      # gpt-oss:120b
-    comparacao = get_llm(papel="comparacao")    # o segundo modelo do .env
-    local      = get_llm(model="local:qwen3:8b")  # outro PROVEDOR (Ollama local)
-
-O prefixo `local:` / `nuvem:` no nome do modelo escolhe o provedor (endpoint).
-É o que torna a chamada multi-provider do bônus uma realidade e não só "vários
-modelos no mesmo servidor".
 """
 
 from __future__ import annotations
