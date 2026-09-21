@@ -1,0 +1,15 @@
+# Tema GoodWe (mesma paleta do painel ChargeOps). O CSS de src/ui/streamlit_app.py
+# refina os cards; este arquivo garante a base escura e o acento vermelho mesmo
+# se o usuário tiver outro tema salvo na máquina.
+[theme]
+base = "dark"
+primaryColor = "#E8442F"
+backgroundColor = "#0B0B0D"
+secondaryBackgroundColor = "#141417"
+textColor = "#E8E8EA"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

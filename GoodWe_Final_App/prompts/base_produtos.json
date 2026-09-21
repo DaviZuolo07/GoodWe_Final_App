@@ -1,0 +1,26 @@
+{
+  "origem": "Cadastro do condomínio de demonstração do projeto (seed db/02_seed.sql do GoodWe_MVP). Só entra aqui especificação conferida em datasheet oficial ou no cadastro real do condomínio.",
+  "tarifa_condominio_brl_kwh": 2.10,
+  "produtos": [
+    {
+      "modelo": "GoodWe AC 7,4kW",
+      "tipo": "AC",
+      "potencia_maxima_kw": 7.4,
+      "conector": "Tipo 2",
+      "tensao_v": 230,
+      "corrente_maxima_a": 32,
+      "fases": "monofásico",
+      "unidades_no_condominio": 5
+    },
+    {
+      "modelo": "GoodWe AC 22kW",
+      "tipo": "AC",
+      "potencia_maxima_kw": 22,
+      "conector": "Tipo 2",
+      "tensao_v": 400,
+      "corrente_maxima_a": 32,
+      "fases": "trifásico",
+      "unidades_no_condominio": 1
+    }
+  ]
+}

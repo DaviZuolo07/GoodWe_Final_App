@@ -1,0 +1,41 @@
+# Sprint 03 - stack LangChain
+# Arquivo SEPARADO do requirements.txt de propósito: o requirements original é
+# o que faz a versão legada (ai/) rodar, e ela é o grupo de controle do
+# comparativo antes/depois. Misturar os dois arruína o experimento.
+#
+#     pip install -r requirements-sprint3.txt
+#
+# Versões FIXADAS e testadas juntas (111 testes em tests/ passando). O LangChain
+# 1.x publica release quase toda semana; sem pin, uma atualização na véspera
+# quebra a entrega. Subiu versão? Rode `pytest tests` e o eval, e registre.
+
+langchain==1.3.18
+langchain-core==1.6.1
+langchain-ollama==1.1.0
+
+# ConversationTokenBufferMemory mora aqui desde o LangChain 1.x (saiu de
+# langchain.memory). Necessário porque o item 2 do escopo pede essa classe.
+langchain-classic==1.0.8
+
+# LangGraph: NÃO é exigido pela Sprint 03 (Módulos 3/4) e não é usado no
+# núcleo. Mantido fixado para não quebrar ambientes já instalados.
+langgraph==1.2.11
+
+pydantic==2.13.5
+
+# Medição de tokens (Aula 04). Encoding o200k_harmony = tokenizador do gpt-oss.
+tiktoken==0.14.0
+
+python-dotenv==1.1.1
+
+# Adaptador do legado (ai/services/llm_provider.py usa requests).
+requests==2.34.2
+
+# Relatório de evolução em PDF (evals/relatorio_pdf.py).
+reportlab==5.0.1
+
+# Interface de demonstração e testes interativos (src/ui/streamlit_app.py).
+streamlit==1.57.0
+
+# Testes offline (inclui os testes de renderização da interface, via AppTest).
+pytest==9.1.1

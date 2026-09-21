@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "nome": "structured_set_chargeops",
+    "versao": "1.0",
+    "congelado_em": "2026-09-18",
+    "campos_avaliados": [
+      "intencao",
+      "capacidade_bateria_kwh",
+      "soc_atual_pct",
+      "soc_alvo_pct",
+      "potencia_carregador_kw",
+      "potencia_max_ac_veiculo_kw",
+      "tarifa_kwh_brl",
+      "energia_entregue_kwh",
+      "estado_carregador",
+      "tipo_corrente"
+    ],
+    "regra": "Campo ausente em 'esperado' significa que o valor correto é null (não informado). Números comparados com tolerância de 1%. SO-13 é inconsistente de propósito (alvo < atual): o comportamento correto é a validação REJEITAR, não aceitar calado.",
+    "por_que": "Mede o item 'acurácia do structured output' do §8. Os casos cobrem vírgula decimal, milhar com ponto, unidade grudada, 'por cento', sinônimos de estado, limite AC do veículo, DC e dado ausente (não pode ser inventado)."
+  },
+  "casos": [
+    {
+      "id": "SO-01",
+      "mensagem": "Minha bateria é de 60 kWh, está em 20% e quero ir até 80% num carregador de 7,4 kW. Quanto tempo?",
+      "esperado": {
+        "intencao": "estimativa_tempo",
+        "capacidade_bateria_kwh": 60,
+        "soc_atual_pct": 20,
+        "soc_alvo_pct": 80,
+        "potencia_carregador_kw": 7.4
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-02",
+      "mensagem": "BYD Dolphin com bateria de 44,9 kWh, tá em 35 por cento. Quanto demora pra encher no wallbox de 7kW?",
+      "esperado": {
+        "intencao": "estimativa_tempo",
+        "capacidade_bateria_kwh": 44.9,
+        "soc_atual_pct": 35,
+        "soc_alvo_pct": 100,
+        "potencia_carregador_kw": 7
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-03",
+      "mensagem": "Quanto vou pagar para carregar de 10% a 90% uma bateria de 50kWh com tarifa de R$ 2,10 o kWh?",
+      "esperado": {
+        "intencao": "estimativa_custo",
+        "capacidade_bateria_kwh": 50,
+        "soc_atual_pct": 10,
+        "soc_alvo_pct": 90,
+        "tarifa_kwh_brl": 2.1
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-04",
+      "mensagem": "O carregador 3 está livre?",
+      "esperado": {
+        "intencao": "estado_carregador"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-05",
+      "mensagem": "O carregador da vaga 12 está mostrando erro vermelho, parou no meio da recarga.",
+      "esperado": {
+        "intencao": "estado_carregador",
+        "estado_carregador": "falha"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-06",
+      "mensagem": "Meu carro só aceita 6,6 kW em AC e o carregador é de 22 kW. Bateria 60 kWh, de 30 a 80%. Quanto tempo?",
+      "esperado": {
+        "intencao": "estimativa_tempo",
+        "capacidade_bateria_kwh": 60,
+        "soc_atual_pct": 30,
+        "soc_alvo_pct": 80,
+        "potencia_carregador_kw": 22,
+        "potencia_max_ac_veiculo_kw": 6.6,
+        "tipo_corrente": "AC"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-07",
+      "mensagem": "Num carregador rápido DC de 50 kW, quanto tempo de 20 a 80% com bateria de 77 kWh?",
+      "esperado": {
+        "intencao": "estimativa_tempo",
+        "capacidade_bateria_kwh": 77,
+        "soc_atual_pct": 20,
+        "soc_alvo_pct": 80,
+        "potencia_carregador_kw": 50,
+        "tipo_corrente": "DC"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-08",
+      "mensagem": "Qual a diferença entre kW e kWh?",
+      "esperado": {
+        "intencao": "conceitual"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-09",
+      "mensagem": "A sessão de ontem entregou 18,5 kWh. Com a tarifa de 1,95 por kWh, quanto deu?",
+      "esperado": {
+        "intencao": "faturamento",
+        "energia_entregue_kwh": 18.5,
+        "tarifa_kwh_brl": 1.95
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-10",
+      "mensagem": "quanto tempo",
+      "esperado": {
+        "intencao": "estimativa_tempo"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-11",
+      "mensagem": "O carregador está desligado, sem luz nenhuma no painel.",
+      "esperado": {
+        "intencao": "estado_carregador",
+        "estado_carregador": "offline"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-12",
+      "mensagem": "Tenho 1.234,5 km rodados este mês, a bateria de 40 kWh está com 50%. Carregador de 3,7 kW até 100%, quanto tempo?",
+      "esperado": {
+        "intencao": "estimativa_tempo",
+        "capacidade_bateria_kwh": 40,
+        "soc_atual_pct": 50,
+        "soc_alvo_pct": 100,
+        "potencia_carregador_kw": 3.7
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-13",
+      "mensagem": "Estou com 90% e quero chegar a 80%, bateria de 60 kWh, carregador 7,4 kW.",
+      "esperado": {
+        "intencao": "estimativa_tempo",
+        "capacidade_bateria_kwh": 60,
+        "potencia_carregador_kw": 7.4
+      },
+      "esperado_valido": false
+    },
+    {
+      "id": "SO-14",
+      "mensagem": "O carregador GoodWe AC 22kW suporta que conector?",
+      "esperado": {
+        "intencao": "conceitual",
+        "modelo_carregador": "GoodWe AC 22kW"
+      },
+      "esperado_valido": true
+    },
+    {
+      "id": "SO-15",
+      "mensagem": "Quanto custa carregar 30 kWh?",
+      "esperado": {
+        "intencao": "estimativa_custo"
+      },
+      "esperado_valido": true
+    }
+  ]
+}

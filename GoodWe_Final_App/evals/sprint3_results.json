@@ -1,0 +1,128 @@
+{
+  "gerado_em": "2026-09-20T23:05:49",
+  "modelo_principal": "gpt-oss:120b",
+  "modelos": {
+    "principal": "gpt-oss:120b"
+  },
+  "tokens_estaticos": {
+    "system_legado_v0": 3700,
+    "system_v1": 307,
+    "system_v2": 987,
+    "format_instructions_pydantic": 1060,
+    "format_instructions_compacto": 508,
+    "regua": "o200k_harmony"
+  },
+  "tabela_antes_depois": {
+    "legado": {
+      "nota_ponderada": null,
+      "conformidade_pct": null,
+      "tokens_por_turno_media": null,
+      "tokens_por_turno_com_llm_media": null,
+      "tokens_servidor_por_turno_media": null,
+      "chamadas_llm_por_turno": null,
+      "latencia_media_ms": null,
+      "latencia_p90_ms": null,
+      "turnos_resolvidos_por_guardrail": null,
+      "structured_valido_1a_tentativa_pct": "n/a",
+      "structured_acuracia_campos_pct": null,
+      "structured_schema_valido_pct": null
+    },
+    "lcel_cru": {
+      "nota_ponderada": null,
+      "conformidade_pct": null,
+      "tokens_por_turno_media": null,
+      "tokens_por_turno_com_llm_media": null,
+      "tokens_servidor_por_turno_media": null,
+      "chamadas_llm_por_turno": null,
+      "latencia_media_ms": null,
+      "latencia_p90_ms": null,
+      "turnos_resolvidos_por_guardrail": null,
+      "structured_valido_1a_tentativa_pct": "n/a",
+      "structured_acuracia_campos_pct": "n/a",
+      "structured_schema_valido_pct": "n/a"
+    },
+    "v1": {
+      "nota_ponderada": null,
+      "conformidade_pct": null,
+      "tokens_por_turno_media": null,
+      "tokens_por_turno_com_llm_media": null,
+      "tokens_servidor_por_turno_media": null,
+      "chamadas_llm_por_turno": null,
+      "latencia_media_ms": null,
+      "latencia_p90_ms": null,
+      "turnos_resolvidos_por_guardrail": null,
+      "structured_valido_1a_tentativa_pct": "n/a",
+      "structured_acuracia_campos_pct": "n/a",
+      "structured_schema_valido_pct": "n/a"
+    },
+    "v2": {
+      "nota_ponderada": null,
+      "conformidade_pct": null,
+      "tokens_por_turno_media": null,
+      "tokens_por_turno_com_llm_media": null,
+      "tokens_servidor_por_turno_media": null,
+      "chamadas_llm_por_turno": null,
+      "latencia_media_ms": null,
+      "latencia_p90_ms": null,
+      "turnos_resolvidos_por_guardrail": null,
+      "structured_valido_1a_tentativa_pct": null,
+      "structured_acuracia_campos_pct": null,
+      "structured_schema_valido_pct": null
+    },
+    "v2_sem_guardrails": {
+      "nota_ponderada": null,
+      "conformidade_pct": null,
+      "tokens_por_turno_media": null,
+      "tokens_por_turno_com_llm_media": null,
+      "tokens_servidor_por_turno_media": null,
+      "chamadas_llm_por_turno": null,
+      "latencia_media_ms": null,
+      "latencia_p90_ms": null,
+      "turnos_resolvidos_por_guardrail": null,
+      "structured_valido_1a_tentativa_pct": null,
+      "structured_acuracia_campos_pct": null,
+      "structured_schema_valido_pct": null
+    }
+  },
+  "chaves_usadas": {
+    "legado": "legado[gpt-oss:120b]",
+    "lcel_cru": "lcel_cru[gpt-oss:120b]",
+    "v1": "lcel_v1[gpt-oss:120b]",
+    "v2": "lcel_v2[gpt-oss:120b]",
+    "v2_sem_guardrails": "lcel_v2[gpt-oss:120b,sem_guardrails]"
+  },
+  "por_modelo": {
+    "gpt-oss:120b": {
+      "papel": "principal",
+      "parametros": {
+        "papel": "principal",
+        "model": "gpt-oss:120b",
+        "provedor": "local",
+        "host": "http://127.0.0.1:11434",
+        "perfil": "redator",
+        "think": "low",
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "num_predict": 1024,
+        "seed": 42,
+        "regua_tokens": "o200k_harmony"
+      },
+      "metricas": null,
+      "por_categoria": null,
+      "structured": null
+    }
+  },
+  "structured": {},
+  "memoria": {},
+  "guardrails": {
+    "ataques_e_restritos": 39,
+    "bloqueados": 39,
+    "taxa_bloqueio_pct": 100.0,
+    "legitimas": 44,
+    "falsos_positivos": 0,
+    "taxa_falso_positivo_pct": 0.0,
+    "restritos_com_encaminhamento": "11/11"
+  },
+  "execucoes": {},
+  "execucoes_descartadas": []
+}
