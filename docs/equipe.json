@@ -2,9 +2,25 @@
   "_instrucao": "Preencham 'tarefa_principal' com o que cada um fez de verdade na Sprint 03 (o §8 exige). O PDF é gerado a partir deste arquivo.",
   "turma": "PREENCHER",
   "integrantes": [
-    {"nome": "Davi Q. Zuolo", "rm": "571669", "tarefa_principal": "PREENCHER"},
-    {"nome": "Gustavo Zagato", "rm": "569420", "tarefa_principal": "PREENCHER"},
-    {"nome": "Daniel Vilela Mana", "rm": "571632", "tarefa_principal": "PREENCHER"},
-    {"nome": "Kayo Henderson", "rm": "570706", "tarefa_principal": "PREENCHER"}
+    {
+      "nome": "Davi Q. Zuolo",
+      "rm": "571669",
+      "tarefa_principal": "FULL-STACK"
+    },
+    {
+      "nome": "Gustavo Zagato",
+      "rm": "569420",
+      "tarefa_principal": "Auditoria"
+    },
+    {
+      "nome": "Daniel Vilela Mana",
+      "rm": "571632",
+      "tarefa_principal": "Auditoria"
+    },
+    {
+      "nome": "Kayo Henderson",
+      "rm": "570706",
+      "tarefa_principal": "Suporte Auditoria"
+    }
   ]
 }
