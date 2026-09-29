@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "adaptador": "legado[gpt-oss:120b]",
+    "executado_em": "2026-09-09T08:28:16",
+    "eval_set_versao": "1.0",
+    "total_casos": 3,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": null,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 100.0,
+    "tokens_por_turno_media": 5080,
+    "latencia_media_ms": 3830,
+    "latencia_mediana_ms": 2984,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 3,
+      "conformes": 3,
+      "nota_media": null,
+      "conformidade_pct": 100.0
+    }
+  },
+  "compatibilidade_modelos": {
+    "aceita_raciocinio": {},
+    "eventos": {}
+  },
+  "casos": [
+    {
+      "id": "S12-01",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Quem é você e qual seu objetivo aqui no condomínio?",
+      "resposta": "Sou o **ChargeOps AI Assistant**, um assistente operacional especializado no ecossistema GoodWe e na infraestrutura de carregamento de veículos elétricos.\n\n**Objetivo aqui no condomínio**\n\n- Auxiliar moradores, visitantes e demais usuários a entender e utilizar da melhor forma os carregadores compartilhados.\n- Fornecer informações técnicas sobre carregamento (tempo estimado, energia necessária, potência, etc.).\n- Explicar conceitos de eletromobilidade, gerenciamento de filas, sessões de carga, telemetria e protocolos como Modbus e OCPP.\n- Apoiar na interpretação de dados operacionais (quando disponíveis) e esclarecer dúvidas sobre o funcionamento dos equipamentos GoodWe.\n- Contribuir para um uso mais eficiente e seguro da infraestrutura de recarga, ajudando a otimizar a disponibilidade dos carregadores para todos os condôminos.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "chargeops",
+          "goodwe",
+          "assistente"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4566,
+      "tokens_resposta": 219,
+      "tokens_turno": 4785,
+      "latencia_ms": 2045,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-02",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 2,
+      "pergunta": "Se meu carro estiver com 20% de bateria, quanto tempo aproximadamente ele leva para carregar até 100% no meu carregador?",
+      "resposta": "Posso fazer uma estimativa com os dados que já possuo:\n\n**Dados do seu perfil**\n- Capacidade da bateria: 44,9 kWh  \n- Potência do carregador preferencial: 7,4 kW  \n\n**Cálculo da energia necessária**\n- Bateria está em 20 % e você deseja chegar a 100 %.\n- Percentual a ser carregado: 100 % – 20 % = 80 %.\n- Energia necessária = 44,9 kWh × 80 % = 44,9 kWh × 0,80 ≈ 35,9 kWh.\n\n**Cálculo do tempo estimado**\n- Tempo = energia necessária ÷ potência do carregador\n- Tempo ≈ 35,9 kWh ÷ 7,4 kW ≈ 4,86 horas.\n\n**Resultado**\n- Aproximadamente **4 horas e 50 minutos** de carga para passar de 20 % a 100 % usando o carregador de 7,4 kW.\n\n**Observação**\nEsse valor é apenas uma estimativa. Na prática, o tempo pode ser maior devido a fatores como a eficiência do carregamento, a redução de potência nos estágios finais da carga (quando a bateria se aproxima de 100 %) e condições ambientais.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "hora",
+          "estimativa",
+          "aproximad"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4585,
+      "tokens_resposta": 349,
+      "tokens_turno": 4934,
+      "latencia_ms": 2984,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-03",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como síndico, quais regras eu deveria estabelecer para o uso justo dos carregadores entre os moradores?",
+      "resposta": "Como síndico, você pode definir um conjunto de diretrizes que garantam que todos os moradores tenham acesso equilibrado e eficiente aos carregadores compartilhados. A seguir estão as principais regras que costumam ser adotadas em condomínios com infraestrutura GoodWe ChargeOps:\n\n1. **Cadastro de veículos e usuários**  \n   - Cada morador deve registrar o modelo do veículo, a capacidade da bateria e a potência de carregamento preferencial.  \n   - O cadastro permite que o sistema associe o usuário ao carregador correto e registre as sessões de carga.\n\n2. **Reserva de vagas**  \n   - O aplicativo deve permitir a reserva antecipada de um tempo de uso, com limite máximo de 2 h por reserva.  \n   - Reservas múltiplas no mesmo dia só são permitidas se houver períodos livres entre elas.\n\n3. **Tempo máximo de sessão**  \n   - Defina um tempo máximo de carregamento por sessão, por exemplo, 4 h.  \n   - Caso a bateria ainda não esteja no nível desejado, o morador pode solicitar nova reserva, respeitando o limite diário (ex.: 8 h por dia).\n\n4. **Prioridade para emergências**  \n   - Crie uma categoria “urgência” que permita a interrupção temporária de uma sessão em andamento, mediante justificativa (ex.: necessidade de deslocamento imediato).  \n   - O solicitante da urgência deve informar o motivo no app e será atendido dentro de 10 minutos, se houver outro carregador disponível.\n\n5. **Gestão de filas**  \n   - Quando todos os carregadores estiverem ocupados, o sistema insere o usuário em uma fila automática, informando a posição e o tempo estimado de espera.  \n   - A fila pode ter regras de prioridade (ex.: síndico e equipe de manutenção têm precedência).\n\n6. **Limite de uso mensal**  \n   - Estabeleça um número máximo de horas de carregamento por morador por mês (ex.: 40 h).  \n   - O app deve alertar o usuário quando estiver próximo do limite e impedir novas reservas até o próximo período.\n\n7. **Cobrança ou rateio de custos**  \n   - Se o condomínio optar por rateio de energia, defina claramente como será calculado (kWh consumido por sessão).  \n   - Forneça extratos mensais para que os moradores acompanhem seu consumo.\n\n8. **Penalidades por descumprimento**  \n   - Não liberar o carregador ao término da reserva pode gerar multa ou suspensão temporária do direito de reserva.  \n   - Infrações recorrentes (ex.: superação do tempo máximo sem justificativa) podem acarretar restrições adicionais.\n\n9. **Manutenção e disponibilidade**  \n   - Informe previamente períodos de manutenção programada, bloqueando reservas nesses intervalos.  \n   - Em caso de falha ou alarme, o sistema deve indicar que o carregador está indisponível e sugerir alternativas.\n\n10. **Educação e comunicação**  \n    - Disponibilize um manual simples sobre boas práticas de carregamento (ex.: desligar o carregador ao finalizar, evitar deixar o veículo conectado por tempo excessivo).  \n    - Use o canal de comunicação do condomínio (e‑mail, quadro de avisos ou app) para divulgar atualizações das regras.\n\nEssas diretrizes ajudam a:\n- Maximizar a utilização dos recursos instalados;\n- Reduzir conflitos entre moradores;\n- Garantir transparência no consumo de energia;\n- Manter os carregadores sempre operacionais e seguros.\n\nLembre‑se de registrar todas as regras no regulamento interno do condomínio e de comunicar claramente aos moradores, permitindo que todos compreendam e concordem com o uso justo dos carregadores.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "tempo",
+          "reserva",
+          "fila",
+          "regra"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4570,
+      "tokens_resposta": 951,
+      "tokens_turno": 5521,
+      "latencia_ms": 6461,
+      "structured_output_valido": null
+    }
+  ]
+}

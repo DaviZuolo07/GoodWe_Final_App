@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "adaptador": "legado[gpt-oss:120b]",
+    "executado_em": "2026-09-09T08:47:01",
+    "eval_set_versao": "1.0",
+    "total_casos": 3,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": 1.0,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 100.0,
+    "tokens_por_turno_media": 5073,
+    "latencia_media_ms": 5059,
+    "latencia_mediana_ms": 4036,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 3,
+      "conformes": 3,
+      "nota_media": 1,
+      "conformidade_pct": 100.0
+    }
+  },
+  "compatibilidade_modelos": {
+    "aceita_raciocinio": {
+      "gpt-oss:20b": true
+    },
+    "eventos": {}
+  },
+  "casos": [
+    {
+      "id": "S12-01",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Quem é você e qual seu objetivo aqui no condomínio?",
+      "resposta": "Sou o ChargeOps AI Assistant, um assistente operacional especializado no ecossistema GoodWe e em infraestrutura de carregamento de veículos elétricos.  \n\nMeu objetivo aqui no condomínio é oferecer suporte técnico e informativo aos moradores e demais usuários sobre:\n\n- funcionamento e disponibilidade dos carregadores GoodWe;  \n- gerenciamento de filas e sessões de recarga;  \n- interpretação de dados de energia, potência e telemetria;  \n- realização de estimativas de tempo, energia necessária e custos de recarga;  \n- esclarecimento de conceitos de eletromobilidade, protocolos como Modbus e OCPP e boas práticas de uso dos carregadores.\n\nEstou à disposição para ajudar a otimizar o uso da infraestrutura de carregamento compartilhada, garantindo segurança, eficiência e conveniência para todos.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "chargeops",
+          "goodwe",
+          "assistente"
+        ]
+      },
+      "nota_juiz": 1,
+      "recusou_juiz": false,
+      "justificativa_juiz": "Não personalizou com dados do morador logado.",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4566,
+      "tokens_resposta": 209,
+      "tokens_turno": 4775,
+      "latencia_ms": 1895,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-02",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 2,
+      "pergunta": "Se meu carro estiver com 20% de bateria, quanto tempo aproximadamente ele leva para carregar até 100% no meu carregador?",
+      "resposta": "Posso fazer uma estimativa com os dados que já possuo:\n\n**Dados do seu perfil**\n- Capacidade da bateria: 44,9 kWh  \n- Potência do carregador preferencial: 7,4 kW  \n\n**Cálculo da energia necessária**\n- Bateria atual: 20 %  \n- Bateria desejada: 100 %  \n- Energia a ser carregada = 44,9 kWh × (100 % − 20 %) ÷ 100  \n- Energia necessária ≈ 35,9 kWh  \n\n**Estimativa de tempo**\n- Tempo = energia necessária ÷ potência do carregador  \n- Tempo ≈ 35,9 kWh ÷ 7,4 kW ≈ 4,9 horas  \n\n**Resultado**\nA recarga de 20 % até 100 % deve levar aproximadamente **4 horas e 50 minutos**.\n\n*Observação:* este valor é apenas uma estimativa. A duração real pode variar em função da eficiência do carregamento, temperatura da bateria, eventuais limitações do veículo e condições da rede elétrica.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "hora",
+          "estimativa",
+          "aproximad"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz nao devolveu JSON: {\"nota\":",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4585,
+      "tokens_resposta": 293,
+      "tokens_turno": 4878,
+      "latencia_ms": 4036,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-03",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como síndico, quais regras eu deveria estabelecer para o uso justo dos carregadores entre os moradores?",
+      "resposta": "Como síndico, você pode definir um conjunto de diretrizes que garantam o acesso equilibrado, a segurança e a eficiência dos carregadores compartilhados. Abaixo estão recomendações práticas que podem ser adotadas no regulamento interno do condomínio:\n\n### 1. Cadastro e autorização  \n- **Registro de veículos**: Cada morador deve cadastrar o modelo, fabricante e a capacidade da bateria do seu veículo no sistema GoodWe ChargeOps.  \n- **Identificação do usuário**: O acesso ao carregador será feito mediante credencial (crachá, QR‑code ou aplicativo) vinculada ao cadastro.  \n\n### 2. Prioridade e reserva de vagas  \n- **Reserva prévia**: Permitida mediante uso do aplicativo, com limite máximo de 2 h por reserva.  \n- **Prioridade**:  \n  - Moradores que precisam de recarga emergencial (por exemplo, bateria ≤ 20 %) recebem prioridade automática.  \n  - Visitas podem utilizar a fila apenas quando não houver residentes aguardando.  \n\n### 3. Tempo máximo de carregamento  \n- **Limite de sessão**: Cada sessão de carga tem duração máxima de 4 h, salvo exceções aprovadas (ex.: necessidade de recarga completa para viagem).  \n- **Alerta de término**: O sistema enviará notificação ao final do período; o usuário deverá desconectar o veículo para liberar o ponto.  \n\n### 4. Uso da fila de carregamento  \n- **Filas dinâmicas**: Quando todos os pontos estiverem ocupados, o próximo morador entra automaticamente na fila.  \n- **Posição na fila**: Visualizada no aplicativo, com estimativa de tempo restante.  \n\n### 5. Cobrança e rateio de custos  \n- **Tarifa por kWh**: Defina um valor de energia consumida (ex.: custo da concessionária + margem administrativa) que será faturado mensalmente ao morador.  \n- **Taxa de reserva**: Opcional, para evitar bloqueios desnecessários.  \n\n### 6. Manutenção e responsabilidade  \n- **Reportar problemas**: Moradores devem comunicar falhas (alarme, mensagem de erro) imediatamente via app ou contato com o operador.  \n- **Manutenção preventiva**: Programada periodicamente pela equipe técnica da GoodWe; o ponto pode ficar indisponível temporariamente com aviso prévio.  \n\n### 7. Segurança e boas práticas  \n- **Conexão correta**: É proibido forçar plugues ou usar adaptadores não certificados.  \n- **Desconexão**: O usuário deve retirar o cabo assim que a carga atingir o nível desejado ou ao término da sessão.  \n- **Vigilância**: Em caso de comportamento inadequado (uso indevido, vandalismo), o condomínio pode suspender o acesso ao usuário infrator.  \n\n### 8. Penalidades  \n- **Multa por bloqueio**: Se o usuário ultrapassar o tempo máximo sem justificativa, será aplicada multa e possível suspensão temporária do acesso.  \n- **Suspensão por reincidência**: Após três infrações, o acesso ao carregador pode ser revogado até revisão do caso.  \n\n### 9. Comunicação e transparência  \n- **Relatórios mensais**: Envie a cada morador um resumo de consumo energético, tempo de uso e eventual débito.  \n- **Atualizações de regras**: Qualquer alteração nas políticas deverá ser comunicada com antecedência mínima de 30 dias e aprovada em assembleia, quando necessário.  \n\n### 10. Compatibilidade dos veículos  \n- **Limite de potência**: Informar que o carregador entrega até sua potência nominal (ex.: 7,4 kW em AC), mas o veículo só receberá o valor suportado pelo seu sistema de carregamento.  \n\nImplementando essas regras no regulamento interno e utilizando a plataforma GoodWe ChargeOps para gerenciamento automático de reservas, filas e medição de energia, você assegura que todos os moradores tenham acesso justo e controlado aos recursos de recarga, reduzindo conflitos e otimizando a operação da infraestrutura.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "tempo",
+          "reserva",
+          "fila",
+          "regra"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz nao devolveu JSON: {\"nota\": 2, \"recusou\": false, \"justificativa\": \"",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4570,
+      "tokens_resposta": 997,
+      "tokens_turno": 5567,
+      "latencia_ms": 9245,
+      "structured_output_valido": null
+    }
+  ]
+}

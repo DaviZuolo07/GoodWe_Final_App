@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "adaptador": "legado[gpt-oss:120b]",
+    "executado_em": "2026-09-05T12:35:13",
+    "eval_set_versao": "1.0",
+    "total_casos": 3,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": null,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 100.0,
+    "tokens_por_turno_media": 5153,
+    "latencia_media_ms": 5482,
+    "latencia_mediana_ms": 1440,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 3,
+      "conformes": 3,
+      "nota_media": null,
+      "conformidade_pct": 100.0
+    }
+  },
+  "compatibilidade_modelos": {
+    "aceita_raciocinio": {},
+    "eventos": {}
+  },
+  "casos": [
+    {
+      "id": "S12-01",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Quem é você e qual seu objetivo aqui no condomínio?",
+      "resposta": "Sou o **ChargeOps AI Assistant**, um assistente operacional especializado no ecossistema GoodWe e na infraestrutura de carregamento de veículos elétricos do condomínio.\n\n**Objetivo**\n\n- Auxiliar moradores, visitantes e operadores a entender, utilizar e otimizar os carregadores compartilhados.\n- Fornecer informações técnicas sobre carregamento (tempo, energia, potência, eficiência), filas de uso, sessões de carga e protocolos de comunicação (Modbus, OCPP).\n- Ajudar na interpretação de dados operacionais, estimativas de recarga e boas práticas de uso dos carregadores GoodWe.\n- Oferecer suporte para dúvidas relacionadas a veículos elétricos, baterias, energia e gestão da infraestrutura de recarga.\n\nEstou aqui para tornar a experiência de recarga mais prática, segura e eficiente para todos os moradores do condomínio.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "chargeops",
+          "goodwe",
+          "assistente"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4566,
+      "tokens_resposta": 220,
+      "tokens_turno": 4786,
+      "latencia_ms": 1194,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-02",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 2,
+      "pergunta": "Se meu carro estiver com 20% de bateria, quanto tempo aproximadamente ele leva para carregar até 100% no meu carregador?",
+      "resposta": "Posso fazer uma estimativa com base nas informações do seu perfil.\n\n**Dados disponíveis**\n- Capacidade da bateria: 44,9 kWh  \n- Estado atual da bateria: 20 %  \n- Estado desejado: 100 %  \n- Potência do carregador preferencial: 7,4 kW  \n\n**Energia necessária**\nA bateria precisa ganhar 80 % da sua capacidade (de 20 % para 100 %).  \n44,9 kWh × 0,80 = **35,92 kWh**.\n\n**Tempo estimado**\nDividindo a energia necessária pela potência do carregador:\n\n35,92 kWh ÷ 7,4 kW ≈ **4,86 horas**.\n\nIsso corresponde a cerca de **4 horas e 50 minutos**.\n\n**Observação**\nEste cálculo assume eficiência ideal e que o carregador forneça potência constante até 100 %. Na prática, a velocidade de carregamento costuma desacelerar nos últimos 10 %–20 % da bateria para proteger a vida útil das células, portanto o tempo real pode ser um pouco maior.  \n\nPortanto, a recarga de 20 % até 100 % deve levar aproximadamente **5 horas**.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "hora",
+          "estimativa",
+          "aproximad"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4585,
+      "tokens_resposta": 322,
+      "tokens_turno": 4907,
+      "latencia_ms": 1440,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-03",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como síndico, quais regras eu deveria estabelecer para o uso justo dos carregadores entre os moradores?",
+      "resposta": "Como síndico, você pode definir um conjunto de regras que garanta o acesso equilibrado, a segurança e a eficiência dos carregadores compartilhados. A seguir estão alguns pontos recomendados para a política de uso dos carregadores em condomínio:\n\n1. **Cadastro e autorização**  \n   - Cada morador que deseje utilizar o carregador deve registrar o seu veículo (modelo, fabricante e capacidade da bateria) no sistema GoodWe ChargeOps.  \n   - O síndico ou o operador aprova o cadastro e vincula o apartamento ao usuário.\n\n2. **Reserva de horário**  \n   - O sistema permite a reserva de horários em blocos de 30 min a 1 h.  \n   - Recomenda‑se limitar a reserva a no máximo 2 horas consecutivas por sessão, para evitar ocupação prolongada de um único ponto.\n\n3. **Prioridade de uso**  \n   - **Moradores residentes** têm prioridade sobre visitantes.  \n   - Em caso de necessidade urgente (por exemplo, bateria muito baixa), o morador pode solicitar prioridade via aplicativo; o operador avalia e, se necessário, realoca a fila.  \n   - Para veículos com baterias de menor capacidade (ex.: até 30 kWh), pode‑se estabelecer um tempo de recarga máximo menor, já que precisarão de menos energia.\n\n4. **Tempo máximo de recarga**  \n   - Defina um limite de tempo de recarga (ex.: 4 h) para cada sessão.  \n   - Se a carga atingir o nível desejado antes desse limite, o usuário deve encerrar a sessão para liberar o ponto.  \n   - Caso a bateria não alcance o nível esperado dentro do tempo máximo, o usuário pode abrir nova reserva.\n\n5. **Cancelamento e no‑show**  \n   - Cancelamentos devem ser feitos com, pelo menos, 15 minutos de antecedência.  \n   - Falta de comparecimento à reserva (no‑show) resulta em penalidade: bloqueio de novas reservas por um período (ex.: 1 dia) ou perda de direito de reserva por uma sessão.\n\n6. **Tarifação (se houver cobrança)**  \n   - Se o condomínio adotar cobrança por energia ou tempo, informe claramente as tarifas (ex.: R$ X por kWh ou R$ Y por hora).  \n   - O aplicativo GoodWe ChargeOps gera o relatório de consumo para cada sessão, facilitando a transparência.\n\n7. **Manutenção e reporte de falhas**  \n   - Usuários devem comunicar imediatamente qualquer anomalia (carga interrompida, falha, mensagem de erro).  \n   - O operador registra o incidente no sistema; o carregador só será declarado disponível novamente após a manutenção concluída e verificação.\n\n8. **Uso adequado e segurança**  \n   - Proibição de conexão de dispositivos não autorizados (ex.: extensões, adaptadores não certificados).  \n   - É obrigatório seguir as instruções de segurança exibidas no painel do carregador (como não tocar nos terminais com as mãos molhadas).  \n   - Em caso de emergência (incêndio, choque elétrico), desligar imediatamente a energia no quadro do condomínio e acionar os serviços de emergência.\n\n9. **Limites de potência por ponto**  \n   - Cada carregador tem uma potência nominal (ex.: 7,4 kW). Informar aos moradores que veículos que aceitam menos potência não se beneficiarão de carregadores de maior capacidade.  \n   - Evitar a instalação de carregadores de potência excessiva que não seja suportada pela maioria dos veículos, otimizando custos e consumo.\n\n10. **Revisão periódica da política**  \n    - Avaliar trimestralmente o uso dos carregadores (taxa de ocupação, número de reservas, incidentes).  \n    - Ajustar regras de tempo, prioridade e tarifação com base nos dados coletados pelo GoodWe ChargeOps.\n\n**Benefícios dessas regras**\n\n- **Equidade:** Todos os moradores têm acesso semelhante, evitando monopolização de um ponto.  \n- **Eficiência:** Reservas bem gerenciadas reduzem o tempo ocioso dos carregadores.  \n- **Transparência:** Relatórios de consumo e uso são acessíveis a todos, facilitando a cobrança justa (se aplicada).  \n- **Segurança:** Procedimentos claros minimizam riscos de danos ao equipamento ou ao usuário.\n\nLembre‑se de comunicar as regras de forma clara (manual impresso, portal do condomínio e notificações no aplicativo) e de disponibilizar um canal de suporte para dúvidas ou sugestões dos moradores. Essas medidas ajudam a manter a infraestrutura de recarga operando de forma confiável e satisfatória para toda a comunidade.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "tempo",
+          "reserva",
+          "fila",
+          "regra"
+        ]
+      },
+      "nota_juiz": null,
+      "recusou_juiz": null,
+      "justificativa_juiz": "juiz desativado",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 4570,
+      "tokens_resposta": 1197,
+      "tokens_turno": 5767,
+      "latencia_ms": 13812,
+      "structured_output_valido": null
+    }
+  ]
+}

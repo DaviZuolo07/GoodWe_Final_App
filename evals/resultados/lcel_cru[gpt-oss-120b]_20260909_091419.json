@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "adaptador": "lcel_cru[gpt-oss:120b]",
+    "executado_em": "2026-09-09T09:14:19",
+    "eval_set_versao": "1.0",
+    "total_casos": 3,
+    "casos_com_erro": 0
+  },
+  "metricas": {
+    "nota_ponderada": 1.5,
+    "nota_maxima": 2.0,
+    "conformidade_pct": 100.0,
+    "tokens_por_turno_media": 797,
+    "latencia_media_ms": 3977,
+    "latencia_mediana_ms": 2332,
+    "acuracia_structured_output": null,
+    "divergencias_juiz_checador": 0
+  },
+  "por_categoria": {
+    "happy_path": {
+      "n": 3,
+      "conformes": 3,
+      "nota_media": 1.33,
+      "conformidade_pct": 100.0
+    }
+  },
+  "compatibilidade_modelos": {
+    "aceita_raciocinio": {
+      "gpt-oss:120b": true,
+      "gpt-oss:20b": false
+    },
+    "eventos": {}
+  },
+  "casos": [
+    {
+      "id": "S12-01",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 1,
+      "pergunta": "Quem é você e qual seu objetivo aqui no condomínio?",
+      "resposta": "Olá, eu sou o **ChargeOps AI**, o assistente virtual da GoodWe especializado em recarga de veículos elétricos aqui no condomínio.  \n\n**Meu objetivo** é ajudar os moradores a:\n\n- Escolher e instalar o carregador mais adequado para o seu carro elétrico.  \n- Gerenciar o uso da energia de forma eficiente e econômica.  \n- Tirar dúvidas sobre a infraestrutura de carregamento do condomínio (pontos de carga, normas, agendamento, etc.).  \n- Fornecer suporte técnico básico e orientações de segurança.  \n\nEstou à disposição para ajudar você, morador do bloco A, apartamento 102, que possui um BYD Dolphin com bateria de 44,9 kWh e um carregador de 7,4 kW. Como posso ajudar hoje?",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "chargeops",
+          "goodwe",
+          "assistente"
+        ]
+      },
+      "nota_juiz": 1,
+      "recusou_juiz": false,
+      "justificativa_juiz": "Nome não corresponde exatamente ao esperado.",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 104,
+      "tokens_resposta": 210,
+      "tokens_turno": 314,
+      "latencia_ms": 1495,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-02",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "morador",
+      "peso": 2,
+      "pergunta": "Se meu carro estiver com 20% de bateria, quanto tempo aproximadamente ele leva para carregar até 100% no meu carregador?",
+      "resposta": "Olá, Morador!  \n\nVamos calcular o tempo aproximado de carga para o seu BYD Dolphin usando o carregador de 7,4 kW que está instalado no condomínio.\n\n### 1. Quantidade de energia que falta na bateria\n- **Capacidade total da bateria:** 44,9 kWh  \n- **Estado atual:** 20 %  \n- **Energia necessária para chegar a 100 %:**  \n\n\\[\n\\text{Energia necessária} = 44,9 \\text{ kWh} \\times (1 - 0,20) = 44,9 \\times 0,80 = 35,92 \\text{ kWh}\n\\]\n\n### 2. Potência efetiva do carregador\nOs carregadores de corrente alternada normalmente têm uma eficiência entre 85 % e 95 %. Vamos considerar uma eficiência de **90 %** (valor típico).\n\n\\[\n\\text{Potência efetiva} = 7,4 \\text{ kW} \\times 0,90 = 6,66 \\text{ kW}\n\\]\n\n### 3. Tempo estimado de carga\n\\[\n\\text{Tempo} = \\frac{\\text{Energia necessária}}{\\text{Potência efetiva}} = \\frac{35,92 \\text{ kWh}}{6,66 \\text{ kW}} \\approx 5,39 \\text{ horas}\n\\]\n\n### Resultado\n- **Tempo aproximado:** **5 h e 20 min** (aproximadamente 5,5 horas)\n\n> **Observação:** Esse cálculo é uma estimativa. O tempo real pode variar um pouco devido a fatores como a temperatura da bateria, a degradação da bateria ao longo do tempo e eventuais perdas adicionais no sistema elétrico do condomínio.\n\nSe precisar de mais alguma informação ou quiser agendar um horário de carga, é só me chamar! 🚗⚡️",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "hora",
+          "estimativa",
+          "aproximad"
+        ]
+      },
+      "nota_juiz": 2,
+      "recusou_juiz": false,
+      "justificativa_juiz": "Resposta correta, dentro do intervalo esperado e clara.",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 123,
+      "tokens_resposta": 469,
+      "tokens_turno": 592,
+      "latencia_ms": 2332,
+      "structured_output_valido": null
+    },
+    {
+      "id": "S12-03",
+      "categoria": "happy_path",
+      "origem": "sprint_1_2",
+      "persona": "sindico",
+      "peso": 1,
+      "pergunta": "Como síndico, quais regras eu deveria estabelecer para o uso justo dos carregadores entre os moradores?",
+      "resposta": "**Regras de uso justo dos carregadores de veículos elétricos (VEs) em condomínio – bloco B**  \n\n> **Objetivo:** garantir que todos os moradores tenham acesso equitativo, seguro e eficiente aos pontos de recarga, evitando conflitos, sobrecarga elétrica e uso indevido.\n\n---\n\n## 1️⃣  Definições básicas  \n\n| Termo | Significado |\n|-------|--------------|\n| **Morador** | Proprietário ou inquilino que reside no bloco B e possui vaga registrada. |\n| **Vaga registrada** | Vaga que consta no cadastro do condomínio e que tem direito a um ponto de recarga (ou a reserva de horário). |\n| **Ponto de recarga** | Estação de carregamento instalada nas áreas comuns (ponto “A”, “B”, etc.). |\n| **Tempo máximo de carga** | Período contínuo permitido para carregar um veículo (ex.: 4 h). |\n| **Reserva de horário** | Sistema de agendamento prévio (via app ou portal) para uso do ponto. |\n\n---\n\n## 2️⃣  Diretrizes de acesso  \n\n| Regra | Detalhamento |\n|------|--------------|\n| **2.1. Direito ao ponto** | Cada vaga registrada tem direito a **um** ponto de recarga ou a **X horas** de uso por dia, conforme a capacidade instalada. |\n| **2.2. Cadastro no sistema** | Todos os usuários devem cadastrar seu veículo (marca, modelo, placa) e o número da vaga no **Portal de Recarga** do condomínio. |\n| **2.3. Identificação no ponto** | O carregador possui leitor RFID ou QR‑code. O morador deve autenticar-se antes de iniciar a carga. |\n| **2.4. Reserva prévia** | Para evitar “filas”, o uso pode ser reservado com até **48 h** de antecedência, com limite de **2 reservas por dia** por morador. |\n| **2.5. Prioridade emergencial** | Em caso de emergência (ex.: bateria quase zerada), o morador pode solicitar liberação imediata ao síndico ou à administradora, que autoriza o uso imediato. |\n\n---\n\n## 3️⃣  Limites de tempo e consumo  \n\n| Regra | Detalhamento |\n|------|--------------|\n| **3.1. Tempo máximo por carga** | **4 h** contínuas (ou 6 h em pontos de carga lenta). Após esse período, o carregador desliga automaticamente e o usuário recebe notificação. |\n| **3.2. Intervalo entre cargas** | Se o ponto for usado por outro morador, o usuário que acabou de carregar deve liberar o ponto imediatamente. |\n| **3.3. Consumo mensal** | Cada ponto tem um limite de **kWh** mensal (ex.: 300 kWh). O consumo é monitorado e exibido no portal. Excedido o limite, o usuário será notificado e precisará aguardar o próximo ciclo ou solicitar aumento ao síndico. |\n| **3.4. Tarifa** | O custo da energia será rateado proporcionalmente ao kWh consumido, conforme a conta de energia do condomínio (ou tarifa fixa definida em assembleia). |\n\n---\n\n## 4️⃣  Boas práticas de segurança  \n\n| Regra | Detalhamento |\n|------|--------------|\n| **4.1. Cabos e conectores** | Utilizar apenas cabos e conectores homologados (Tipo 2, CCS, CHAdeMO). Não usar extensões ou adaptadores improvisados. |\n| **4.2. Estado do equipamento** | Verificar visualmente se há danos (corte, desgaste, água). Caso encontre anomalia, **não** use e comunique a administração imediatamente. |\n| **4.3. Desconexão ao término** | O usuário deve retirar o plugue ao final da carga. Deixar o veículo conectado sem necessidade pode gerar sobrecarga e bloqueio do ponto. |\n| **4.4. Proibição de uso para outros fins** | É proibido usar o ponto para carregar equipamentos não‑veiculares (ex.: ferramentas, baterias de casa). |\n| **4.5. Manutenção** | A manutenção preventiva será feita trimestralmente por empresa credenciada. O ponto ficará indisponível por, no máximo, **2 h** durante a manutenção. Avisos serão enviados com antecedência. |\n\n---\n\n## 5️⃣  Penalidades e advertências  \n\n| Infrações | Penalidade |\n|-----------|------------|\n| **Uso sem autenticação** | Advertência escrita + bloqueio temporário do ponto (até 7 dias). |\n| **Exceder o tempo máximo** | Multa de **R$ 50,00** por hora extra + bloqueio de 24 h após a terceira infração. |\n| **Desrespeitar reserva de horário** | Advertência + perda de direito de reserva por 30 dias após 2 advertências. |\n| **Danos ao equipamento** | Responsabilidade integral de reparo ou substituição, mais multa de **R$ 200,00**. |\n| **Uso de cabos/adaptadores não homologados** | Advertência + obrigação de adquirir cabo correto, multa de **R$ 100,00** se houver risco de dano. |\n\n> **Obs.:** As penalidades devem ser aprovadas em assembleia e constar no regulamento interno.  \n\n---\n\n## 6️⃣  Procedimentos de reclamação e suporte  \n\n1. **Abrir chamado** no portal ou aplicativo (área “Recarga – Suporte”).  \n2.",
+      "erro": null,
+      "conforme": true,
+      "falhas": [],
+      "detalhes_checagem": {
+        "recusa_detectada": false,
+        "termos_encontrados": [
+          "tempo",
+          "agenda",
+          "reserva",
+          "fila",
+          "regra"
+        ]
+      },
+      "nota_juiz": 1,
+      "recusou_juiz": false,
+      "justificativa_juiz": "Resposta longa, cobre requisitos, mas excessiva.",
+      "divergencia_juiz_checador": false,
+      "tokens_prompt": 90,
+      "tokens_resposta": 1394,
+      "tokens_turno": 1484,
+      "latencia_ms": 8104,
+      "structured_output_valido": null
+    }
+  ]
+}
