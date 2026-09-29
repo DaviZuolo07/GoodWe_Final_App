@@ -26,8 +26,8 @@ eles ficam em `EstadoSessao.fatos` e entram no prompt como <fatos_da_sessao>,
 independentemente da janela. Resultado: custo de tokens com teto fixo (pela
 janela) + fatos críticos que nunca se perdem + zero chamada extra de resumo.
 
-O limite padrão (MEMORIA_MAX_TOKENS=1200) está justificado em
-docs/relatorio_modelos.md, a partir do tamanho medido das respostas.
+O limite padrão (MEMORIA_MAX_TOKENS=1200) foi medido na Sprint 3 (≈174 tokens
+por turno nas conversas de teste → ≈6,9 turnos na janela).
 """
 
 from __future__ import annotations

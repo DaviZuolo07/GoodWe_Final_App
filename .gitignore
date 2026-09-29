@@ -79,3 +79,16 @@ checkpoints/
 # ==================================
 
 .cache/
+
+# ==================================
+# Sprint 04 (RAG)
+# ==================================
+
+# Vector store persistente: regenerável a partir de data/knowledge_base/
+chroma_db/
+**/chroma_db/
+
+# Testes e artefatos gerados localmente
+.pytest_cache/
+docs/modelos_disponiveis.json
+.gradio/

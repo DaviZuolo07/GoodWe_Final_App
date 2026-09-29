@@ -12,7 +12,7 @@ Cada arquivo tem um cabeçalho mínimo:
 
 O prompt deixa de ser uma string no meio do código e vira artefato versionado:
 trocar de versão é um argumento (`versao="v1"`), e o eval mede cada versão com
-o mesmo runner. É isso que alimenta a tabela de versões do §6.
+o mesmo eval. É isso que alimenta a tabela de versões do prompt.
 """
 
 from __future__ import annotations
@@ -137,25 +137,3 @@ def tokens_do_sistema(versao: str) -> int:
     vazio = {v: "" for v in pv.variaveis}
     vazio.update({"base_produtos": base_produtos_texto(), "canario": CANARIO})
     return tokens.contar(pv.sistema.format(**vazio))
-
-
-def tokens_legado() -> int:
-    """
-    Tokens do contexto fixo que o legado (Sprint 2) envia em TODA chamada:
-    system_prompt.txt + GOODWE_CONTEXT + few_shots.txt, como mensagens system
-    separadas (ver ai/agents/chargeops_agent.py). Leitura apenas — o legado
-    não é alterado.
-    """
-    import ast
-
-    pasta = RAIZ / "ai"
-    sistema = (pasta / "prompts" / "system_prompt.txt").read_text(encoding="utf-8")
-    few = (pasta / "prompts" / "few_shots.txt").read_text(encoding="utf-8")
-    fonte = (pasta / "context" / "goodwe_context.py").read_text(encoding="utf-8")
-    contexto = ""
-    for no in ast.walk(ast.parse(fonte)):
-        if isinstance(no, ast.Assign) and getattr(no.targets[0], "id", "") == "GOODWE_CONTEXT":
-            contexto = ast.literal_eval(no.value)
-    return tokens.contar_mensagens([
-        {"content": sistema}, {"content": contexto}, {"content": few},
-    ])

@@ -13,7 +13,7 @@ próprio modelo, e não uma aproximação. A versão anterior do runner usava
 Para os outros modelos (gemma, qwen, glm) a contagem continua sendo uma
 APROXIMAÇÃO, e o relatório diz isso. O que importa numa comparação é usar a
 MESMA régua em todas as colunas — e é o que este módulo garante: todo o projeto
-(runner, memória, relatório) conta tokens por aqui.
+(memória, eval, relatório) conta tokens por aqui.
 
 A contagem REAL de cada chamada (inclusive tokens de raciocínio) vem do próprio
 servidor em `usage_metadata` e é registrada separadamente pelo eval.

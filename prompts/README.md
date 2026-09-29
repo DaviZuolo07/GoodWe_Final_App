@@ -1,13 +1,28 @@
 # Prompts versionados
 
-Cada versão é um arquivo `system_prompt_vN.md` com cabeçalho (versão, data, template da mensagem humana). O builder carrega por argumento (`ChatbotChargeOps(versao_prompt="v2")`) e o runner mede cada versão com o mesmo eval. Tabela gerada por `evals/gerar_relatorios.py`.
+Cada versão é um arquivo `system_prompt_vN.md` com cabeçalho (`versao`, `data`,
+template da mensagem humana). O builder carrega por argumento
+(`ChatbotChargeOps(versao_prompt="v2")`). O cabeçalho entre `---` é removido
+pelo carregador antes de ir ao modelo.
 
-| Versão | Data | O que mudou | Por quê | Tokens do system | Nota juiz | Conformidade | Latência média | Tokens/turno |
-|---|---|---|---|---|---|---|---|---|
-| v0 (legado) | Sprint 2 | system_prompt.txt + GOODWE_CONTEXT + 11 few-shots, enviados em toda chamada | ponto de partida | 3700 | pendente | pendente | pendente | pendente |
-| v1 | 2026-09-01 | prompt consolidado em markdown: escopo, recusas com encaminhamento, limite de 4 frases, sem LaTeX/tabelas | respostas prolixas (12–15 frases no LCEL cru) e recusas sem encaminhamento | 307 | pendente | pendente | pendente | pendente |
-| v2 | 2026-09-15 | XML tagging por seção; spotlighting da entrada em <pergunta_usuario>; canário anti-vazamento; <base_produtos>; <calculo_verificado> e <fatos_da_sessao> preenchidos pelo código; 3 few-shots curtos | isolar instrução de dado (injection), tirar a aritmética do modelo, fatos sobreviverem à janela de memória | 989 | pendente | pendente | pendente | pendente |
+`base_produtos.json` é hoje a única fonte de especificação de produto. Na
+Sprint 04 ela será substituída pela base de conhecimento em `data/knowledge_base/`
+recuperada via ChromaDB. O **prompt RAG** versionado exigido pela Sprint 04 fica
+em `src/rag/prompt_rag.py` e terá tabela própria.
 
-Régua de tokens: `o200k_harmony`. "Tokens do system" = texto fixo do system prompt com os blocos dinâmicos vazios. O v2 é maior que o v1 porque carrega a base de produtos, os exemplos e as seções de segurança; o ganho de custo em relação ao legado vem de enviar ~1/4 dos tokens fixos.
+## Histórico do system prompt (Sprint 3) — só números medidos
 
-`base_produtos.json`: única fonte de especificação de produto. O que não está nele é recusado (§6: não inventar especificação de produto fora da base).
+Mesmo eval set de 28 casos, modelo `gpt-oss:120b`. Arquivos-fonte em
+`evals/baseline_sprint3/`.
+
+| Versão | O que mudou | Nota do juiz (0–2) | Conformidade | Tokens/turno |
+|---|---|---|---|---|
+| legado (Sprints 1/2) | system_prompt.txt + contexto GoodWe + 11 few-shots em toda chamada | 1,119 e 1,275 (2 execuções) | 28,6% e 39,3% | ~5.000 |
+| sem prompt (LCEL cru) | chain LCEL com system genérico, para isolar o efeito do framework | 1,000 | 35,7% | 915 |
+| v1 | identidade, escopo, recusas com encaminhamento a profissional, limite de formato | 1,707 e 1,714 (2 execuções) | 67,9% e 75,0% | ~1.375 |
+| v2 | XML tagging, spotlighting em `<pergunta_usuario>`, canário, `<calculo_verificado>`, `<fatos_da_sessao>` | **não medido** | **não medido** | — |
+
+O v2 é o prompt em uso, mas **nunca foi medido com modelo real**: a única
+execução registrada (20/09) rodou contra o servidor falso de testes e foi
+descartada. Achado: o framework sozinho não melhorou a nota (legado → LCEL cru);
+o ganho veio do prompt versionado (LCEL cru → v1).
