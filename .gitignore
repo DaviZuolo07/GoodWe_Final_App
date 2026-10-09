@@ -92,3 +92,4 @@ chroma_db/
 .pytest_cache/
 docs/modelos_disponiveis.json
 .gradio/
+evals/resultados/

@@ -1,5 +1,50 @@
 # Changelog — Sprint 04
 
+## F1 — Base de conhecimento, primeira carga (06/10/2026)
+
+### Criado
+- `data/knowledge_base/manual__goodwe-hca-g2-manual-usuario.pdf` (70 págs.) e
+  `manual__goodwe-hca-g2-datasheet.pdf` (2 págs.): documentos oficiais GoodWe do
+  material do Challenge, sem alteração.
+- `data/knowledge_base/manual__goodwe-hca-g2-modbus-resumo.pdf` (4 págs.):
+  resumo em português do mapa Modbus V1.0.15, **derivado pelo grupo**. Mantém
+  falhas, estados, medições, sessão, agendamento e limites; retira histórico de
+  versões, texto em chinês, reservados e envio de firmware.
+- `data/knowledge_base/README.md` reescrito: categoria `norma` adicionada ao
+  padrão de nomes, registro de origem preenchido e lista do que falta coletar.
+
+### Verificação
+- Os 3 PDFs carregam no `PyMuPDFLoader` sem página vazia (70, 2 e 4 páginas).
+
+### Achados registrados (viram tarefa nas próximas fases)
+- `prompts/base_produtos.json` cita "GoodWe AC 7,4kW" e "22kW"; o datasheet
+  oficial lista GW7K-HCA-20 (7000 W), GW11K-HCA-20 e GW22K-HCA-20. A base fixa
+  sai do prompt quando o RAG entrar (F5).
+- O guardrail de escopo recusa perguntas com "lei", "artigo" e "código civil".
+  Com lei e regimento na base, essa regra precisa ser revista na F5.
+- O datasheet é uma tabela de 3 colunas que o loader achata em linhas soltas, e
+  o manual tem páginas de sumário cheias de pontilhado. Tratar no chunking (F2).
+- Em aberto: normas (Lei SP 18.403/2026, IT-41, ANEEL REN 1.000/2021), tarifa,
+  regimento e FAQ.
+
+## F0.1 — Faxina efetivada (06/10/2026)
+
+A F0 documentou as remoções abaixo, mas os arquivos continuaram no disco e
+entraram no commit `F0`. Um deles (`evals/juiz.py`) já quebrava no import. A
+remoção foi efetivada nesta fase com `git rm`; a lista é a mesma da F0, mais
+todo o conteúdo de `evals/resultados/` (execuções da Sprint 3; as medidas com
+modelo real estão em `evals/baseline_sprint3/`). `evals/resultados/` passa a ser
+ignorado pelo Git: é saída regenerável.
+
+Tudo segue recuperável na tag `sprint3-final`.
+
+### Verificação
+- Simulado numa cópia: `pytest tests` 111 passaram; `evals.guardrails_eval`
+  sem falso positivo.
+- `pip install -r requirements.txt` resolve as versões fixadas e os imports das
+  Aulas 05–08 funcionam em Python 3.13. O `venv` local é Python 3.14: conferir
+  na instalação.
+
 ## F0 — Faxina, segurança e fundação (29/09/2026)
 
 Aprovada pelo Daniel com as decisões D1–D4: apagar `ai/` após a tag, apagar o

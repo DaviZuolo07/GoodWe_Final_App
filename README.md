@@ -18,7 +18,7 @@ Entrega em 23/10/2026. Andamento por feature em [`docs/CHANGELOG_SPRINT4.md`](do
 
 | # | Requisito do enunciado | Onde fica | Status |
 |---|---|---|---|
-| 1 | Base expandida em ChromaDB persistente + `nomic-embed-text` | `data/knowledge_base/`, `src/rag/` | a fazer |
+| 1 | Base expandida em ChromaDB persistente + `nomic-embed-text` | `data/knowledge_base/`, `src/rag/` | parcial (base: 3 PDFs GoodWe; faltam normas, tarifa, regimento e FAQ; vetorização a fazer) |
 | 2 | Pipeline PyMuPDFLoader → RecursiveCharacterTextSplitter → retriever → prompt RAG versionado | `src/rag/` | a fazer |
 | 3 | Grounding + citação de fonte em toda resposta | `src/rag/prompt_rag.py` | a fazer |
 | 4 | Avaliação RAGAS (faithfulness, answer_relevancy) ou fallback manual | `evals/` | a fazer |
