@@ -52,6 +52,7 @@ class RespostaRAG(BaseModel):
     categoria_guardrail: Optional[str] = None
     fontes: list[dict] = Field(default_factory=list)      # trechos enviados ao modelo, com score
     descartados: list[dict] = Field(default_factory=list)  # top-k abaixo do limiar
+    descartados_por_injecao: list[dict] = Field(default_factory=list)  # trecho com instrução ao modelo
     citacoes: list[str] = Field(default_factory=list)      # "(fonte: doc, página X)" presentes no texto
     citacao_adicionada: bool = False       # o modelo não citou; a chain anexou a do melhor trecho
     citacoes_invalidas: list[str] = Field(default_factory=list)  # citadas mas não recuperadas

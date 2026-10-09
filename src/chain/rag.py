@@ -9,11 +9,27 @@ primeiro"):
 
     pergunta ─► moderação (injection/jailbreak) ─┬─ bloqueada ─► resposta fixa
                                                  └─► emergência elétrica? ─► resposta fixa (193)
-                                                 └─► retriever (k, limiar)
-                                                       ├─ nenhum trecho ─► scope_validator:
-                                                       │                    encaminhamento ou RECUSA literal
+                                                 └─► retriever (k, limiar, filtro de injection)
+                                                       ├─ nenhum trecho ─► sem resposta na base
                                                        └─ trechos ─► prompt RAG | llm | parser
                                                                      ─► pós-processamento
+                                                                        (recusa do modelo ─► sem resposta na base)
+
+    SEM RESPOSTA NA BASE — um critério só, nos dois caminhos acima:
+        jurídico, financeiro ou segurança elétrica ─► encaminhamento a profissional habilitado
+        qualquer outro caso                         ─► RECUSA literal (invariante 1 do CLAUDE.md)
+
+"Sem resposta na base" acontece de dois jeitos: nenhum trecho passa do limiar,
+ou passa mas o modelo recusa. O segundo é o mais comum em pergunta jurídica:
+"posso processar o síndico por não deixar instalar o carregador?" cita
+"carregador" e "síndico", traz trechos do manual com score 0,75 e o modelo
+corretamente recusa. Sem tratar a recusa do modelo como "sem resposta", o
+encaminhamento ao advogado (§6 do enunciado) se perdia.
+
+Jurídico é checado ANTES do `validar_escopo`, de propósito: a pergunta acima
+também casa com a regra de segurança elétrica ("instalar o carregador"), que
+o `validar_escopo` testa primeiro — e o morador receberia "chame um
+eletricista" para uma dúvida sobre direito.
 
 Antes do RAG, o `scope_validator` rodava ANTES do modelo e recusava qualquer
 pergunta com "lei", "artigo" ou "advogado" — inclusive as que a base passará a
@@ -52,13 +68,18 @@ from src.chain.llm import descrever as descrever_llm
 from src.chain.llm import get_llm_robusto
 from src.chain.prompts import CANARIO
 from src.guardrails.moderation import moderar, normalizar
-from src.guardrails.scope_validator import EMERGENCIA, RESPOSTAS, validar_escopo, validar_saida
+from src.guardrails.scope_validator import (EMERGENCIA, JURIDICO, RESPOSTAS, validar_escopo,
+                                            validar_saida)
 from src.rag import chunking, embeddings, prompt_rag
 from src.rag.prompt_rag import RECUSA
 from src.rag.retriever import Recuperador
 from src.schemas.resultados import RespostaRAG
 
 PERFIL_LLM = "rag"
+
+# Sem resposta na base, estas categorias do scope_validator ganham o
+# encaminhamento a profissional habilitado; as demais viram a RECUSA literal.
+ENCAMINHAMENTO_PROFISSIONAL = ("juridico", "financeiro", "seguranca_eletrica")
 
 AVISO_ELETRICO = ("A instalação e qualquer ajuste elétrico devem ser feitos por eletricista "
                   "habilitado, com ART ou TRT.")
@@ -124,37 +145,58 @@ class ChatbotRAG:
     # -- etapa 2: retriever ----------------------------------------------
     def _etapa_busca(self, x: dict) -> dict:
         todos = self.recuperador.buscar_tudo(x["pergunta"])
-        usados = [t for t in todos if t.score >= self.recuperador.limiar]
-        return {"usados": usados, "descartados": [t for t in todos if t not in usados]}
+        acima = [t for t in todos if t.score >= self.recuperador.limiar]
+        # Injection via documento: o trecho que dá ordem ao modelo não chega a ele.
+        suspeitos = {t.chunk_id: motivo for t in acima if (motivo := prompt_rag.trecho_suspeito(t.texto))}
+        usados = [t for t in acima if t.chunk_id not in suspeitos]
+        injecao = [{**t.resumo(), "motivo": suspeitos[t.chunk_id]} for t in acima if t.chunk_id in suspeitos]
+        return {"usados": usados, "descartados": [t for t in todos if t not in acima], "injecao": injecao}
 
-    # -- etapa 3a: nada acima do limiar -> scope_validator decide ----------
+    # -- sem resposta na base -> encaminhamento ou RECUSA literal ----------
+    def _encaminhamento(self, pergunta: str) -> tuple[str, str] | None:
+        """(categoria, resposta fixa) quando a pergunta pede profissional habilitado."""
+        if not self.guardrails:
+            return None
+        if JURIDICO.search(normalizar(pergunta)):
+            return "juridico", RESPOSTAS["juridico"]
+        # modelos_base=None: a especificação agora vem da base vetorizada, não
+        # do prompts/base_produtos.json (que tem modelos que o datasheet não lista).
+        e = validar_escopo(pergunta, modelos_base=None)
+        if not e.permitido and e.categoria in ENCAMINHAMENTO_PROFISSIONAL:
+            return e.categoria, e.resposta
+        return None
+
+    # -- etapa 3a: nada acima do limiar ------------------------------------
     def _etapa_sem_contexto(self, x: dict) -> RespostaRAG:
-        descartados = [t.resumo() for t in x["trechos"]["descartados"]]
-        if self.guardrails:
-            # modelos_base=None: a especificação agora vem da base vetorizada, não
-            # do prompts/base_produtos.json (que tem modelos que o datasheet não lista).
-            e = validar_escopo(x["pergunta"], modelos_base=None)
-            if not e.permitido:
-                return RespostaRAG(texto=e.resposta, rota="recusa_escopo", categoria_guardrail=e.categoria,
-                                   descartados=descartados)
-        return RespostaRAG(texto=RECUSA, rota="sem_contexto", descartados=descartados)
+        base = {"descartados": [t.resumo() for t in x["trechos"]["descartados"]],
+                "descartados_por_injecao": x["trechos"]["injecao"]}
+        encaminhar = self._encaminhamento(x["pergunta"])
+        if encaminhar:
+            return RespostaRAG(texto=encaminhar[1], rota="recusa_escopo", categoria_guardrail=encaminhar[0], **base)
+        return RespostaRAG(texto=RECUSA, rota="sem_contexto", **base)
 
     # -- etapa 3b: resposta com contexto ----------------------------------
     def _etapa_rag(self, x: dict, config: RunnableConfig) -> RespostaRAG:
         usados = x["trechos"]["usados"]
         texto = self.chain_resposta.invoke(
             {"pergunta": x["pergunta"], "contexto": prompt_rag.formatar_contexto(usados)}, config=config)
-        return self._pos_processar(texto, usados, x["trechos"]["descartados"])
+        return self._pos_processar(texto, usados, x["trechos"]["descartados"], x["pergunta"],
+                                   x["trechos"].get("injecao", []))
 
-    def _pos_processar(self, texto: str, usados, descartados) -> RespostaRAG:
+    def _pos_processar(self, texto: str, usados, descartados, pergunta: str = "",
+                       injecao: list[dict] | None = None) -> RespostaRAG:
         base = {"fontes": [t.resumo() for t in usados], "descartados": [t.resumo() for t in descartados],
-                "chamadas_llm": 1}
+                "descartados_por_injecao": injecao or [], "chamadas_llm": 1}
 
         corrigido, motivo = (validar_saida(texto, CANARIO) if self.guardrails else (texto, None))
         if motivo and motivo != "instrucao_eletrica_na_saida":
             return RespostaRAG(texto=corrigido, rota="rag", saida_corrigida_por_guardrail=motivo, **base)
 
         if prompt_rag.eh_recusa(texto):
+            encaminhar = self._encaminhamento(pergunta)
+            if encaminhar:
+                return RespostaRAG(texto=encaminhar[1], rota="recusa_escopo",
+                                   categoria_guardrail=encaminhar[0], **base)
             return RespostaRAG(texto=RECUSA, rota="recusa_llm", **base)
 
         recuperados = {(t.documento, t.pagina) for t in usados}
@@ -203,6 +245,8 @@ def _imprimir(r: RespostaRAG, detalhes: bool) -> None:
         print(f"  [usado {f['score']:.3f}] {f['documento']}, página {f['pagina']}")
     for f in r.descartados:
         print(f"  [abaixo {f['score']:.3f}] {f['documento']}, página {f['pagina']}")
+    for f in r.descartados_por_injecao:
+        print(f"  [injection {f['score']:.3f}] {f['documento']}, página {f['pagina']} ({f['motivo']})")
     if r.citacao_adicionada:
         print("  ! o modelo não citou; citação anexada pela chain")
     if r.citacoes_invalidas:
