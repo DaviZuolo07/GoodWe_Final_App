@@ -1,5 +1,73 @@
 # Changelog — Sprint 04
 
+## Passo 0 — Git limpo, ambiente e kit de trabalho (09/10/2026)
+
+### O que mudou
+- Backup integral em `..\GoodWe_BACKUP_09102026` antes de qualquer ação.
+- `git fetch --prune`: `origin/feature/*` (ai-davi, backend-crepe, frontend-gus)
+  já não existiam no GitHub. As três locais apontavam para o commit raiz `18266c0`,
+  sem trabalho próprio, e foram apagadas com `git branch -d`.
+- Tag `sprint3-final` (`bc3e78f`) publicada no GitHub — era a única cópia das
+  Sprints 1–3 e só existia no disco local.
+- Os 62 arquivos não rastreados (legado das Sprints 1–3 que a F0 tirou do índice)
+  foram conferidos um a um contra a tag: **todos idênticos byte a byte**. Em vez de
+  `git clean -fd`, foram **movidos** para `..\GoodWe_QUARENTENA_legado_09102026`
+  (reversível; a tag continua sendo a cópia oficial).
+- `main` local estava em `18266c0`; avançou para `develop` e recebeu o merge de
+  `origin/main` (PR #1, cuja árvore é a da F0). Resultado: `main` e `develop` no
+  mesmo commit de merge `c53eb7d`, 54 arquivos rastreados, diff vazio entre as duas.
+- `venv` estava sem metade da stack da Sprint 04 (sem `langchain-classic`, chroma,
+  ragas, gradio; `langchain-core` em 1.6.7 contra o pin 1.6.1) e o `pytest` quebrava
+  na coleta. Reinstalado com `pip install -r requirements.txt`: `pip check` limpo e
+  imports das Aulas 05–08 funcionando **em Python 3.14** (os pins também valem aqui).
+- `.env` reconstruído a partir do `.env.example`, com `EMBEDDING_MODEL` e
+  `CHROMA_DIR`. O anterior está em `.env.backup-local` (ignorado por `.env.*`).
+- Instalados na raiz: `CLAUDE.md`, `ROADMAP_SOLO.md`, `PASSO_0.md`.
+- Identidade git do repositório: `DaviZuolo07 <davi.zuolo07@gmail.com>` (a máquina
+  não tinha `user.name` configurado).
+
+### Em aberto
+- **Chave do Ollama não foi trocada (0.1).** O `.env` novo ainda usa a chave que
+  vazou. Revogar em https://ollama.com/settings/keys e colar a nova.
+- `docs/briefs/` (5 briefs das fases) ainda não está no repositório.
+- 0.8: os outros três integrantes ainda precisam configurar `user.name`/`user.email`
+  e commitar (`git shortlog -sn` hoje mostra só um nome).
+
+### Achados (viram tarefa)
+- **`nomic-embed-text` NÃO está disponível no Ollama Cloud desta conta.** Não aparece
+  entre os 18 modelos do `teste_auth`, e `POST /api/embed` responde **401** para
+  qualquer modelo de embedding com a mesma chave que o `/api/chat` aceita. No Ollama
+  local o modelo também não está baixado (404). Proposta: embeddings no Ollama local
+  (`ollama pull nomic-embed-text`) — mantém o modelo pedido no §3 e muda só o host de
+  embedding. **Decisão do grupo, afeta a F1/F2.**
+- A `origin/main` rastreava `evals/resultados/*.json` e `docs/modelos_disponiveis.json`,
+  que hoje estão no `.gitignore`; o merge desta fase os retirou da `main`.
+
+### Verificação
+```
+> git ls-remote --tags origin
+bc3e78f528d848e265bb26198a1b1b7a953de8e0	refs/tags/sprint3-final
+
+> git check-ignore -v .env .env.backup-local
+.gitignore:22:.env	.env
+.gitignore:23:.env.*	.env.backup-local
+
+> git ls-files | find /c /v ""
+54
+
+> python -m pytest tests -q
+111 passed in 1.22s
+
+> python -m evals.guardrails_eval
+  "bloqueados": 39, "taxa_bloqueio_pct": 100.0, "legitimas": 44,
+  "falsos_positivos": 0, "taxa_falso_positivo_pct": 0.0,
+  "restritos_com_encaminhamento": "11/11"
+
+> python -m src.teste_auth   (seção 5)
+  18 modelo(s): ... gemma4:31b, gpt-oss:120b <- principal, gpt-oss:20b ...
+  (nomic-embed-text ausente)
+```
+
 ## F1 — Base de conhecimento, primeira carga (06/10/2026)
 
 ### Criado
