@@ -3,6 +3,7 @@ Schemas de SAÍDA do sistema (Pydantic v2).
 
 `CalculoRecarga`  resultado da calculadora determinística (o LLM só o narra)
 `RespostaTurno`   envelope de um turno do chatbot (texto + telemetria)
+`RespostaRAG`     envelope de um turno do RAG (texto + fontes + verificação da citação)
 """
 
 from __future__ import annotations
@@ -43,3 +44,18 @@ class RespostaTurno(BaseModel):
     tokens_servidor_saida: int = 0     # inclui tokens de raciocínio
     saida_corrigida_por_guardrail: Optional[str] = None
     prompt_enviado: str = ""
+
+
+class RespostaRAG(BaseModel):
+    texto: str
+    rota: Literal["bloqueio_moderacao", "sem_contexto", "recusa_escopo", "recusa_llm", "rag"]
+    categoria_guardrail: Optional[str] = None
+    fontes: list[dict] = Field(default_factory=list)      # trechos enviados ao modelo, com score
+    descartados: list[dict] = Field(default_factory=list)  # top-k abaixo do limiar
+    citacoes: list[str] = Field(default_factory=list)      # "(fonte: doc, página X)" presentes no texto
+    citacao_adicionada: bool = False       # o modelo não citou; a chain anexou a do melhor trecho
+    citacoes_invalidas: list[str] = Field(default_factory=list)  # citadas mas não recuperadas
+    saida_corrigida_por_guardrail: Optional[str] = None
+    chamadas_llm: int = 0
+    tokens_servidor_entrada: int = 0
+    tokens_servidor_saida: int = 0

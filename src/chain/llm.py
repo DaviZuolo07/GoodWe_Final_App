@@ -52,6 +52,11 @@ PERFIS = {
 
     # Saída estruturada (Pydantic): zero criatividade, JSON válido no 1º try.
     "estruturado": {"temperature": 0.0, "top_p": 1.0, "num_predict": 1024, "seed": 42},
+
+    # RAG (Sprint 04): temperature 0 é contrato (§6) — resposta só do contexto e
+    # medida no RAGAS. Orçamento de 2048 porque o contexto de 4 trechos faz o
+    # gpt-oss raciocinar mais antes de responder (ver nota do num_predict acima).
+    "rag": {"temperature": 0.0, "top_p": 1.0, "num_predict": 2048, "seed": 42},
 }
 
 PERFIL_PADRAO = "redator"

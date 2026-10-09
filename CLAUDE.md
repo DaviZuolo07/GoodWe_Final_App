@@ -190,10 +190,17 @@ python -m src.teste_auth               # confere chave, host e modelos do Ollama
 python -m src.app --detalhes           # conversar pelo terminal
 ```
 
-A criar nesta sprint:
+RAG (Fase 1 — exige o Ollama local com `ollama pull nomic-embed-text`):
 
 ```bash
 python -m src.rag.vector_store --reindexar    # indexa data/knowledge_base/ no ChromaDB
+python -m src.chain.rag "pergunta"            # uma pergunta, com fontes, scores e rota
+python -m src.chain.rag --detalhes            # modo conversa
+```
+
+A criar nesta sprint:
+
+```bash
 python -m evals.ragas_eval --iteracao 1       # mede faithfulness e answer_relevancy
 python app/main.py                            # sobe a interface Gradio
 ```
