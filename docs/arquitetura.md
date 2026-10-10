@@ -28,7 +28,7 @@ flowchart TD
     M -- sim --> B["resposta fixa de bloqueio<br/>rota: bloqueio_moderacao"]
     M -- não --> EM{"emergência elétrica?<br/>(fumaça, faísca, choque)"}
     EM -- sim --> E193["resposta fixa: desligar, 193<br/>rota: recusa_escopo"]
-    EM -- não --> R["retriever.py<br/>top-k=4 por cosseno · limiar 0,65"]
+    EM -- não --> R["retriever.py<br/>híbrido top-k=6: cosseno + BM25 (RRF)<br/>limiar 0,65 no cosseno"]
     R --> INJ["prompt_rag.trecho_suspeito<br/>tira trecho que dá ordem ao modelo<br/>(injection via documento)"]
     INJ --> T{"sobrou trecho<br/>acima do limiar?"}
     T -- não --> S["sem resposta na base"]

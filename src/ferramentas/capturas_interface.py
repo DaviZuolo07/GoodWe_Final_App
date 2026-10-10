@@ -21,7 +21,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ / "app"))
 
 PERGUNTAS = {
-    "interface_resposta": "Qual a potência nominal de saída do GW22K-HCA-20?",
+    "interface_resposta": "Qual a potência do GW22K-HCA-20?",
     "interface_tarifa": "Quanto vou pagar por uma recarga de 30 kWh?",
     "interface_recusa": "Qual a previsão do tempo para amanhã em São Paulo?",
 }
@@ -41,14 +41,14 @@ def main():
     destino = RAIZ / "docs" / "img"
     destino.mkdir(parents=True, exist_ok=True)
     demo = app.montar_interface()
-    demo.launch(server_port=PORTA, prevent_thread_lock=True, inbrowser=False)
+    demo.launch(server_port=PORTA, prevent_thread_lock=True, inbrowser=False, **app.opcoes_visuais())
     try:
         with sync_playwright() as p:
             navegador = p.chromium.launch(channel="msedge", headless=True)
             for nome, pergunta in PERGUNTAS.items():
                 pagina = navegador.new_page(viewport={"width": 1440, "height": 960})
                 pagina.goto(f"http://127.0.0.1:{PORTA}/")
-                caixa = pagina.get_by_placeholder("Pergunte sobre")
+                caixa = pagina.locator("#entrada textarea")
                 caixa.wait_for(timeout=60_000)
                 caixa.fill(pergunta)
                 caixa.press("Enter")

@@ -3,6 +3,7 @@ Diagnóstico de recuperação, sem LLM: o trecho com a resposta chega ao top-k?
 
     python -m evals.recall_retriever                         # grade chunk_size x k padrão
     python -m evals.recall_retriever --configs 1000:4,1000:8,512:8
+    python -m evals.recall_retriever --set robustez --configs 1000:4 --estrategias estrutura
 
 POR QUE EXISTE: o RAGAS mede a resposta final, que mistura dois erros — o
 retriever não trouxe o trecho, ou trouxe e o modelo não usou. Na iteração 1 os
@@ -14,6 +15,12 @@ para varrer a grade antes de gastar uma iteração do RAGAS.
 
 A evidência de cada caso é um texto curto copiado do PDF (não da resposta de
 referência), comparado sem acento e sem espaço extra.
+
+`--modos denso,hibrido` mede as duas buscas do `retriever.py` na mesma grade.
+`--set robustez` usa `evals/eval_set_robustez.json`: perguntas curtas, como o
+morador digita na interface, com a evidência no próprio arquivo. Foi esse conjunto
+que mostrou o buraco do denso puro que o eval set do RAGAS (perguntas longas e
+específicas) não mostrava.
 """
 
 from __future__ import annotations
@@ -21,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from src.guardrails.moderation import normalizar
@@ -48,16 +56,16 @@ def _store(chunk: int, overlap: int, estrategia: str):
     return store
 
 
-def medir(chunk: int, k: int, casos: list[dict], estrategia: str) -> dict:
+def medir(chunk: int, k: int, casos: list[dict], estrategia: str, modo: str = "denso") -> dict:
     overlap = chunking.SOBREPOSICAO if chunk == chunking.TAMANHO else chunk // 8
-    rec = retriever.Recuperador(store=_store(chunk, overlap, estrategia), k=k)
+    rec = retriever.Recuperador(store=_store(chunk, overlap, estrategia), k=k, modo=modo)
     achou, posicoes = {}, {}
     for c in casos:
         trechos = rec.recuperar(c["pergunta"])
-        alvo = normalizar(EVIDENCIA[c["id"]])
+        alvo = normalizar(c.get("evidencia") or EVIDENCIA[c["id"]])
         pos = next((i for i, t in enumerate(trechos, 1) if alvo in normalizar(" ".join(t.texto.split()))), None)
         achou[c["id"]], posicoes[c["id"]] = pos is not None, pos
-    return {"chunk_size": chunk, "chunk_overlap": overlap, "separadores": estrategia, "k": k,
+    return {"chunk_size": chunk, "chunk_overlap": overlap, "separadores": estrategia, "k": k, "modo": modo,
             "recall": round(sum(achou.values()) / len(achou), 4),
             "faltou": [i for i, ok in achou.items() if not ok], "posicao": posicoes}
 
@@ -67,20 +75,26 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--configs", default="256:4,512:4,1000:4,512:8,1000:8",
-                    help="chunk:k separados por vírgula; cada um roda com as duas estratégias")
+                    help="chunk:k separados por vírgula; cada um roda com cada estratégia e modo")
+    ap.add_argument("--set", default="rag", choices=["rag", "robustez"], help="eval set de perguntas")
+    ap.add_argument("--modos", default="denso,hibrido", help="buscas do retriever.py a medir")
+    ap.add_argument("--estrategias", default=",".join(chunking.ESTRATEGIAS))
     a = ap.parse_args()
-    dados = json.loads((RAIZ / "evals" / "eval_set_rag.json").read_text(encoding="utf-8"))
-    casos = [c for c in dados["casos"] if not c["deve_recusar"] and not c.get("invalidado")]
+    dados = json.loads((RAIZ / "evals" / f"eval_set_{a.set}.json").read_text(encoding="utf-8"))
+    casos = [c for c in dados["casos"] if not c.get("deve_recusar") and not c.get("invalidado")]
     linhas = []
-    for estrategia in chunking.ESTRATEGIAS:
+    for estrategia in a.estrategias.split(","):
         for cfg in a.configs.split(","):
             chunk, k = (int(x) for x in cfg.split(":"))
-            r = medir(chunk, k, casos, estrategia)
-            linhas.append(r)
-            print(f"{estrategia:9s} chunk {chunk:4d}/{r['chunk_overlap']:3d}  k={k}  "
-                  f"recall={r['recall']:.3f}  faltou={r['faltou']}")
+            for modo in a.modos.split(","):
+                r = medir(chunk, k, casos, estrategia, modo)
+                linhas.append({"set": a.set, **r})
+                print(f"{a.set:8s} {estrategia:9s} chunk {chunk:4d}/{r['chunk_overlap']:3d}  k={k}  "
+                      f"{modo:7s}  recall={r['recall']:.3f}  faltou={r['faltou']}")
     PASTA.mkdir(parents=True, exist_ok=True)
-    (PASTA / "recall_retriever.json").write_text(json.dumps(linhas, indent=2, ensure_ascii=False), encoding="utf-8")
+    destino = PASTA / f"recall_{a.set}_{datetime.now():%Y%m%d_%H%M%S}.json"
+    destino.write_text(json.dumps(linhas, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"\ngravado em {destino.relative_to(RAIZ)}")
 
 
 if __name__ == "__main__":

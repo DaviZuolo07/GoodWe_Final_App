@@ -204,9 +204,11 @@ python -m src.chain.rag --detalhes            # modo conversa
 Avaliação e interface (Sprint 04, Python 3.13 — o `ragas` não instala no 3.14):
 
 ```bash
-python -m evals.ragas_eval --iteracao 1 --prompt v1 --separadores aula   # iteração 1 (linha de base)
-python -m evals.ragas_eval --iteracao 2 --prompt v2                      # iteração 2 (config padrão)
-python -m evals.recall_retriever              # recall do retriever por chunk_size x k, sem LLM
+python -m evals.ragas_eval --iteracao 1 --separadores aula --modo denso --k 4   # iteração 1 (linha de base)
+python -m evals.ragas_eval --iteracao 2 --modo denso --k 4                      # iteração 2
+python -m evals.ragas_eval --iteracao 3                      # iteração 3 (config padrão: híbrida, k 6)
+python -m evals.robustez_eval --modo denso --k 4             # perguntas curtas de morador, ponta a ponta
+python -m evals.recall_retriever              # recall do retriever por chunk_size x k x busca, sem LLM
 python -m src.chain.multi_provider "pergunta" --rag --modelos gpt-oss:120b,gemma4:31b,local:qwen3.5:4b
 python app/main.py                            # sobe a interface Gradio
 python -m src.ferramentas.md_para_pdf relatorio   # docs/relatorio_evolucao.md -> PDF (≤5 págs.)

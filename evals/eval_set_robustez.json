@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "nome": "eval_set_robustez",
+    "versao": "1.0",
+    "congelado_em": "2026-10-10",
+    "uso": "Diagnóstico do RETRIEVER (sem LLM) com perguntas curtas e em linguagem de morador. Complementa o eval_set_rag.json, que continua congelado e é a régua do RAGAS. Escrito ANTES de medir a busca híbrida, a partir do teste manual na interface em 10/10/2026: 'Qual a potência do GW22K-HCA-20' recusou porque o datasheet ficou fora do top-4.",
+    "por_que_separado": "Acrescentar casos ao eval_set_rag.json mudaria a régua e mataria a comparação iteração 1 x iteração 2 (invariante 6 do CLAUDE.md).",
+    "evidencia": "texto literal do PDF que responde a pergunta, comparado sem acento e sem espaço extra contra os trechos recuperados"
+  },
+  "casos": [
+    {"id": "N01", "pergunta": "Qual a potência do GW22K-HCA-20", "evidencia": "22000"},
+    {"id": "N02", "pergunta": "qual a potencia do carregador de 7 kW?", "evidencia": "7000"},
+    {"id": "N03", "pergunta": "Qual o grau de proteção do carregador?", "evidencia": "ip66"},
+    {"id": "N04", "pergunta": "Qual o peso do carregador?", "evidencia": "peso (kg)"},
+    {"id": "N05", "pergunta": "Quais as dimensões do carregador?", "evidencia": "208"},
+    {"id": "N06", "pergunta": "Qual a corrente máxima do GW11K?", "evidencia": "corrente nominal"},
+    {"id": "N07", "pergunta": "Quais certificações o HCA G2 tem?", "evidencia": "iec61851-1"},
+    {"id": "N08", "pergunta": "Pode instalar o carregador na área externa?", "evidencia": "interior ou exterior"},
+    {"id": "N09", "pergunta": "Qual a temperatura de operação do carregador?", "evidencia": "-30 ~ +50"},
+    {"id": "N10", "pergunta": "Como posso iniciar a recarga?", "evidencia": "rfid"},
+    {"id": "N11", "pergunta": "Que cor fica a luz quando está carregando?", "evidencia": "azul"},
+    {"id": "N12", "pergunta": "a luz vermelha piscou duas vezes, o que é?", "evidencia": "nao correspondem"},
+    {"id": "N13", "pergunta": "Quanto custa o kWh?", "evidencia": "2,10 por kwh"},
+    {"id": "N14", "pergunta": "Quanto pago por 50 kWh?", "evidencia": "105,00"},
+    {"id": "N15", "pergunta": "Tem taxa se eu deixar o carro parado na vaga?", "evidencia": "taxa de ocupacao"},
+    {"id": "N16", "pergunta": "Quanto custa a segunda via do cartão?", "evidencia": "30,00"},
+    {"id": "N17", "pergunta": "Quantas reservas posso ter ao mesmo tempo?", "evidencia": "2 (duas) reservas"},
+    {"id": "N18", "pergunta": "Quantos carregadores tem no prédio?", "evidencia": "6 (seis) pontos"},
+    {"id": "N19", "pergunta": "Perdi meu cartão RFID, e agora?", "evidencia": "24 horas"},
+    {"id": "N20", "pergunta": "Qual a multa por descumprir o regimento?", "evidencia": "10% (dez por cento)"},
+    {"id": "N21", "pergunta": "Como pago as recargas?", "evidencia": "boleto condominial"},
+    {"id": "N22", "pergunta": "Quero instalar um carregador na minha vaga, como faço?", "evidencia": "pedido por escrito"},
+    {"id": "N23", "pergunta": "Meu carro carrega devagar, por quê?", "evidencia": "obc"},
+    {"id": "N24", "pergunta": "Qual o baud rate do Modbus?", "evidencia": "9600"}
+  ]
+}

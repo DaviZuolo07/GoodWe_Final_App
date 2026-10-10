@@ -1,8 +1,9 @@
 """
 Avaliação do RAG (Aula 07): RAGAS (faithfulness, answer_relevancy) + rubrica manual.
 
-    python -m evals.ragas_eval --iteracao 1                      # config padrão (prompt v1, chunk 1000/150, k 4)
-    python -m evals.ragas_eval --iteracao 2 --prompt v2 --k 6
+    python -m evals.ragas_eval --iteracao 1 --separadores aula --modo denso --k 4   # iteração 1
+    python -m evals.ragas_eval --iteracao 2 --modo denso --k 4                      # iteração 2
+    python -m evals.ragas_eval --iteracao 3                      # config padrão (busca híbrida, k 6)
     python -m evals.ragas_eval --iteracao chunk512 --chunk 512   # experimento de chunk_size
     python -m evals.ragas_eval --iteracao modeloB --modelo gemma4:31b
 
@@ -113,11 +114,11 @@ def rodar_ragas(amostras: list[dict], juiz: str) -> list[dict]:
 
 def avaliar(iteracao: str, versao: str, chunk: int, overlap: int, estrategia: str, k: int, limiar: float,
             modelo: str | None, juiz: str, usar_ragas: bool, usar_manual: bool,
-            limite: int | None) -> dict:
+            limite: int | None, modo: str = retriever.MODO) -> dict:
     meta, casos = carregar_casos(limite)
     store, n_chunks = abrir_store(chunk, overlap, estrategia)
     bot = ChatbotRAG(versao_prompt=versao, model=modelo,
-                     recuperador=retriever.Recuperador(store=store, k=k, limiar=limiar))
+                     recuperador=retriever.Recuperador(store=store, k=k, limiar=limiar, modo=modo))
 
     linhas = []
     for c in casos:
@@ -192,7 +193,7 @@ def avaliar(iteracao: str, versao: str, chunk: int, overlap: int, estrategia: st
         "iteracao": iteracao, "prompt_rag": versao, "eval_set": f"{meta['nome']} v{meta['versao']}",
         "chunk_size": chunk, "chunk_overlap": overlap, "separadores": estrategia,
         "chunks_indexados": n_chunks,
-        "k": k, "limiar": limiar, "temperature": perfil["temperature"], "top_p": perfil["top_p"],
+        "k": k, "busca": modo, "limiar": limiar, "temperature": perfil["temperature"], "top_p": perfil["top_p"],
         "max_tokens": perfil["num_predict"], "seed": perfil["seed"],
         "modelo": bot.descrever()["llm"]["model"], "juiz": juiz,
         "embeddings": embeddings.nome_do_modelo(), "regua": "contexto rotulado com [documento, página]", "metricas_ragas": usar_ragas and not erro_ragas,
@@ -213,6 +214,8 @@ def main():
     ap.add_argument("--separadores", default=chunking.ESTRATEGIA, choices=list(chunking.ESTRATEGIAS))
     ap.add_argument("--k", type=int, default=retriever.K)
     ap.add_argument("--limiar", type=float, default=retriever.LIMIAR)
+    ap.add_argument("--modo", default=retriever.MODO, choices=list(retriever.MODOS),
+                    help="busca do retriever: denso (iterações 1 e 2) ou hibrido (iteração 3)")
     ap.add_argument("--modelo", default=None, help="padrão: OLLAMA_MODEL do .env")
     ap.add_argument("--juiz", default=_juiz_padrao())
     ap.add_argument("--sem-ragas", action="store_true")
@@ -222,11 +225,12 @@ def main():
     overlap = a.overlap if a.overlap is not None else (
         chunking.SOBREPOSICAO if a.chunk == chunking.TAMANHO else a.chunk // 8)
 
-    print(f"iteração {a.iteracao}: prompt {a.prompt}, chunk {a.chunk}/{overlap} ({a.separadores}), k {a.k}, "
+    print(f"iteração {a.iteracao}: prompt {a.prompt}, chunk {a.chunk}/{overlap} ({a.separadores}), "
+          f"busca {a.modo}, k {a.k}, "
           f"limiar {a.limiar}, juiz {a.juiz}")
     inicio = time.perf_counter()
     saida = avaliar(a.iteracao, a.prompt, a.chunk, overlap, a.separadores, a.k, a.limiar, a.modelo, a.juiz,
-                    not a.sem_ragas, not a.sem_manual, a.limite)
+                    not a.sem_ragas, not a.sem_manual, a.limite, a.modo)
     saida["parametros"]["duracao_s"] = round(time.perf_counter() - inicio, 1)
 
     PASTA_RESULTADOS.mkdir(parents=True, exist_ok=True)

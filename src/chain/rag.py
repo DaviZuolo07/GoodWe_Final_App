@@ -40,6 +40,15 @@ A única exceção à ordem é a EMERGÊNCIA elétrica (fumaça, faísca, choque
 responde antes da busca, porque a resposta fixa manda desligar e ligar 193, e
 nenhum trecho de manual recuperado por similaridade pode atrasar ou diluir isso.
 
+APRESENTAÇÃO ("do que se trata esse chatbot?", "oi", "o que você faz?") também
+responde antes da busca, com texto fixo. Sem isso, a primeira coisa que um
+usuário novo digita recebia "Não encontrei essa informação nos documentos" —
+correto pela regra, inútil na prática (teste na interface, 10/10/2026). O texto
+fixo descreve o assistente e a base, e não contém nenhuma especificação de
+produto, então não fere o grounding (invariante 3). O padrão casa a pergunta
+INTEIRA (`fullmatch`): "o que você sabe sobre a potência do GW22K?" vai para o
+retriever, não para a apresentação.
+
 PÓS-PROCESSAMENTO (determinístico, não depende do modelo obedecer):
   - recusa do modelo é normalizada para a string literal;
   - resposta sem citação recebe a do trecho mais similar (`citacao_adicionada`);
@@ -55,6 +64,7 @@ PÓS-PROCESSAMENTO (determinístico, não depende do modelo obedecer):
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 
 from langchain_core.callbacks import UsageMetadataCallbackHandler
@@ -80,6 +90,31 @@ PERFIL_LLM = "rag"
 # Sem resposta na base, estas categorias do scope_validator ganham o
 # encaminhamento a profissional habilitado; as demais viram a RECUSA literal.
 ENCAMINHAMENTO_PROFISSIONAL = ("juridico", "financeiro", "seguranca_eletrica")
+
+APRESENTACAO = (
+    "Sou o ChargeOps, assistente da GoodWe para recarga de veículos elétricos no condomínio. "
+    "Respondo dúvidas sobre o carregador GoodWe HCA G2 (uso, luzes, falhas, especificações e "
+    "manutenção), as regras de uso das vagas de recarga e a tarifa cobrada, sempre com base nos "
+    "documentos indexados: manual do usuário, datasheet e resumo Modbus do HCA G2, FAQ de recarga, "
+    "regimento e tabela tarifária do condomínio de demonstração. Toda resposta traz a fonte, com "
+    "documento e página; se a informação não estiver nos documentos, eu digo que não encontrei. "
+    "Experimente: \"Qual a potência do GW22K-HCA-20?\" ou \"Quanto custa uma recarga de 30 kWh?\"")
+# Texto normalizado (minúsculo, sem acento). Casa a pergunta inteira, nunca um pedaço.
+_RE_APRESENTACAO = re.compile(
+    r"(oi+|ola|ola tudo bem|bom dia|boa tarde|boa noite|e ai|hello|hi|hey|ajuda|help|menu|inicio)"
+    r"|(do que|sobre o que) (se trata|e|fala) (esse|este|o|a|essa|esta) "
+    r"(chat|chatbot|bot|assistente|sistema|ferramenta|aplicativo|app|projeto)"
+    r"|(o que|quem) (e|sao) (voce|vc|o chargeops|esse (chat|chatbot|bot|assistente))"
+    r"|o que (voce|vc|o chargeops) (faz|pode fazer|sabe fazer|responde)"
+    r"|(o que|sobre o que) (eu )?(posso|da para|consigo) (te )?perguntar"
+    r"|(como|para que) (voce|vc|esse (chat|chatbot|bot|assistente)) (funciona|serve)"
+)
+
+
+def eh_apresentacao(pergunta: str) -> bool:
+    t = re.sub(r"[^\w\s]", " ", normalizar(pergunta))
+    return bool(_RE_APRESENTACAO.fullmatch(" ".join(t.split())))
+
 
 AVISO_ELETRICO = ("A instalação e qualquer ajuste elétrico devem ser feitos por eletricista "
                   "habilitado, com ART ou TRT.")
@@ -142,6 +177,8 @@ class ChatbotRAG:
         if EMERGENCIA.search(normalizar(x["pergunta"])):
             return {**x, "guardrail": {"rota": "recusa_escopo", "categoria": "emergencia_eletrica",
                                        "resposta": RESPOSTAS["emergencia_eletrica"]}}
+        if eh_apresentacao(x["pergunta"]):
+            return {**x, "guardrail": {"rota": "apresentacao", "categoria": None, "resposta": APRESENTACAO}}
         return {**x, "guardrail": None}
 
     def _etapa_resposta_fixa(self, x: dict) -> RespostaRAG:

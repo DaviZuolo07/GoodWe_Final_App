@@ -1,5 +1,121 @@
 # Changelog — Sprint 04
 
+## Fase 7 — Busca híbrida (iteração 3), apresentação e interface SEMS+ (10/10/2026)
+
+Motivada por teste manual na interface: "Qual a potência do GW22K-HCA-20" e "Do que se
+trata esse chatbot?" receberam "Não encontrei essa informação nos documentos fornecidos.",
+com o eval set do RAGAS em 100% de resposta.
+
+### Ambiente
+- O `venv` tinha sido recriado com Python 3.14 **por cima** do venv 3.13: o `pyvenv.cfg`
+  apontava para o 3.14 e os pacotes compilados continuavam `cp313` (`numpy` quebrava no
+  `import gradio`), e o `pip install` respondia "já instalado". Venv apagado e recriado com
+  `py -3.13 -m venv venv`. `app/main.py` agora para com mensagem clara fora do 3.13.
+
+### Diagnóstico (antes de mudar qualquer coisa)
+- Busca só vetorial: para a pergunta curta, o datasheet p. 2 caía para o **5º lugar**, atrás
+  de quatro páginas de desenho de dimensão do manual que repetem o código do modelo. "Qual o
+  peso do carregador?" e "grau de proteção" nem chegavam ao top-12: a tabela técnica tem
+  ~40 campos num chunk e o embedding é a média deles. O modelo recusava corretamente, com
+  os trechos errados.
+- O eval set do RAGAS não pegava isso: as perguntas dele são longas e específicas.
+- Criado `evals/eval_set_robustez.json` (24 perguntas curtas, com evidência literal),
+  **escrito antes de medir a solução** e separado do eval set do RAGAS, que continua
+  congelado (invariante 6).
+- Alternativas testadas sem LLM e descartadas: sub-trechos de 300 caracteres para a busca
+  com o chunk inteiro para o modelo (recall de robustez 0,708 com BM25, mas o score das
+  perguntas fora da base sobe de 0,63–0,70 para 0,67–0,72, o que enfraquece o limiar);
+  janelas só nos chunks de tabela (0,708, idem); `find_tables` do PyMuPDF (células
+  duplicadas e não detecta a tabela do datasheet).
+
+### O que mudou
+- `src/rag/retriever.py`: **busca híbrida**. BM25 em memória sobre os mesmos chunks do
+  Chroma, fundido com o ranking de cosseno por Reciprocal Rank Fusion (k=60). O limiar de
+  0,65 continua sobre o cosseno (a fusão só decide a ordem). `MODO = "hibrido"`,
+  `K = 6`; `modo="denso"` reproduz as iterações 1 e 2. Nenhuma dependência nova.
+- `src/chain/rag.py`: rota **apresentação** ("oi", "do que se trata esse chatbot?", "o que
+  você faz?"), com texto fixo e sem número de especificação, depois da moderação e antes
+  da busca. O padrão casa a pergunta inteira (`fullmatch`), então "o que você sabe sobre a
+  potência…" continua indo para o retriever. `RespostaRAG.rota` ganhou `"apresentacao"`.
+- `evals/robustez_eval.py` (novo): eval ponta a ponta com modelo real nas perguntas de
+  morador: taxa de resposta e "fato na fonte citada", sem juiz LLM.
+- `evals/recall_retriever.py`: `--set robustez`, `--modos denso,hibrido`, `--estrategias`;
+  grava `recall_<set>_<carimbo>.json` (o `recall_retriever.json` antigo fica intacto).
+- `evals/ragas_eval.py`: `--modo`; o parâmetro `busca` vai para o JSON de resultado.
+- `app/main.py` + `app/tema_sems.css` (novo): interface refeita no visual do app GoodWe
+  SEMS+ (grafite, cartões, vermelho GoodWe, KPIs do índice, medidor semicircular de
+  relevância com o limiar, trilha moderação → busca → modelo → citação, cartões de fonte
+  com selo "citada", citação como etiqueta no balão). Todo texto de documento passa por
+  `html.escape` no painel. Logo com o fundo branco tornado transparente em memória.
+  Tema e CSS vão no `launch()` (mudança do Gradio 6), via `opcoes_visuais()`.
+- `src/ferramentas/capturas_interface.py`: usa o tema e procura a caixa por `#entrada`.
+- `tests/test_busca_hibrida.py` (novo, 26 testes): BM25, RRF, híbrida sobre Chroma real com
+  embedding falso, apresentação (casa e não casa, não chama retriever nem modelo, injection
+  continua antes), painel (escape de HTML, selo de citada), medidor.
+- Docs: README, `docs/relatorio_rag.md` (§4.1 e tabela da §7), `docs/relatorio_evolucao.md`
+  (+ PDF), `docs/relatorio_modelos.md` (k e busca), `prompts/versoes_rag.md`,
+  `docs/arquitetura.md`, `app/README.md`, comandos do CLAUDE.md §7 (as iterações 1 e 2
+  agora precisam de `--modo denso --k 4` para reproduzir).
+
+### Verificação
+
+```
+> python -m evals.recall_retriever --set robustez --configs 1000:4,1000:6 --estrategias estrutura
+robustez estrutura chunk 1000/150  k=4  denso    recall=0.375
+robustez estrutura chunk 1000/150  k=4  hibrido  recall=0.625
+robustez estrutura chunk 1000/150  k=6  denso    recall=0.500
+robustez estrutura chunk 1000/150  k=6  hibrido  recall=0.667
+> python -m evals.recall_retriever --set rag --configs 1000:4,1000:6 --estrategias estrutura
+rag      estrutura chunk 1000/150  k=4  denso    recall=1.000   (idem hibrido, e k=6 nos dois)
+
+> python -m evals.robustez_eval --modo denso --k 4        (config. da iteração 2)
+taxa de resposta       0.625   recusados: ['N01', 'N04', 'N05', 'N09', 'N11', 'N15', 'N18', 'N20', 'N24']
+fato na fonte citada   0.375
+> python -m evals.robustez_eval --modo hibrido --k 4
+taxa de resposta       0.875   recusados: ['N04', 'N05', 'N20']
+fato na fonte citada   0.625
+> python -m evals.robustez_eval --modo hibrido --k 6      (iteração 3)
+taxa de resposta       0.917   recusados: ['N05', 'N20']
+fato na fonte citada   0.667
+
+> python -m evals.ragas_eval --iteracao 3                 (híbrida, k 6, prompt v1)
+"faithfulness": 1.0, "answer_relevancy": 0.7886, "fidelidade_manual": 1.0,
+"relevancia_manual": 0.9643, "taxa_resposta": 1.0, "taxa_citacao": 1.0,
+"taxa_fonte_correta": 1.0, "recusa_correta": "2/2", "citacoes_invalidas": 0,
+"tokens_entrada_medio": 1815, "tokens_saida_medio": 80
+gravado em evals\resultados\ragas_3_20261010_115329.json
+
+> python -m evals.guardrails_eval
+"bloqueados": 39, "taxa_bloqueio_pct": 100.0, "legitimas": 44, "falsos_positivos": 0,
+"restritos_com_encaminhamento": "11/11"
+
+> python -m evals.injecao_documento_eval
+passaram: 3/3
+
+> python -m pytest tests -q
+177 passed
+```
+
+As 8 respostas de robustez que não contaram como "fato na fonte citada" (híbrida, k 6)
+foram lidas uma a uma: N01 ("22 kW, trifásico", regimento), N02, N08, N09, N13 e N21
+corretas por outra fonte (N21 incompleta: não cita o boleto); N05 e N20 recusadas. Nenhuma
+invenção.
+
+### Leitura
+- No eval set congelado a iteração 3 **não regride** e o ganho é pequeno: faithfulness
+  0,976 → 1,000; answer_relevancy 0,789, dentro do ruído medido (0,742–0,780 em duas
+  execuções idênticas da iteração 2). Relevância manual 1,00 → 0,96 e contexto ~1.510 →
+  ~1.815 tokens. O ganho que justifica a mudança está nas perguntas curtas: taxa de
+  resposta 0,625 → 0,917.
+
+### Em aberto / achados
+- N05 ("Quais as dimensões do carregador?") segue recusado: a linha "Dimensão" da tabela
+  técnica não chega ao top-6. Candidato: linearizar a tabela do datasheet na carga
+  (rótulo + valores numa linha só).
+- N20 (multa do regimento): o Art. 24 ficou em 0,649, um milésimo abaixo do limiar. Não
+  mexer no limiar por um caso; reavaliar se outros casos de regimento caírem na faixa.
+- O eval de robustez não tem juiz: "fato na fonte citada" é estrito por construção.
+
 ## Fases 2 a 6 — Base, interface, RAGAS em duas iterações, relatórios (10/10/2026)
 
 Uma sessão só, por decisão do Davi (entrega antecipada). Cada fase passou pelo próprio

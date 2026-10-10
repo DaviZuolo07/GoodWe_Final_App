@@ -1,0 +1,192 @@
+/* Tema da interface ChargeOps, inspirado no app GoodWe SEMS+.
+   Grafite quase preto, cartões com borda fina, vermelho GoodWe só para destaque,
+   números em tiles e medidor semicircular. Cores em variáveis: troca-se aqui. */
+
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root, .dark {
+  --cx-fundo: #07090d;
+  --cx-cartao: #11141b;
+  --cx-cartao-2: #171b24;
+  --cx-borda: #232836;
+  --cx-borda-forte: #2f3546;
+  --cx-texto: #e8ebf2;
+  --cx-sub: #8b93a7;
+  --cx-fraco: #5d6579;
+  --cx-vermelho: #e60012;
+  --cx-vermelho-claro: #ff4d57;
+  --cx-azul: #3b82f6;
+  --cx-verde: #22c55e;
+  --cx-ambar: #f5a524;
+  --cx-raio: 16px;
+}
+
+body, .gradio-container {
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(230, 0, 18, .10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(59, 130, 246, .07), transparent 60%),
+    var(--cx-fundo) !important;
+  color: var(--cx-texto);
+}
+.gradio-container { max-width: 1480px !important; margin: 0 auto !important; padding: 18px 22px 8px !important; }
+footer:not(.rodape) { opacity: .45; }
+
+/* ---------- cabeçalho ---------- */
+#cabecalho { padding: 0 !important; border: 0 !important; background: transparent !important; }
+.topo {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 14px 20px; border: 1px solid var(--cx-borda); border-radius: var(--cx-raio);
+  background: linear-gradient(180deg, rgba(23, 27, 36, .92), rgba(17, 20, 27, .92));
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .03);
+}
+.marca { display: flex; align-items: center; gap: 16px; }
+.logo { height: 30px; width: auto; filter: drop-shadow(0 0 14px rgba(230, 0, 18, .35)); }
+.divisor { width: 1px; height: 30px; background: var(--cx-borda-forte); }
+.produto { display: flex; flex-direction: column; line-height: 1.1; }
+.produto .nome { font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: .5px; color: #fff; }
+.produto .sub { font-size: 12px; color: var(--cx-sub); letter-spacing: .3px; margin-top: 3px; }
+.online { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--cx-sub);
+  padding: 7px 12px; border: 1px solid var(--cx-borda); border-radius: 999px; background: rgba(34, 197, 94, .06); }
+.online .ponto { background: var(--cx-verde); box-shadow: 0 0 0 0 rgba(34, 197, 94, .6); animation: pulso 2.2s infinite; }
+
+.ponto { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cx-fraco); flex: none; }
+@keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .55); } 70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+/* ---------- KPIs ---------- */
+.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.tile {
+  position: relative; overflow: hidden; padding: 12px 14px; border-radius: 12px;
+  background: var(--cx-cartao-2); border: 1px solid var(--cx-borda);
+}
+.tile.kpi::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--cx-vermelho); }
+.tile-valor { font-family: 'Exo 2', sans-serif; font-weight: 600; font-size: 20px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile-rotulo { font-size: 11.5px; color: var(--cx-sub); margin-top: 2px; text-transform: lowercase; }
+
+/* ---------- área principal ---------- */
+#area { gap: 14px !important; margin-top: 14px; align-items: flex-start; }
+.cartao {
+  border: 1px solid var(--cx-borda) !important; border-radius: var(--cx-raio) !important;
+  background: linear-gradient(180deg, #131720, #0f1218) !important; padding: 14px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .30);
+}
+.cartao > .block, .cartao .form, .cartao .html-container { background: transparent !important; border: 0 !important; }
+.cartao-titulo { display: flex; align-items: center; gap: 10px; font-family: 'Exo 2', sans-serif; font-weight: 600;
+  font-size: 16px; color: #fff; padding: 2px 4px 10px; border-bottom: 1px solid var(--cx-borda); margin-bottom: 6px; }
+.cartao-titulo .icone { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(230, 0, 18, .12); border: 1px solid rgba(230, 0, 18, .35); font-size: 14px; }
+.cartao-titulo .dica { margin-left: auto; font-family: Inter, sans-serif; font-weight: 400; font-size: 12px; color: var(--cx-sub); }
+
+/* ---------- chat ---------- */
+#chat { background: transparent !important; border: 0 !important; }
+#chat .message-wrap, #chat .bubble-wrap { background: transparent !important; }
+#chat .message { border-radius: 14px !important; font-size: 14.5px; line-height: 1.55; }
+#chat .message.user, #chat .user .message, #chat [data-testid="user"] {
+  background: linear-gradient(135deg, #e60012, #b3000e) !important; color: #fff !important; border: 0 !important;
+  box-shadow: 0 6px 22px rgba(230, 0, 18, .25);
+}
+#chat .message.bot, #chat .bot .message, #chat [data-testid="bot"] {
+  background: var(--cx-cartao-2) !important; border: 1px solid var(--cx-borda) !important; color: var(--cx-texto) !important;
+}
+/* citação "(fonte: doc, página X)" — chega como código inline e vira etiqueta */
+#chat .bot code, #chat [data-testid="bot"] code {
+  display: inline-block; margin: 2px 0; padding: 2px 9px; border-radius: 999px;
+  font-family: Inter, sans-serif; font-size: 12px; white-space: normal;
+  color: #ffd6d9; background: rgba(230, 0, 18, .14); border: 1px solid rgba(230, 0, 18, .45);
+}
+.boas-vindas { text-align: center; color: var(--cx-sub); font-size: 14px; line-height: 1.7; padding: 24px; }
+.boas-vindas b { font-family: 'Exo 2', sans-serif; font-size: 20px; color: #fff; }
+
+#entrada textarea { font-size: 14.5px !important; }
+#entrada { border-radius: 14px !important; }
+.gradio-container button.primary, #entrada button { box-shadow: 0 0 18px rgba(230, 0, 18, .35); }
+#limpar { margin-top: 6px; border-radius: 12px !important; font-size: 13px !important; color: var(--cx-sub) !important; }
+#limpar:hover { color: #fff !important; border-color: var(--cx-vermelho) !important; }
+
+/* exemplos do ChatInterface */
+.cartao .examples button, .cartao button.example, .cartao .example {
+  border-radius: 999px !important; border: 1px solid var(--cx-borda-forte) !important;
+  background: rgba(255, 255, 255, .02) !important; color: var(--cx-texto) !important; font-size: 12.5px !important;
+}
+.cartao .examples button:hover, .cartao button.example:hover { border-color: var(--cx-vermelho) !important; }
+
+/* ---------- painel de grounding ---------- */
+#painel { background: transparent !important; border: 0 !important; }
+.painel { display: flex; flex-direction: column; gap: 12px; }
+.medidor { width: 100%; max-width: 300px; margin: 4px auto 0; display: block; }
+.medidor line { stroke-width: 4; stroke-linecap: round; }
+.medidor .m-off { stroke: #262b38; }
+.medidor .m-baixo { stroke: #7a0d16; }
+.medidor .m-on { stroke: var(--cx-vermelho); filter: drop-shadow(0 0 3px rgba(230, 0, 18, .65)); }
+.medidor .m-limiar { stroke: var(--cx-ambar); stroke-width: 2; stroke-dasharray: 3 3; }
+.medidor .m-valor { font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 34px; fill: #fff; }
+.medidor .m-rotulo { font-family: Inter, sans-serif; font-size: 9px; fill: var(--cx-sub); letter-spacing: .4px; }
+
+.status { align-self: center; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 600; border: 1px solid var(--cx-borda); background: var(--cx-cartao-2); }
+.status.ok { color: #b9f5cf; border-color: rgba(34, 197, 94, .45); background: rgba(34, 197, 94, .08); }
+.status.ok .ponto { background: var(--cx-verde); }
+.status.alerta { color: #ffe1a8; border-color: rgba(245, 165, 36, .45); background: rgba(245, 165, 36, .08); }
+.status.alerta .ponto { background: var(--cx-ambar); }
+.status.erro { color: #ffc2c6; border-color: rgba(230, 0, 18, .5); background: rgba(230, 0, 18, .10); }
+.status.erro .ponto { background: var(--cx-vermelho); }
+.status.info { color: #cfe0ff; border-color: rgba(59, 130, 246, .45); background: rgba(59, 130, 246, .08); }
+.status.info .ponto { background: var(--cx-azul); }
+.status.pulsando .ponto { animation: pisca 1s infinite; }
+@keyframes pisca { 50% { opacity: .2; } }
+
+.trilha { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 10px 12px;
+  border: 1px solid var(--cx-borda); border-radius: 12px; background: rgba(255, 255, 255, .015); }
+.trilha .etapa { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--cx-fraco); white-space: nowrap; }
+.trilha .liga { flex: 1; height: 1px; background: linear-gradient(90deg, var(--cx-borda-forte), var(--cx-borda)); min-width: 8px; }
+.trilha .etapa.ok { color: var(--cx-texto); } .trilha .etapa.ok .ponto { background: var(--cx-verde); box-shadow: 0 0 8px rgba(34, 197, 94, .7); }
+.trilha .etapa.alerta { color: #ffe1a8; } .trilha .etapa.alerta .ponto { background: var(--cx-ambar); box-shadow: 0 0 8px rgba(245, 165, 36, .7); }
+.trilha .etapa.erro { color: #ffc2c6; } .trilha .etapa.erro .ponto { background: var(--cx-vermelho); box-shadow: 0 0 8px rgba(230, 0, 18, .8); }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tiles .tile { padding: 10px; text-align: center; }
+.tiles .tile-valor { font-size: 18px; }
+.tiles .tile-rotulo { font-size: 10.5px; }
+
+.nota { margin: 0; font-size: 13px; color: var(--cx-sub); line-height: 1.5; }
+.nota b { color: var(--cx-texto); }
+.nota.alerta b { color: #ffe1a8; } .nota.erro b { color: #ffc2c6; }
+.vazio { text-align: center; color: var(--cx-sub); font-size: 13px; margin: 4px 12px; }
+
+.lista-fontes { display: flex; flex-direction: column; gap: 10px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
+.lista-fontes::-webkit-scrollbar { width: 6px; }
+.lista-fontes::-webkit-scrollbar-thumb { background: var(--cx-borda-forte); border-radius: 6px; }
+.fonte { padding: 12px 14px; border-radius: 12px; background: var(--cx-cartao-2); border: 1px solid var(--cx-borda);
+  transition: border-color .2s, transform .2s; }
+.fonte:hover { border-color: rgba(230, 0, 18, .55); transform: translateY(-1px); }
+.fonte-topo { display: flex; align-items: center; gap: 10px; }
+.fonte-n { font-family: 'Exo 2', sans-serif; font-weight: 700; font-size: 13px; color: var(--cx-vermelho-claro); }
+.fonte-doc { font-weight: 600; font-size: 13px; color: #fff; word-break: break-all; }
+.selo-citada { margin-left: auto; font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  color: #b9f5cf; background: rgba(34, 197, 94, .10); border: 1px solid rgba(34, 197, 94, .45); }
+.fonte-meta { font-size: 12px; color: var(--cx-sub); margin: 4px 0 8px; }
+.fonte-meta code { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: #1d2230; color: #cfd5e3; }
+.fonte-meta b { color: #fff; }
+.barra { height: 4px; border-radius: 4px; background: #232836; overflow: hidden; margin-bottom: 8px; }
+.barra span { display: block; height: 100%; background: linear-gradient(90deg, #7a0009, var(--cx-vermelho), #ff5a63); }
+.fonte blockquote { margin: 0; padding: 8px 10px; border-left: 2px solid var(--cx-borda-forte); border-radius: 0 8px 8px 0;
+  background: rgba(0, 0, 0, .18); font-size: 12.5px; color: #c3c9d6; line-height: 1.5; }
+.painel details { border: 1px dashed var(--cx-borda-forte); border-radius: 12px; padding: 8px 12px; }
+.painel details summary { cursor: pointer; font-size: 12.5px; color: var(--cx-sub); }
+.painel details .fonte { margin-top: 8px; opacity: .75; }
+
+.rodape { text-align: center; font-size: 11.5px; color: var(--cx-fraco); padding: 14px 0 4px; }
+
+/* ---------- telas estreitas ---------- */
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .gradio-container { padding: 10px 12px !important; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .online { width: 100%; justify-content: center; }
+  .marca { gap: 10px; flex-wrap: wrap; }
+  .logo { height: 22px; }
+  .divisor { height: 22px; }
+  .produto .nome { font-size: 18px; }
+  .cartao-titulo .dica { display: none; }
+  .trilha .etapa { font-size: 11px; }
+}

@@ -40,10 +40,18 @@ python app/main.py --porta 8080
 
 ## O que a tela mostra
 
+Visual inspirado no app **GoodWe SEMS+** (grafite, cartões com borda fina, vermelho GoodWe
+como destaque, KPIs em tiles, medidor semicircular). Tema em [`tema_sems.css`](tema_sems.css)
+e na função `tema()` de `main.py`.
+
 | Elemento | O que é |
 |---|---|
-| Conversa | resposta em streaming (token a token), precedida de "⏳ Buscando nos documentos..." |
-| **📄 Fontes consultadas** | para cada trecho enviado ao modelo: documento, página (`page + 1`), categoria, score (1 − distância de cosseno) e o início do trecho; abaixo, os trechos descartados por ficarem abaixo do limiar de 0,65 |
+| Cabeçalho e KPIs | documentos indexados, trechos no ChromaDB, categorias, busca (híbrida, k) e modelo, lidos do índice local ao abrir |
+| Conversa | resposta em streaming (token a token), precedida de "⏳ Buscando nos documentos..."; a citação `(fonte: documento, página X)` aparece como etiqueta vermelha no balão (o texto não muda) |
+| **Medidor de relevância** | score do melhor trecho (1 − distância de cosseno) de 0 a 1, com o limiar de 0,65 tracejado |
+| **Trilha do pipeline** | Moderação → Busca → Modelo → Citação: verde onde passou, âmbar onde parou por falta de resposta, vermelho no bloqueio |
+| **📄 Grounding** | para cada trecho enviado ao modelo: documento, página (`page + 1`), categoria, score, barra de score e o início do trecho; selo **citada** no trecho que a resposta citou; abaixo, os trechos descartados por ficarem abaixo do limiar |
+| Apresentação | "oi", "do que se trata esse chatbot?", "o que você faz?" recebem uma apresentação fixa do assistente, sem consultar documento e sem nenhuma especificação |
 | Recusa | quando a base não tem a resposta, o texto é exatamente "Não encontrei essa informação nos documentos fornecidos." e o painel explica se nada passou do limiar ou se passou mas não continha a resposta |
 | Bloqueio | tentativa de prompt injection é barrada antes da busca; o painel diz que nenhum documento foi consultado |
 | 🧹 Nova conversa | apaga a memória da sessão |

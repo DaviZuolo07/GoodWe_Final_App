@@ -21,18 +21,23 @@ toda resposta, e recusando o que a base não tem.
 
 ## Resultado medido (Sprint 04)
 
-| | Iteração 1 | Iteração 2 (entregue) |
-|---|---|---|
-| Configuração | prompt v1 · chunk 1000/150 · separadores da aula · k 4 | prompt v1 · chunk 1000/150 · **separadores por estrutura** · k 4 |
-| Faithfulness (RAGAS) | 0,875 | **0,976** |
-| Answer relevancy (RAGAS) | 0,714 | **0,780** (repetição 0,742) |
-| Rubrica manual (fidelidade / relevância) | 1,00 / 0,93 | 1,00 / 1,00 |
-| Taxa de resposta nos casos respondíveis | 92,9% | **100%** |
-| Fonte certa citada | 92,9% | **100%** |
-| Recusa correta fora da base | 2/2 | 2/2 |
+| | Iteração 1 | Iteração 2 | Iteração 3 (entregue) |
+|---|---|---|---|
+| Configuração | prompt v1 · chunk 1000/150 · separadores da aula · busca vetorial · k 4 | prompt v1 · chunk 1000/150 · **separadores por estrutura** · busca vetorial · k 4 | idem · **busca híbrida (BM25 + vetor) · k 6** |
+| Faithfulness (RAGAS) | 0,875 | 0,976 | **1,000** |
+| Answer relevancy (RAGAS) | 0,714 | 0,780 (repetição 0,742) | 0,789 |
+| Rubrica manual (fidelidade / relevância) | 1,00 / 0,93 | 1,00 / 1,00 | 1,00 / 0,96 |
+| Taxa de resposta nos casos respondíveis | 92,9% | 100% | 100% |
+| Fonte certa citada | 92,9% | 100% | 100% |
+| Recusa correta fora da base | 2/2 | 2/2 | 2/2 |
+| **Perguntas curtas de morador** (24, `evals/eval_set_robustez.json`): taxa de resposta | — | 62,5% | **91,7%** |
 
 Eval set de 16 casos congelado (`evals/eval_set_rag.json`), juiz `gpt-oss:120b` com
-temperature 0, mesmo modelo e seed nas duas pontas. Comparação de modelos (`gemma4:31b`),
+temperature 0, mesmo modelo e seed em todas as iterações. A iteração 3 nasceu de um teste
+na interface: "Qual a potência do GW22K-HCA-20" era recusada porque a busca só vetorial
+deixava o datasheet fora do top-4. No eval set congelado ela não regride (answer_relevancy
+dentro do ruído medido); o ganho está nas perguntas curtas, medido à parte para não mudar a
+régua das iterações anteriores ([`docs/relatorio_rag.md`](docs/relatorio_rag.md), seção 4.1). Comparação de modelos (`gemma4:31b`),
 de chunk_size (256/512/1024) e de prompts (v2 testado e não adotado — sem ganho medido)
 nos relatórios abaixo. Segurança: 39/39 ataques bloqueados com 0 falsos positivos; 3/3
 casos de injection **via documento** barrados.
@@ -44,7 +49,7 @@ casos de injection **via documento** barrados.
 | 1 | Base expandida em ChromaDB persistente + `nomic-embed-text` | `data/knowledge_base/` (6 PDFs, 4 categorias), `src/rag/vector_store.py` | ✅ |
 | 2 | Pipeline PyMuPDFLoader → RecursiveCharacterTextSplitter → retriever → prompt RAG versionado | `src/rag/` (loader, chunking, embeddings, vector_store, retriever, prompt_rag), `src/chain/rag.py` | ✅ |
 | 3 | Grounding + citação de fonte em toda resposta | `src/rag/prompt_rag.py` + pós-processamento em `src/chain/rag.py` | ✅ 100% citado |
-| 4 | Avaliação RAGAS (faithfulness, answer_relevancy) + fallback manual | `evals/ragas_eval.py`, `evals/juiz_rag.py`, `evals/rubrica_manual.md`, `evals/resultados/` | ✅ 2 iterações |
+| 4 | Avaliação RAGAS (faithfulness, answer_relevancy) + fallback manual | `evals/ragas_eval.py`, `evals/juiz_rag.py`, `evals/rubrica_manual.md`, `evals/resultados/` | ✅ 3 iterações |
 | 5 | Interface web com citação visível | `app/main.py`, [`app/README.md`](app/README.md) | ✅ Gradio |
 | 6 | Recusa fora do contexto + proteção contra injection via documento | `src/guardrails/`, `prompt_rag.trecho_suspeito`, `evals/injecao_documento_eval.py` | ✅ |
 | 7 | Relatório de evolução (PDF, ≤5 págs.) + `relatorio_rag.md` + `relatorio_modelos.md` | [`docs/relatorio_evolucao.pdf`](docs/relatorio_evolucao.pdf), [`docs/relatorio_rag.md`](docs/relatorio_rag.md), [`docs/relatorio_modelos.md`](docs/relatorio_modelos.md) | ✅ 3 págs. |
@@ -70,19 +75,21 @@ python app/main.py                              REM interface em http://127.0.0.
 Outros comandos:
 
 ```bat
-python -m pytest tests -q                       REM 151 testes offline (não chamam modelo)
+python -m pytest tests -q                       REM 177 testes offline (não chamam modelo)
 python -m src.chain.rag "Qual a potência do GW22K-HCA-20?"     REM uma pergunta, com fontes e scores
 python -m evals.guardrails_eval                 REM 39/39 ataques, 0 falso positivo
 python -m evals.injecao_documento_eval          REM injection via documento: 3/3
-python -m evals.ragas_eval --iteracao 2         REM RAGAS + rubrica manual no eval set
-python -m evals.recall_retriever                REM recall do retriever por chunk_size x k (sem LLM)
+python -m evals.ragas_eval --iteracao 3         REM RAGAS + rubrica manual no eval set (config entregue)
+python -m evals.robustez_eval                   REM perguntas curtas de morador, ponta a ponta
+python -m evals.recall_retriever                REM recall do retriever por chunk_size x k x busca (sem LLM)
+python -m evals.recall_retriever --set robustez --configs 1000:4,1000:6 --estrategias estrutura
 python -m src.chain.multi_provider "pergunta" --rag --modelos gpt-oss:120b,gemma4:31b,local:qwen3.5:4b
 python -m src.teste_auth                        REM confere chave e modelos da Ollama Cloud
 ```
 
 **Modelo.** Principal `gpt-oss:120b`, comparação `gemma4:31b` (Ollama Cloud). O
 `kimi-k2.6` é aceito pelo código (`OLLAMA_MODEL=kimi-k2.6` ou `kimi-k2.6:cloud`), mas exige
-créditos na Ollama Cloud; trocar o modelo exige reexecutar as duas iterações do eval.
+créditos na Ollama Cloud; trocar o modelo exige reexecutar as iterações do eval.
 
 ## Fluxo do projeto
 
@@ -96,7 +103,9 @@ flowchart TD
     end
     U(["Pergunta"]) --> MOD{"moderação<br/>injection?"}
     MOD -- bloqueia --> FIX["resposta fixa"]
-    MOD -- ok --> RET["retriever top-4<br/>limiar 0,65"]
+    MOD -- ok --> AP{"pergunta sobre<br/>o assistente?"}
+    AP -- sim --> FIX
+    AP -- não --> RET["retriever híbrido top-6<br/>cosseno + BM25 (RRF)<br/>limiar 0,65 no cosseno"]
     DB --> RET
     RET --> FIL["filtro de injection<br/>via documento"]
     FIL --> Q{"há trecho?"}
@@ -128,7 +137,7 @@ evals/                 eval set RAG, RAGAS, rubrica manual, recall, guardrails, 
                        resultados/ (JSONs medidos) e baseline_sprint3/ (coluna "antes", congelada)
 prompts/               versoes_rag.md + prompts do chatbot da Sprint 3
 docs/                  relatórios, arquitetura, changelog, briefs das fases, img/
-tests/                 151 testes offline
+tests/                 177 testes offline
 ```
 
 ## Documentos

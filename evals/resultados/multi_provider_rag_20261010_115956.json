@@ -1,0 +1,63 @@
+{
+  "pergunta": "Quanto custa o kWh?",
+  "resultados": [
+    {
+      "modelo": "gpt-oss:120b",
+      "provedor": "nuvem",
+      "prompt": "rag_v1",
+      "resposta": "O valor do kWh é R$ 2,10 (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "erro": null,
+      "latencia_ms": 3250,
+      "tokens_prompt": 1761,
+      "tokens_resposta": 67
+    },
+    {
+      "modelo": "gpt-oss:120b",
+      "provedor": "nuvem",
+      "prompt": "rag_v2",
+      "resposta": "O valor do kWh é R$ 2,10 (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "erro": null,
+      "latencia_ms": 4857,
+      "tokens_prompt": 1892,
+      "tokens_resposta": 57
+    },
+    {
+      "modelo": "gemma4:31b",
+      "provedor": "nuvem",
+      "prompt": "rag_v1",
+      "resposta": "O valor por kWh é de R$ 2,10 (fonte: tarifa__condominio-demonstracao.pdf, página 1). Esse valor é o mesmo para qualquer horário e para os carregadores GW7K-HCA-20 de 7 kW e GW22K-HCA-20 de 22 kW (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)",
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "erro": null,
+      "latencia_ms": 4014,
+      "tokens_prompt": 1911,
+      "tokens_resposta": 94
+    },
+    {
+      "modelo": "gemma4:31b",
+      "provedor": "nuvem",
+      "prompt": "rag_v2",
+      "resposta": "O valor por kWh é de R$ 2,10 (fonte: tarifa__condominio-demonstracao.pdf, página 1). Esse valor é o mesmo em qualquer horário e para todos os carregadores GW7K-HCA-20 de 7 kW e GW22K-HCA-20 de 22 kW (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)",
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "erro": null,
+      "latencia_ms": 5886,
+      "tokens_prompt": 2043,
+      "tokens_resposta": 95
+    }
+  ]
+}

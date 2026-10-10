@@ -48,7 +48,8 @@ class RespostaTurno(BaseModel):
 
 class RespostaRAG(BaseModel):
     texto: str
-    rota: Literal["bloqueio_moderacao", "sem_contexto", "recusa_escopo", "recusa_llm", "rag"]
+    rota: Literal["bloqueio_moderacao", "sem_contexto", "recusa_escopo", "recusa_llm", "rag",
+                  "apresentacao"]
     categoria_guardrail: Optional[str] = None
     fontes: list[dict] = Field(default_factory=list)      # trechos enviados ao modelo, com score
     descartados: list[dict] = Field(default_factory=list)  # top-k abaixo do limiar

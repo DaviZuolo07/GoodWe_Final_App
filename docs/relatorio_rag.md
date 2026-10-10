@@ -91,9 +91,9 @@ os separadores chegava a 0,929 e dobrava o contexto.
 
 | Parâmetro | Valor | Justificativa medida |
 |---|---|---|
-| Busca | similaridade de cosseno, `similarity_search_with_relevance_scores` | score explícito, exibido no painel de fontes |
-| k | 4 | recall 1,000 com a estratégia `estrutura` (tabela 2.2); ~1.400 tokens de entrada por turno |
-| Limiar | 0,65 | ver abaixo |
+| Busca | **híbrida** desde a iteração 3: cosseno (`similarity_search_with_relevance_scores`) + BM25 sobre os mesmos chunks, fundidos por Reciprocal Rank Fusion (k=60). Iterações 1 e 2: só cosseno | ver 4.1 |
+| k | **6** desde a iteração 3 (4 nas iterações 1 e 2) | recall 1,000 no eval set com k 4 e com k 6; no eval set de robustez, k 6 responde 0,917 contra 0,875 de k 4; ~1.800 tokens de entrada por turno |
+| Limiar | 0,65, sempre sobre o **cosseno** | ver abaixo |
 
 **Por que 0,65 e não 0,75** (o 0,75 é a heurística da Aula 05). Na calibração de
 09/10/2026, as perguntas respondíveis tinham o melhor chunk entre 0,704 e 0,846, e as fora
@@ -102,6 +102,42 @@ presença da resposta. Com 0,75 o bot recusaria perguntas boas (0,704). O limiar
 corta o claramente fora de assunto (aí o LLM nem é chamado); a recusa fina fica com o
 prompt, que devolve a frase literal quando os trechos não contêm a resposta. Nos 2 casos
 de recusa do eval set, as duas camadas juntas acertaram 2/2 em todas as execuções.
+
+### 4.1 Busca híbrida — o ganho da iteração 3
+
+**Problema achado no uso, não no eval.** Na interface, "Qual a potência do GW22K-HCA-20"
+(sem "nominal de saída") recebeu a recusa. O eval set do RAGAS tem perguntas longas e
+específicas e estava em 100% de resposta; a pergunta curta de morador não estava lá. O
+diagnóstico: o datasheet caiu para o 5º lugar, atrás de quatro páginas de **desenho de
+dimensão** do manual que repetem o código do modelo. "Qual o peso do carregador?" e "qual o
+grau de proteção?" nem chegavam ao top-12: a tabela técnica tem ~40 campos num chunk, e o
+embedding dela é a média de todos.
+
+**O que foi medido antes de mudar.** Criamos `evals/eval_set_robustez.json` (24 perguntas
+curtas, com a evidência literal de cada uma) **separado** do eval set do RAGAS, que continua
+congelado (acrescentar casos mudaria a régua das iterações 1 e 2). Testamos, sem LLM, três
+alternativas: sub-trechos pequenos para a busca com o chunk inteiro para o modelo (recall
+0,458 → 0,708 com BM25, mas sobe o score de perguntas fora da base e enfraquece o limiar);
+janelas só nos chunks de tabela (0,708, idem); extração de tabela do PyMuPDF (células
+duplicadas, e não detecta a tabela do datasheet). Ficou a mais simples: **BM25 + vetor com
+RRF**, sem dependência nova e sem mudar o índice.
+
+| Busca (eval set de robustez, 24 perguntas de morador) | Recall do retriever | Taxa de resposta | Fato na fonte citada |
+|---|---|---|---|
+| Vetorial, k 4 (config. da iteração 2) | 0,375 | 0,625 | 0,375 |
+| Híbrida (BM25 + vetor, RRF), k 4 | 0,625 | 0,875 | 0,625 |
+| **Híbrida, k 6 (iteração 3, entregue)** | **0,667** | **0,917** | **0,667** |
+
+"Fato na fonte citada" = a resposta cita (documento, página) de um trecho que contém a
+evidência literal, ou a própria resposta a contém (`python -m evals.robustez_eval`). É
+estrito: "22 kW (trifásico)" citando o regimento responde N01 corretamente mas não conta,
+porque a evidência é o "22000" do datasheet. As 8 respostas que não contaram foram lidas
+uma a uma: 6 corretas por outra fonte, 2 recusas (dimensões; multa do regimento, cujo
+trecho ficou em 0,649, logo abaixo do limiar). **Nenhuma invenção.** O limiar continua
+sobre o cosseno: a fusão só decide a ordem, então uma pergunta fora de assunto que repete
+uma palavra da base não ganha contexto pelo BM25. Arquivos: `recall_robustez_20261010_114321.json`,
+`robustez_denso_k4_20261010_114634.json`, `robustez_hibrido_k4_20261010_114726.json`,
+`robustez_hibrido_k6_20261010_114726.json`.
 
 ## 5. Grounding e citação
 
@@ -128,7 +164,7 @@ Três mecanismos no prompt (`src/rag/prompt_rag.py`, v1) e um determinístico de
 | Injection **via documento** (PDF da base com "ignore as instruções") | (a) contexto entre `<contexto_recuperado>`, declarado como DADO; (b) marcadores do prompt neutralizados dentro do texto do chunk; (c) `trecho_suspeito` tira do contexto o chunk que dá ordem ao modelo | `python -m evals.injecao_documento_eval`: 3/3 com o filtro; 3/3 só com o prompt (`--sem-filtro`); 0 falsos positivos nos 141 chunks reais |
 | Pergunta fora da base | limiar + recusa literal | `recusa_correta` 2/2 em todas as iterações |
 | Jurídico, financeiro, elétrico sem resposta na base | `scope_validator` depois do retriever (CLAUDE.md §6) | 11/11 com encaminhamento a profissional habilitado |
-| Especificação inventada | regras 1 e 4 do prompt + temperature 0 | faithfulness 0,976 na iteração 2 |
+| Especificação inventada | regras 1 e 4 do prompt + temperature 0 | faithfulness 0,976 na iteração 2 e 1,000 na iteração 3 |
 
 ## 7. Avaliação
 
@@ -141,13 +177,22 @@ determinísticas (citou? fonte certa? recusou quando devia?).
 | Execução | Config | Faithfulness | Answer relevancy | Fidelidade manual | Relevância manual | Resposta | Fonte certa | Recusa |
 |---|---|---|---|---|---|---|---|---|
 | **Iteração 1** | v1, chunk 1000/150, separadores aula, k 4 | 0,875 | 0,714 | 1,00 | 0,93 | 92,9% | 92,9% | 2/2 |
-| **Iteração 2** (entregue) | v1, chunk 1000/150, separadores **estrutura**, k 4 | **0,976** | **0,780** | 1,00 | 1,00 | **100%** | **100%** | 2/2 |
+| **Iteração 2** | v1, chunk 1000/150, separadores **estrutura**, k 4 | **0,976** | **0,780** | 1,00 | 1,00 | **100%** | **100%** | 2/2 |
 | Iteração 2, repetição | idem | 0,976 | 0,742 | 1,00 | 1,00 | 100% | 100% | 2/2 |
 | Iteração 2b | + prompt **v2** | 0,976 | 0,753 | 1,00 | 1,00 | 100% | 100% | 2/2 |
+| **Iteração 3** (entregue) | v1, chunk 1000/150, estrutura, **busca híbrida, k 6** | **1,000** | 0,789 | 1,00 | 0,96 | 100% | 100% | 2/2 |
 
 Juiz `gpt-oss:120b`, temperature 0, seed 42, embeddings `nomic-embed-text`, mesmo eval set
 em todas. Arquivos: `ragas_1_20261010_002052.json`, `ragas_2a_20261010_003243.json`,
-`ragas_2a-repeticao_20261010_003646.json`, `ragas_2_20261010_003438.json`.
+`ragas_2a-repeticao_20261010_003646.json`, `ragas_2_20261010_003438.json`,
+`ragas_3_20261010_115329.json`.
+
+**Leitura honesta da iteração 3.** No eval set congelado ela não regride, e o ganho é
+pequeno: faithfulness 0,976 → 1,000 e answer_relevancy 0,789, dentro da faixa de ruído
+medida (0,742–0,780 em duas execuções idênticas da iteração 2). A relevância manual caiu de
+1,00 para 0,96 (um caso com nota 0,5) e o contexto subiu de ~1.510 para ~1.815 tokens por
+turno. O ganho que justifica a mudança está nas perguntas que o eval set não tinha
+(seção 4.1): taxa de resposta 0,625 → 0,917.
 
 **Pergunta de score baixo analisada — F02** ("Encostei o cartão e a luz vermelha acendeu
 por 2 segundos. O que fiz de errado?"), answer_relevancy 0,44–0,46 em todas as execuções,

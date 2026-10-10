@@ -24,6 +24,9 @@ mesmo modelo (`gpt-oss:120b`) e mesmo juiz (`gpt-oss:120b`). Arquivos em
   recuperação: o artigo certo nem chegava ao modelo (`evals/recall_retriever.py`). Com
   os separadores por estrutura (capítulo/artigo), o v1 passou a responder R01 e R02 sem
   mudar uma palavra. O v2 atacou o sintoma; o chunking atacou a causa.
+- **A iteração 3 também não mexeu no prompt.** Ela trocou a busca (híbrida, k 6) e
+  manteve o v1: faithfulness 1,000, answer_relevancy 0,789 (`ragas_3_20261010_115329.json`).
+  O v1 segue como a versão entregue.
 - **v2 fica versionado**, com a medição, como registro de uma hipótese testada e
   descartada. O padrão do sistema (`VERSAO_PADRAO`) continua `v1`.
 - **Ruído do RAGAS:** duas execuções idênticas da iteração 2 deram answer_relevancy

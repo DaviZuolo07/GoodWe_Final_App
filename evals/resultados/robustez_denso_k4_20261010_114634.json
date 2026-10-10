@@ -1,0 +1,503 @@
+{
+  "eval_set": "eval_set_robustez v1.0",
+  "config": {
+    "prompt_rag": {
+      "versao": "v1",
+      "data": "2026-10-09",
+      "mudancas": "grounding estrito, recusa literal, citação por trecho rotulado, contexto delimitado como dado (anti-injection via documento)"
+    },
+    "llm": {
+      "papel": "principal",
+      "model": "gpt-oss:120b",
+      "provedor": "nuvem",
+      "host": "https://ollama.com",
+      "perfil": "rag",
+      "think": "low",
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "num_predict": 2048,
+      "seed": 42,
+      "regua_tokens": "o200k_harmony"
+    },
+    "retriever": {
+      "k": 4,
+      "limiar": 0.65,
+      "metrica": "cosine",
+      "colecao": "goodwe_kb",
+      "modo": "denso"
+    },
+    "embeddings": {
+      "modelo": "nomic-embed-text",
+      "host": "http://127.0.0.1:11434",
+      "provedor": "local",
+      "dimensoes": 768,
+      "prefixos": true
+    },
+    "chunking": {
+      "splitter": "RecursiveCharacterTextSplitter",
+      "chunk_size": 1000,
+      "chunk_overlap": 150,
+      "estrategia": "estrutura",
+      "separadores": [
+        "\n\n",
+        "\nCapítulo ",
+        "\nArt. ",
+        "\n",
+        ". ",
+        " ",
+        ""
+      ],
+      "unidade": "caracteres",
+      "fronteira": "pagina"
+    }
+  },
+  "n": 24,
+  "taxa_resposta": 0.625,
+  "fato_na_fonte_citada": 0.375,
+  "recusados": [
+    "N01",
+    "N04",
+    "N05",
+    "N09",
+    "N11",
+    "N15",
+    "N18",
+    "N20",
+    "N24"
+  ],
+  "sem_fato": [
+    "N01",
+    "N02",
+    "N04",
+    "N05",
+    "N08",
+    "N09",
+    "N11",
+    "N13",
+    "N15",
+    "N18",
+    "N20",
+    "N21",
+    "N22",
+    "N23",
+    "N24"
+  ],
+  "casos": [
+    {
+      "id": "N01",
+      "pergunta": "Qual a potência do GW22K-HCA-20",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p20 (0.84)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p19 (0.813)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p29 (0.782)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p33 (0.77)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N02",
+      "pergunta": "qual a potencia do carregador de 7 kW?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": false,
+      "resposta": "A potência nominal do carregador de 7 kW é de 7 kW (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 10).",
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 10)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.797)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.787)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p57 (0.776)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p15 (0.773)"
+      ],
+      "segundos": 0.8
+    },
+    {
+      "id": "N03",
+      "pergunta": "Qual o grau de proteção do carregador?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "O carregador possui grau de proteção IP66 (e o plugue de carregamento IP55) (fonte: faq__recarga-condominio.pdf, página 2).",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.771)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p7 (0.766)",
+        "faq__recarga-condominio.pdf p2 (0.763)",
+        "faq__recarga-condominio.pdf p2 (0.756)"
+      ],
+      "segundos": 0.9
+    },
+    {
+      "id": "N04",
+      "pergunta": "Qual o peso do carregador?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p16 (0.776)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.773)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p7 (0.759)",
+        "faq__recarga-condominio.pdf p1 (0.757)"
+      ],
+      "segundos": 0.5
+    },
+    {
+      "id": "N05",
+      "pergunta": "Quais as dimensões do carregador?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.777)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p7 (0.773)",
+        "faq__recarga-condominio.pdf p1 (0.762)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p64 (0.758)"
+      ],
+      "segundos": 0.6
+    },
+    {
+      "id": "N06",
+      "pergunta": "Qual a corrente máxima do GW11K?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "A corrente nominal de saída do modelo GW11K‑HCA‑20 é de 16 A (fonte: manual__goodwe-hca-g2-datasheet.pdf, página 2).",
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-datasheet.pdf, página 2)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-datasheet.pdf p2 (0.755)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p19 (0.749)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p29 (0.74)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.739)"
+      ],
+      "segundos": 0.9
+    },
+    {
+      "id": "N07",
+      "pergunta": "Quais certificações o HCA G2 tem?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "O HCA G2 possui as certificações IEC 61851‑1, IEC 62311, IEC 62955, AS/NZS 4268:2017 e IEC 61008‑1 (fonte: manual__goodwe-hca-g2-datasheet.pdf, página 2).",
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-datasheet.pdf, página 2)"
+      ],
+      "fontes": [
+        "faq__recarga-condominio.pdf p2 (0.77)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p1 (0.759)",
+        "manual__goodwe-hca-g2-datasheet.pdf p2 (0.752)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p3 (0.75)"
+      ],
+      "segundos": 0.9
+    },
+    {
+      "id": "N08",
+      "pergunta": "Pode instalar o carregador na área externa?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": false,
+      "resposta": "Sim, o carregador pode ser instalado em áreas externas, pois possui grau de proteção IP66 e o plugue IP55, permitindo operação ao ar livre. (fonte: faq__recarga-condominio.pdf, página 2)",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "fontes": [
+        "faq__recarga-condominio.pdf p2 (0.778)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p27 (0.755)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p25 (0.752)",
+        "faq__recarga-condominio.pdf p2 (0.748)"
+      ],
+      "segundos": 1.0
+    },
+    {
+      "id": "N09",
+      "pergunta": "Qual a temperatura de operação do carregador?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p8 (0.75)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.747)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.744)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p64 (0.739)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N10",
+      "pergunta": "Como posso iniciar a recarga?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "Para iniciar a recarga no HCA G2, você pode usar o aplicativo (SolarGo ou SEMS Portal), o cartão RFID ou o modo de início automático (AUTO Start), que começa a recarga assim que o plugue é conectado (fonte: faq__recarga-condominio.pdf, página 1).",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 1)"
+      ],
+      "fontes": [
+        "faq__recarga-condominio.pdf p3 (0.737)",
+        "faq__recarga-condominio.pdf p2 (0.737)",
+        "faq__recarga-condominio.pdf p1 (0.732)",
+        "faq__recarga-condominio.pdf p1 (0.722)"
+      ],
+      "segundos": 0.8
+    },
+    {
+      "id": "N11",
+      "pergunta": "Que cor fica a luz quando está carregando?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "faq__recarga-condominio.pdf p1 (0.707)",
+        "faq__recarga-condominio.pdf p1 (0.706)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p22 (0.695)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.687)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N12",
+      "pergunta": "a luz vermelha piscou duas vezes, o que é?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "A luz vermelha piscou duas vezes indica que o carregador e o cartão RFID não correspondem; o cartão não está vinculado ao carregador (fonte: faq__recarga-condominio.pdf, página 1; manual__goodwe-hca-g2-manual-usuario.pdf, página 21).",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 1)"
+      ],
+      "fontes": [
+        "faq__recarga-condominio.pdf p1 (0.708)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p21 (0.654)"
+      ],
+      "segundos": 0.9
+    },
+    {
+      "id": "N13",
+      "pergunta": "Quanto custa o kWh?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": false,
+      "resposta": "O valor cobrado por kWh é R$ 2,10 (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p4 (0.736)",
+        "tarifa__condominio-demonstracao.pdf p1 (0.727)",
+        "regimento__condominio-modelo-recarga.pdf p2 (0.709)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.705)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N14",
+      "pergunta": "Quanto pago por 50 kWh?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "R$ 105,00 (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.732)",
+        "tarifa__condominio-demonstracao.pdf p1 (0.73)",
+        "regimento__condominio-modelo-recarga.pdf p2 (0.712)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p3 (0.709)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N15",
+      "pergunta": "Tem taxa se eu deixar o carro parado na vaga?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "regimento__condominio-modelo-recarga.pdf p2 (0.731)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p6 (0.726)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p16 (0.726)",
+        "faq__recarga-condominio.pdf p1 (0.726)"
+      ],
+      "segundos": 0.9
+    },
+    {
+      "id": "N16",
+      "pergunta": "Quanto custa a segunda via do cartão?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "A segunda via do cartão custa R$ 30,00 (fonte: regimento__condominio-modelo-recarga.pdf, página 1).",
+      "citacoes": [
+        "(fonte: regimento__condominio-modelo-recarga.pdf, página 1)"
+      ],
+      "fontes": [
+        "regimento__condominio-modelo-recarga.pdf p1 (0.697)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p1 (0.675)",
+        "faq__recarga-condominio.pdf p1 (0.674)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p18 (0.661)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N17",
+      "pergunta": "Quantas reservas posso ter ao mesmo tempo?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "Cada unidade pode ter no máximo 2 (duas) reservas ativas ao mesmo tempo (fonte: regimento__condominio-modelo-recarga.pdf, página 1).",
+      "citacoes": [
+        "(fonte: regimento__condominio-modelo-recarga.pdf, página 1)"
+      ],
+      "fontes": [
+        "regimento__condominio-modelo-recarga.pdf p1 (0.72)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p1 (0.691)",
+        "faq__recarga-condominio.pdf p3 (0.685)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p8 (0.68)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N18",
+      "pergunta": "Quantos carregadores tem no prédio?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p7 (0.769)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.753)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p13 (0.743)",
+        "faq__recarga-condominio.pdf p1 (0.742)"
+      ],
+      "segundos": 0.6
+    },
+    {
+      "id": "N19",
+      "pergunta": "Perdi meu cartão RFID, e agora?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": true,
+      "resposta": "A perda ou furto do cartão deve ser comunicado à administração em até 24 horas; até a comunicação, as recargas feitas com o cartão são cobradas da unidade titular, e a segunda via do cartão custa R$ 30,00 (fonte: regimento__condominio-modelo-recarga.pdf, página 1).",
+      "citacoes": [
+        "(fonte: regimento__condominio-modelo-recarga.pdf, página 1)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p4 (0.783)",
+        "faq__recarga-condominio.pdf p1 (0.754)",
+        "regimento__condominio-modelo-recarga.pdf p1 (0.738)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p52 (0.734)"
+      ],
+      "segundos": 1.0
+    },
+    {
+      "id": "N20",
+      "pergunta": "Qual a multa por descumprir o regimento?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "faq__recarga-condominio.pdf p3 (0.706)",
+        "regimento__condominio-modelo-recarga.pdf p1 (0.698)",
+        "regimento__condominio-modelo-recarga.pdf p1 (0.672)",
+        "regimento__condominio-modelo-recarga.pdf p2 (0.669)"
+      ],
+      "segundos": 0.7
+    },
+    {
+      "id": "N21",
+      "pergunta": "Como pago as recargas?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": false,
+      "resposta": "O pagamento das recargas é feito de acordo com o valor por kWh e a forma de cobrança estabelecidos na Tabela Tarifária de Recarga do condomínio (fonte: faq__recarga-condominio.pdf, página 3).",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 3)"
+      ],
+      "fontes": [
+        "regimento__condominio-modelo-recarga.pdf p1 (0.724)",
+        "faq__recarga-condominio.pdf p3 (0.709)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p40 (0.705)",
+        "faq__recarga-condominio.pdf p2 (0.7)"
+      ],
+      "segundos": 0.9
+    },
+    {
+      "id": "N22",
+      "pergunta": "Quero instalar um carregador na minha vaga, como faço?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": false,
+      "resposta": "Instale o carregador em uma superfície firme, não inflamável e à prova de fogo, preferencialmente na posição vertical (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 25).  \nFixe a placa de montagem na parede, evitando canos de água e cabos internos; use óculos de proteção, máscara contra poeira e ferramentas isolantes (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 27).  \nMarque e faça os furos necessários, fixe a placa com parafusos de expansão e, em seguida, prenda o carregador na placa (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 27).  \nUtilize equipamento de proteção individual (luvas, roupas e pulseiras antiestáticas) durante todo o processo (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 7).  \nA instalação deve ser realizada por técnicos qualificados e experientes, seguindo as normas locais de segurança (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 7).",
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 25)",
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 27)",
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 27)",
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 7)",
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 7)"
+      ],
+      "fontes": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf p25 (0.796)",
+        "faq__recarga-condominio.pdf p2 (0.794)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p27 (0.791)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p7 (0.773)"
+      ],
+      "segundos": 1.6
+    },
+    {
+      "id": "N23",
+      "pergunta": "Meu carro carrega devagar, por quê?",
+      "rota": "rag",
+      "respondeu": true,
+      "fato_na_fonte_citada": false,
+      "resposta": "O carregador pode estar reduzindo a velocidade de carregamento ou até pausando‑lo para evitar o disparo do fusível principal quando a corrente consumida se aproxima do limite definido, o que faz o carro carregar mais devagar (controle dinâmico de carga). (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 14)",
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 14)"
+      ],
+      "fontes": [
+        "faq__recarga-condominio.pdf p2 (0.755)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p14 (0.753)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p7 (0.746)",
+        "manual__goodwe-hca-g2-manual-usuario.pdf p10 (0.741)"
+      ],
+      "segundos": 1.1
+    },
+    {
+      "id": "N24",
+      "pergunta": "Qual o baud rate do Modbus?",
+      "rota": "recusa_llm",
+      "respondeu": false,
+      "fato_na_fonte_citada": false,
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "citacoes": [],
+      "fontes": [
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p4 (0.715)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p3 (0.713)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p1 (0.703)",
+        "manual__goodwe-hca-g2-modbus-resumo.pdf p1 (0.687)"
+      ],
+      "segundos": 0.7
+    }
+  ]
+}

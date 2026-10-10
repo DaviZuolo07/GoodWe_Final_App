@@ -11,7 +11,8 @@ Comparação de modelos no pipeline RAG, com os quatro parâmetros pedidos pelo 
 | `temperature` | **0** | `PERFIS["rag"]` | contrato (§6 e invariante 4): resposta só do contexto e medida no RAGAS; greedy decoding minimiza variação |
 | `top_p` | **1,0** | `PERFIS["rag"]` | com temperature 0 o top_p não altera a escolha; fixado em 1 para não haver um segundo filtro implícito |
 | `max_tokens` (`num_predict`) | **2048** | `PERFIS["rag"]` | no Ollama o `num_predict` inclui os tokens de **raciocínio** do gpt-oss; com 400 tokens (Sprint 3) parte das respostas saía vazia. A concisão é controlada pelo prompt (`<formato>`), não pelo corte |
-| `k` (top-k do retriever) | **4** | `src/rag/retriever.py` | recall do retriever 1,000 com chunk 1000/150 e separadores por estrutura; k=8 não acrescenta recall e dobra o contexto (tabela 3) |
+| `k` (top-k do retriever) | **6** desde a iteração 3 (4 nas iterações 1 e 2, e nas comparações de modelo abaixo) | `src/rag/retriever.py` | no eval set do RAGAS, k 4 já tem recall 1,000 (tabela 3); nas perguntas curtas de morador (`evals/eval_set_robustez.json`), com a busca híbrida, k 6 responde 0,917 contra 0,875 de k 4, ao custo de ~+300 tokens de entrada por turno (1.510 → 1.815) |
+| busca | **híbrida** (cosseno + BM25, RRF k=60) desde a iteração 3 | `src/rag/retriever.py` | `docs/relatorio_rag.md` §4.1 |
 | limiar de relevância | 0,65 | `src/rag/retriever.py` | calibrado no corpus (`docs/relatorio_rag.md` §4) |
 | `seed` | 42 | `PERFIS["rag"]` | reexecução; na nuvem compartilhada é "melhor esforço" |
 | `think` | `low` (só gpt-oss) | `.env` `OLLAMA_THINK` | o gemma4 devolve vazio quando recebe o campo; a fábrica não o envia |
@@ -81,4 +82,4 @@ nova é a do multi-provider: 5,8–7,8 s nos modelos de nuvem.
 
 | Modelo | Situação |
 |---|---|
-| `kimi-k2.6` (escolha do grupo para a entrega) | A Ollama Cloud respondeu, em 10/10/2026, *"this model is not included in your free usage, add usage credits"*, tanto direto (`kimi-k2.6`) quanto pelo Ollama local (`kimi-k2.6:cloud`). Sem número. O código aceita os dois nomes (`src/chain/llm.py` remove o sufixo `:cloud` ao falar direto com a nuvem). Com créditos: `OLLAMA_MODEL=kimi-k2.6` no `.env` e reexecutar `python -m evals.ragas_eval --iteracao 1 --prompt v1 --separadores aula` e `--iteracao 2 --prompt v1`. |
+| `kimi-k2.6` (escolha do grupo para a entrega) | A Ollama Cloud respondeu, em 10/10/2026, *"this model is not included in your free usage, add usage credits"*, tanto direto (`kimi-k2.6`) quanto pelo Ollama local (`kimi-k2.6:cloud`). Sem número. O código aceita os dois nomes (`src/chain/llm.py` remove o sufixo `:cloud` ao falar direto com a nuvem). Com créditos: `OLLAMA_MODEL=kimi-k2.6` no `.env` e reexecutar `python -m evals.ragas_eval --iteracao 1 --separadores aula --modo denso --k 4`, `--iteracao 2 --modo denso --k 4` e `--iteracao 3`. |
