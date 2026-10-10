@@ -1,0 +1,266 @@
+[
+  {
+    "chunk_size": 256,
+    "chunk_overlap": 32,
+    "separadores": "aula",
+    "k": 4,
+    "recall": 0.6429,
+    "faltou": [
+      "M01",
+      "M02",
+      "M04",
+      "R03",
+      "T01"
+    ],
+    "posicao": {
+      "M01": null,
+      "M02": null,
+      "M03": 1,
+      "M04": null,
+      "M05": 1,
+      "F01": 1,
+      "F02": 1,
+      "F03": 3,
+      "F04": 2,
+      "R01": 2,
+      "R02": 1,
+      "R03": null,
+      "T01": null,
+      "T02": 1
+    }
+  },
+  {
+    "chunk_size": 512,
+    "chunk_overlap": 64,
+    "separadores": "aula",
+    "k": 4,
+    "recall": 0.8571,
+    "faltou": [
+      "R01",
+      "R03"
+    ],
+    "posicao": {
+      "M01": 2,
+      "M02": 3,
+      "M03": 1,
+      "M04": 1,
+      "M05": 1,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 2,
+      "R01": null,
+      "R02": 1,
+      "R03": null,
+      "T01": 3,
+      "T02": 3
+    }
+  },
+  {
+    "chunk_size": 1000,
+    "chunk_overlap": 150,
+    "separadores": "aula",
+    "k": 4,
+    "recall": 0.8571,
+    "faltou": [
+      "R01",
+      "R02"
+    ],
+    "posicao": {
+      "M01": 3,
+      "M02": 1,
+      "M03": 1,
+      "M04": 1,
+      "M05": 2,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 1,
+      "R01": null,
+      "R02": null,
+      "R03": 4,
+      "T01": 2,
+      "T02": 2
+    }
+  },
+  {
+    "chunk_size": 512,
+    "chunk_overlap": 64,
+    "separadores": "aula",
+    "k": 8,
+    "recall": 0.9286,
+    "faltou": [
+      "R01"
+    ],
+    "posicao": {
+      "M01": 2,
+      "M02": 3,
+      "M03": 1,
+      "M04": 1,
+      "M05": 1,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 2,
+      "R01": null,
+      "R02": 1,
+      "R03": 8,
+      "T01": 3,
+      "T02": 3
+    }
+  },
+  {
+    "chunk_size": 1000,
+    "chunk_overlap": 150,
+    "separadores": "aula",
+    "k": 8,
+    "recall": 0.9286,
+    "faltou": [
+      "R02"
+    ],
+    "posicao": {
+      "M01": 3,
+      "M02": 1,
+      "M03": 1,
+      "M04": 1,
+      "M05": 2,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 1,
+      "R01": 7,
+      "R02": null,
+      "R03": 4,
+      "T01": 2,
+      "T02": 2
+    }
+  },
+  {
+    "chunk_size": 256,
+    "chunk_overlap": 32,
+    "separadores": "estrutura",
+    "k": 4,
+    "recall": 0.6429,
+    "faltou": [
+      "M01",
+      "M02",
+      "M04",
+      "R01",
+      "T01"
+    ],
+    "posicao": {
+      "M01": null,
+      "M02": null,
+      "M03": 1,
+      "M04": null,
+      "M05": 1,
+      "F01": 1,
+      "F02": 1,
+      "F03": 3,
+      "F04": 2,
+      "R01": null,
+      "R02": 1,
+      "R03": 4,
+      "T01": null,
+      "T02": 1
+    }
+  },
+  {
+    "chunk_size": 512,
+    "chunk_overlap": 64,
+    "separadores": "estrutura",
+    "k": 4,
+    "recall": 0.9286,
+    "faltou": [
+      "R03"
+    ],
+    "posicao": {
+      "M01": 2,
+      "M02": 3,
+      "M03": 1,
+      "M04": 1,
+      "M05": 1,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 2,
+      "R01": 2,
+      "R02": 1,
+      "R03": null,
+      "T01": 4,
+      "T02": 3
+    }
+  },
+  {
+    "chunk_size": 1000,
+    "chunk_overlap": 150,
+    "separadores": "estrutura",
+    "k": 4,
+    "recall": 1.0,
+    "faltou": [],
+    "posicao": {
+      "M01": 3,
+      "M02": 1,
+      "M03": 1,
+      "M04": 1,
+      "M05": 2,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 1,
+      "R01": 2,
+      "R02": 1,
+      "R03": 1,
+      "T01": 2,
+      "T02": 2
+    }
+  },
+  {
+    "chunk_size": 512,
+    "chunk_overlap": 64,
+    "separadores": "estrutura",
+    "k": 8,
+    "recall": 1.0,
+    "faltou": [],
+    "posicao": {
+      "M01": 2,
+      "M02": 3,
+      "M03": 1,
+      "M04": 1,
+      "M05": 1,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 2,
+      "R01": 2,
+      "R02": 1,
+      "R03": 7,
+      "T01": 4,
+      "T02": 3
+    }
+  },
+  {
+    "chunk_size": 1000,
+    "chunk_overlap": 150,
+    "separadores": "estrutura",
+    "k": 8,
+    "recall": 1.0,
+    "faltou": [],
+    "posicao": {
+      "M01": 3,
+      "M02": 1,
+      "M03": 1,
+      "M04": 1,
+      "M05": 2,
+      "F01": 1,
+      "F02": 1,
+      "F03": 1,
+      "F04": 1,
+      "R01": 2,
+      "R02": 1,
+      "R03": 1,
+      "T01": 2,
+      "T02": 2
+    }
+  }
+]

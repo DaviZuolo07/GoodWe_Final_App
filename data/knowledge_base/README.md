@@ -35,6 +35,9 @@ o metadado `categoria` no ChromaDB (filtro por metadado, Aula 05).
 | `manual__goodwe-hca-g2-manual-usuario.pdf` | 70 | Manual do Usuário GoodWe HCA G2 (PT), material do EV Challenge fornecido pela GoodWe | oficial, sem alteração | 06/10/2026 | Davi |
 | `manual__goodwe-hca-g2-datasheet.pdf` | 2 | Datasheet GoodWe HCA G2 (PT), material do EV Challenge fornecido pela GoodWe | oficial, sem alteração | 06/10/2026 | Davi |
 | `manual__goodwe-hca-g2-modbus-resumo.pdf` | 4 | Resumo em português do "Mapa MODBUS_HCA G2" (protocolo V1.0.15, 12/09/2025), fornecido pela GoodWe ao Challenge | **derivado pelo grupo** (filtrado e traduzido) | 06/10/2026 | Davi |
+| `faq__recarga-condominio.pdf` | 3 | FAQ de recarga no condomínio; cada resposta técnica copia o Manual/Datasheet do HCA G2 e indica a seção | **elaborado pelo grupo** (fonte: `fontes/faq__recarga-condominio.md`) | 10/10/2026 | Davi |
+| `regimento__condominio-modelo-recarga.pdf` | 2 | Regimento-modelo de recarga do "Condomínio de Demonstração ChargeOps" (fictício) | **elaborado pelo grupo** (fonte: `fontes/regimento__condominio-modelo-recarga.md`) | 10/10/2026 | Davi |
+| `tarifa__condominio-demonstracao.pdf` | 1 | Tabela tarifária do condomínio de demonstração (R$ 2,10/kWh, do cadastro de demonstração do projeto) | **elaborado pelo grupo** (fonte: `fontes/tarifa__condominio-demonstracao.md`) | 10/10/2026 | Davi |
 
 ### Sobre o resumo do Modbus
 
@@ -48,7 +51,20 @@ códigos de alarme IoT (30000–30015) e de motivo de encerramento (10168)
 dependem de apêndices que não temos; o PDF diz isso explicitamente para o
 chatbot recusar em vez de inventar.
 
-## A coletar (F1 em aberto)
+### Documentos elaborados pelo grupo (FAQ, regimento, tarifa)
+
+Fonte em Markdown em `fontes/`, versionada no git; o PDF é gerado com
+`python -m src.ferramentas.md_para_pdf base` (texto selecionável, sem rodapé — o
+rodapé entrava nos chunks e piorava a busca). Cada documento declara no cabeçalho que
+foi elaborado pelo grupo. O condomínio e a tarifa são **fictícios** (cenário de
+demonstração). Nenhuma especificação de produto foi criada: o FAQ só repete o que está no
+Manual e no Datasheet do HCA G2, com a seção de origem.
+
+## A coletar (cortado da Sprint 04 pelo roadmap)
+
+Normas e tarifa oficial (prioridades 2 e 3) ficaram fora: o roadmap manda cortar
+primeiro essas fontes, e a base fecha as 4 categorias sem elas. O validador de escopo
+encaminha a advogado as perguntas jurídicas que a base não responde.
 
 Baixar o PDF oficial, conferir que o texto é selecionável, salvar aqui com o
 nome indicado e preencher a tabela acima. Itens marcados "conferir" não foram

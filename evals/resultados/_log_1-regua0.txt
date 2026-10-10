@@ -1,0 +1,40 @@
+iteração 1: prompt v1, chunk 1000/150, k 4, limiar 0.65, juiz gpt-oss:120b
+  [M01] rag             0.8s  'A potência nominal de saída do GW22K‑HCA‑20 é 22\u202f000\u202fW (22\u202fkW). (fonte: manual__goodwe-hca'
+  [M02] rag             0.8s  'O carregador HCA\u202fG2 possui grau de proteção IP66 e o plugue de carregamento IP55 (fonte: f'
+  [M03] rag             0.7s  'A corrente nominal de entrada do modelo GW11K‑HCA‑20 é 16\u202fA (fonte: manual__goodwe-hca-g2-'
+  [M04] rag             0.8s  'O botão de parada de emergência deve ser testado ligando e desligando o EMS três vezes con'
+  [M05] rag             0.7s  'A velocidade da comunicação serial Modbus do carregador GoodWe HCA\u202fG2 é 9600\u202fbaud (9600\u202fbp'
+  [F01] rag             0.7s  'A luz azul acesa indica que o carregador está carregando. (fonte: faq__recarga-condominio.'
+  [F02] rag             0.8s  'A luz vermelha acendeu por 2\u202fsegundos porque o cartão RFID foi encostado antes de conectar'
+  [F03] rag             0.8s  'A potência que o veículo receberá será 1/3 da potência nominal do carregador trifásico (qu'
+  [F04] rag             0.7s  'Não. O manual proíbe estender o cabo de carregamento, pois isso reduz a proteção e cria ri'
+  [R01] recusa_llm      0.6s  'Não encontrei essa informação nos documentos fornecidos.'
+  [R02] rag             0.7s  'O morador tem até 30\u202fminutos após o término da recarga ou da reserva para retirar o veícul'
+  [R03] recusa_llm      0.6s  'Não encontrei essa informação nos documentos fornecidos.'
+  [T01] rag             0.7s  'O valor cobrado por kWh na recarga do condomínio é R$\u202f2,10 (fonte: tarifa__condominio-demo'
+  [T02] rag             0.8s  'O valor da sessão para 30\u202fkWh é R$\u202f63,00 (30\u202fkWh\u202f×\u202fR$\u202f2,10/kWh). (fonte: tarifa__condomini'
+  [X01] recusa_llm      0.6s  'Não encontrei essa informação nos documentos fornecidos.'
+  [X02] recusa_llm      0.6s  'Não encontrei essa informação nos documentos fornecidos.'
+  rubrica manual: ok
+  RAGAS: ok
+
+{
+  "casos": 16,
+  "respondiveis": 14,
+  "recusas": 2,
+  "faithfulness": 0.6643,
+  "faithfulness_n": 14,
+  "answer_relevancy": 0.6568,
+  "fidelidade_manual": 1.0,
+  "relevancia_manual": 0.8571,
+  "taxa_resposta": 0.8571,
+  "taxa_citacao": 1.0,
+  "taxa_fonte_correta": 0.8571,
+  "recusa_correta": "2/2",
+  "citacoes_invalidas": 0,
+  "latencia_media_s": 0.71,
+  "tokens_entrada_medio": 1393,
+  "tokens_saida_medio": 79
+}
+
+gravado em evals\resultados\ragas_1_20261010_001705.json

@@ -58,7 +58,7 @@ class Trecho:
         texto = " ".join(self.texto.split())
         return {"documento": self.documento, "pagina": self.pagina, "score": round(self.score, 3),
                 "trecho": texto[:TAMANHO_TRECHO] + ("…" if len(texto) > TAMANHO_TRECHO else ""),
-                "chunk_id": self.chunk_id}
+                "chunk_id": self.chunk_id, "categoria": self.categoria}
 
 
 def para_trecho(doc: Document, score: float) -> Trecho:

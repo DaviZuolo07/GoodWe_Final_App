@@ -1,0 +1,88 @@
+{
+  "pergunta": "Qual o grau de proteção IP do carregador HCA G2 e do plugue?",
+  "resultados": [
+    {
+      "modelo": "gpt-oss:120b",
+      "provedor": "nuvem",
+      "prompt": "rag_v1",
+      "resposta": "O carregador HCA G2 possui grau de proteção IP66 e o plugue de carregamento tem grau IP55 (fonte: faq__recarga-condominio.pdf, página 2).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "erro": null,
+      "latencia_ms": 5781,
+      "tokens_prompt": 1643,
+      "tokens_resposta": 88
+    },
+    {
+      "modelo": "gpt-oss:120b",
+      "provedor": "nuvem",
+      "prompt": "rag_v2",
+      "resposta": "O carregador HCA G2 possui grau de proteção IP66 e o plugue de carregamento IP55 (fonte: faq__recarga-condominio.pdf, página 2).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "erro": null,
+      "latencia_ms": 6343,
+      "tokens_prompt": 1774,
+      "tokens_resposta": 84
+    },
+    {
+      "modelo": "gemma4:31b",
+      "provedor": "nuvem",
+      "prompt": "rag_v1",
+      "resposta": "O carregador HCA G2 possui grau de proteção IP66 e o plugue de carregamento possui IP55 (fonte: faq__recarga-condominio.pdf, página 2).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "erro": null,
+      "latencia_ms": 7008,
+      "tokens_prompt": 1687,
+      "tokens_resposta": 44
+    },
+    {
+      "modelo": "gemma4:31b",
+      "provedor": "nuvem",
+      "prompt": "rag_v2",
+      "resposta": "O carregador HCA G2 possui grau de proteção IP66 e o plugue de carregamento possui IP55 (fonte: faq__recarga-condominio.pdf, página 2). Ambos contam com recursos antipoeira e à prova d'água, permitindo a operação em áreas externas (fonte: faq__recarga-condominio.pdf, página 2).",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)",
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "erro": null,
+      "latencia_ms": 7785,
+      "tokens_prompt": 1819,
+      "tokens_resposta": 85
+    },
+    {
+      "modelo": "local:qwen3.5:4b",
+      "provedor": "local",
+      "prompt": "rag_v1",
+      "resposta": "O carregador HCA G2 possui grau de proteção IP66, conforme o documento faq__recarga-condominio.pdf, página 2. O plugue de carregamento tem grau de proteção IP55, segundo o mesmo documento, página 2. (fonte: faq__recarga-condominio.pdf, página 2)",
+      "rota": "rag",
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "erro": null,
+      "latencia_ms": 287705,
+      "tokens_prompt": 3312,
+      "tokens_resposta": 4223
+    },
+    {
+      "modelo": "local:qwen3.5:4b",
+      "provedor": "local",
+      "prompt": "rag_v2",
+      "resposta": "",
+      "rota": null,
+      "citacoes": [],
+      "erro": "RespostaVazia: modelo devolveu conteúdo vazio",
+      "latencia_ms": 256508,
+      "tokens_prompt": 0,
+      "tokens_resposta": 0
+    }
+  ]
+}

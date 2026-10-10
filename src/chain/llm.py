@@ -162,9 +162,10 @@ def get_llm(
             "Crie a chave em https://ollama.com/settings/keys"
         )
 
-    if na_nuvem and model.endswith("-cloud"):
-        # '-cloud' é para o Ollama LOCAL puxar da nuvem; direto na ollama.com o
-        # nome correto é sem sufixo (senão: 404, fácil de confundir com auth).
+    if na_nuvem and model.endswith(("-cloud", ":cloud")):
+        # '-cloud'/':cloud' (ex.: 'kimi-k2.6:cloud') é para o Ollama LOCAL puxar
+        # da nuvem; direto na ollama.com o nome correto é sem sufixo (senão: 404,
+        # fácil de confundir com auth).
         model = model[: -len("-cloud")]
 
     kwargs = {

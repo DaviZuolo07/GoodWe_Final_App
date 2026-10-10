@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "nome": "eval_set_rag",
+    "versao": "1.0",
+    "congelado_em": "2026-10-10",
+    "uso": "Eval set da Sprint 04 para o RAGAS (faithfulness, answer_relevancy) e para o juiz manual. As duas iterações e a comparação de chunk_size rodam sobre ESTE arquivo, sem edição (invariante 6 do CLAUDE.md).",
+    "regra_de_ouro": "Congelado depois da 1ª execução. Caso mal formulado é marcado com 'invalidado': true e um caso novo entra no fim; nada é editado no lugar.",
+    "campos": {
+      "categoria": "categoria do documento onde está a resposta (manual, faq, regimento, tarifa) ou 'recusa' quando a base NÃO tem a resposta",
+      "resposta_referencia": "resposta esperada, escrita a partir do documento; usada pelo juiz e para conferência humana (o RAGAS faithfulness/answer_relevancy não precisa dela)",
+      "deve_recusar": "true = a resposta certa é a recusa literal ou o encaminhamento",
+      "fontes_aceitas": "documentos que contêm a resposta (a FAQ repete fatos do manual, com a seção); 'fonte_correta' verifica se ao menos um foi citado"
+    },
+    "composicao": "16 casos: 5 manual, 4 faq, 3 regimento, 2 tarifa, 2 recusa (fora da base). Cobre as 4 categorias da base e os dois tipos de recusa.",
+    "achado_herdado": "M02 (grau de proteção IP) foi recusado na Fase 1 por falha de recuperação: entra de propósito, é o caso de diagnóstico do chunking."
+  },
+  "casos": [
+    {
+      "id": "M01",
+      "categoria": "manual",
+      "pergunta": "Qual a potência nominal de saída do GW22K-HCA-20?",
+      "resposta_referencia": "22.000 W (22 kW), segundo os dados técnicos do datasheet.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-datasheet.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ]
+    },
+    {
+      "id": "M02",
+      "categoria": "manual",
+      "pergunta": "Qual o grau de proteção IP do carregador HCA G2 e do plugue de carregamento?",
+      "resposta_referencia": "O carregador é IP66 e o plugue de carregamento é IP55.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf",
+        "manual__goodwe-hca-g2-datasheet.pdf",
+        "faq__recarga-condominio.pdf"
+      ]
+    },
+    {
+      "id": "M03",
+      "categoria": "manual",
+      "pergunta": "Qual a corrente nominal de entrada do modelo GW11K-HCA-20?",
+      "resposta_referencia": "16 A.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-datasheet.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ]
+    },
+    {
+      "id": "M04",
+      "categoria": "manual",
+      "pergunta": "Com que frequência o botão de parada de emergência deve ser testado na manutenção de rotina?",
+      "resposta_referencia": "Uma vez a cada 6 meses, ligando e desligando o botão três vezes consecutivas.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf",
+        "faq__recarga-condominio.pdf"
+      ]
+    },
+    {
+      "id": "M05",
+      "categoria": "manual",
+      "pergunta": "Qual é a velocidade (baud rate) da comunicação Modbus serial do HCA G2?",
+      "resposta_referencia": "9600, com 8 bits de dados, 1 bit de parada e sem paridade.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-modbus-resumo.pdf"
+      ]
+    },
+    {
+      "id": "F01",
+      "categoria": "faq",
+      "pergunta": "O que significa a luz azul acesa no carregador?",
+      "resposta_referencia": "Que o carregador está carregando.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ]
+    },
+    {
+      "id": "F02",
+      "categoria": "faq",
+      "pergunta": "Encostei o cartão e a luz vermelha acendeu por 2 segundos. O que fiz de errado?",
+      "resposta_referencia": "O cartão foi encostado antes de conectar o plugue ao veículo; primeiro conecte o plugue e depois encoste o cartão.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ]
+    },
+    {
+      "id": "F03",
+      "categoria": "faq",
+      "pergunta": "Meu carro só aceita recarga monofásica. Quanto de potência ele recebe no carregador trifásico?",
+      "resposta_referencia": "No máximo 1/3 da potência nominal do carregador trifásico.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ]
+    },
+    {
+      "id": "F04",
+      "categoria": "faq",
+      "pergunta": "Posso usar uma extensão no cabo do carregador para alcançar minha vaga?",
+      "resposta_referencia": "Não. O manual proíbe estender o cabo de carregamento, por risco de choque e redução da proteção.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ]
+    },
+    {
+      "id": "R01",
+      "categoria": "regimento",
+      "pergunta": "Por quanto tempo posso reservar a vaga de recarga do condomínio?",
+      "resposta_referencia": "No máximo 4 horas por reserva, com até 2 reservas ativas por unidade.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "regimento__condominio-modelo-recarga.pdf"
+      ]
+    },
+    {
+      "id": "R02",
+      "categoria": "regimento",
+      "pergunta": "Quanto tempo de tolerância tenho se me atrasar para a minha reserva?",
+      "resposta_referencia": "15 minutos; depois disso a reserva é cancelada e a vaga liberada.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "regimento__condominio-modelo-recarga.pdf"
+      ]
+    },
+    {
+      "id": "R03",
+      "categoria": "regimento",
+      "pergunta": "Quantos carregadores o condomínio tem e de quais modelos?",
+      "resposta_referencia": "6 pontos: 5 GW7K-HCA-20 (7 kW, monofásicos) e 1 GW22K-HCA-20 (22 kW, trifásico).",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "regimento__condominio-modelo-recarga.pdf"
+      ]
+    },
+    {
+      "id": "T01",
+      "categoria": "tarifa",
+      "pergunta": "Qual o valor do kWh cobrado na recarga do condomínio?",
+      "resposta_referencia": "R$ 2,10 por kWh, igual em todos os carregadores e horários.",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "tarifa__condominio-demonstracao.pdf"
+      ]
+    },
+    {
+      "id": "T02",
+      "categoria": "tarifa",
+      "pergunta": "Quanto vou pagar por uma recarga de 30 kWh?",
+      "resposta_referencia": "R$ 63,00 (30 kWh × R$ 2,10).",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "tarifa__condominio-demonstracao.pdf"
+      ]
+    },
+    {
+      "id": "X01",
+      "categoria": "recusa",
+      "pergunta": "Qual a previsão do tempo para amanhã em São Paulo?",
+      "resposta_referencia": "Não encontrei essa informação nos documentos fornecidos.",
+      "deve_recusar": true,
+      "fontes_aceitas": []
+    },
+    {
+      "id": "X02",
+      "categoria": "recusa",
+      "pergunta": "Qual a tarifa de energia da Enel SP em 2026?",
+      "resposta_referencia": "Não encontrei essa informação nos documentos fornecidos.",
+      "deve_recusar": true,
+      "fontes_aceitas": []
+    }
+  ]
+}

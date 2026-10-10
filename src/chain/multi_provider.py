@@ -3,6 +3,11 @@ BÔNUS (+1) — chamada multi-provider: mais de um MODELO e mais de um PROMPT.
 
     python -m src.chain.multi_provider "Quanto tempo para carregar 60 kWh de 20 a 80% em 7,4 kW?"
     python -m src.chain.multi_provider "..." --modelos gpt-oss:120b,gemma4:31b,local:qwen3:8b --prompts v1,v2
+    python -m src.chain.multi_provider "Qual o grau de proteção IP?" --rag --modelos gpt-oss:120b,gemma4:31b,local:qwen3.5:4b
+
+`--rag` (Sprint 04) faz a mesma matriz sobre o pipeline RAG: cada ramo é um
+`ChatbotRAG(modelo, prompt RAG)` com o MESMO retriever, então a diferença entre
+ramos é só modelo e prompt. Cada ramo registra a citação e a rota (rag/recusa).
 
 Monta uma matriz modelo x prompt e dispara TODAS as combinações em paralelo
 com um único RunnableParallel (LCEL). "Multi-provider" é literal: o prefixo
@@ -53,6 +58,35 @@ def _ramo(modelo: str, versao: str):
     return RunnableLambda(executar, name=f"{modelo}|{versao}")
 
 
+def _ramo_rag(modelo: str, versao: str, recuperador):
+    from src.chain.rag import ChatbotRAG
+
+    def executar(entrada: dict) -> dict:
+        provedor = resolver_provedor(modelo)[0]
+        t0 = time.perf_counter()
+        try:
+            r = ChatbotRAG(versao_prompt=versao, model=modelo, recuperador=recuperador).responder(entrada["pergunta"])
+            texto, rota, citacoes, erro = r.texto, r.rota, r.citacoes, None
+            tok_in, tok_out = r.tokens_servidor_entrada, r.tokens_servidor_saida
+        except Exception as e:
+            texto, rota, citacoes, tok_in, tok_out = "", None, [], 0, 0
+            erro = f"{type(e).__name__}: {str(e)[:160]}"
+        return {"modelo": modelo, "provedor": provedor, "prompt": f"rag_{versao}", "resposta": texto,
+                "rota": rota, "citacoes": citacoes, "erro": erro,
+                "latencia_ms": round((time.perf_counter() - t0) * 1000),
+                "tokens_prompt": tok_in, "tokens_resposta": tok_out}
+
+    return RunnableLambda(executar, name=f"{modelo}|rag_{versao}")
+
+
+def comparar_rag(pergunta: str, modelos: list[str], versoes: list[str]) -> list[dict]:
+    """Matriz modelo x prompt RAG num único RunnableParallel, com o mesmo retriever."""
+    from src.rag.retriever import Recuperador
+    recuperador = Recuperador()
+    ramos = {f"{m} | rag_{v}": _ramo_rag(m, v, recuperador) for m in modelos for v in versoes}
+    return list(RunnableParallel(**ramos).invoke({"pergunta": pergunta}).values())
+
+
 def comparar(pergunta: str, modelos: list[str], versoes: list[str]) -> list[dict]:
     ramos = {f"{m} | {v}": _ramo(m, v) for m in modelos for v in versoes}
     paralelo = RunnableParallel(**ramos)
@@ -67,16 +101,19 @@ def main():
     ap.add_argument("pergunta")
     ap.add_argument("--modelos", default=None, help="lista separada por vírgula (padrão: todos do .env)")
     ap.add_argument("--prompts", default="v1,v2")
+    ap.add_argument("--rag", action="store_true", help="compara sobre o pipeline RAG (prompts RAG v1, v2)")
     a = ap.parse_args()
     modelos = a.modelos.split(",") if a.modelos else list(modelos_configurados().values())
     if len(modelos) < 2:
         sys.exit("Configure ao menos 2 modelos (OLLAMA_MODEL e OLLAMA_MODEL_B) ou use --modelos.")
-    res = comparar(a.pergunta, modelos, a.prompts.split(","))
+    res = (comparar_rag if a.rag else comparar)(a.pergunta, modelos, a.prompts.split(","))
     for r in res:
         print(f"\n=== {r['modelo']} ({r['provedor']}) | prompt {r['prompt']} | {r['latencia_ms']} ms | "
               f"{r['tokens_prompt']}+{r['tokens_resposta']} tokens")
         print(r["erro"] or r["resposta"])
-    destino = RAIZ / "evals" / "resultados" / f"multi_provider_{datetime.now():%Y%m%d_%H%M%S}.json"
+        if r.get("rota"):
+            print(f"   rota: {r['rota']} | citações: {len(r['citacoes'])}")
+    destino = RAIZ / "evals" / "resultados" / f"multi_provider{'_rag' if a.rag else ''}_{datetime.now():%Y%m%d_%H%M%S}.json"
     destino.parent.mkdir(parents=True, exist_ok=True)
     destino.write_text(json.dumps({"pergunta": a.pergunta, "resultados": res}, indent=2, ensure_ascii=False),
                        encoding="utf-8")

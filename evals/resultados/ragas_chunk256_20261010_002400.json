@@ -1,0 +1,1185 @@
+{
+  "parametros": {
+    "iteracao": "chunk256",
+    "prompt_rag": "v1",
+    "eval_set": "eval_set_rag v1.0",
+    "chunk_size": 256,
+    "chunk_overlap": 32,
+    "chunks_indexados": 446,
+    "k": 4,
+    "limiar": 0.65,
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_tokens": 2048,
+    "seed": 42,
+    "modelo": "gpt-oss:120b",
+    "juiz": "gpt-oss:120b",
+    "embeddings": "nomic-embed-text",
+    "regua": "contexto rotulado com [documento, página]",
+    "metricas_ragas": true,
+    "erro_ragas": null,
+    "sistema": {
+      "prompt_rag": {
+        "versao": "v1",
+        "data": "2026-10-09",
+        "mudancas": "grounding estrito, recusa literal, citação por trecho rotulado, contexto delimitado como dado (anti-injection via documento)"
+      },
+      "llm": {
+        "papel": "principal",
+        "model": "gpt-oss:120b",
+        "provedor": "nuvem",
+        "host": "https://ollama.com",
+        "perfil": "rag",
+        "think": "low",
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "num_predict": 2048,
+        "seed": 42,
+        "regua_tokens": "o200k_harmony"
+      },
+      "retriever": {
+        "k": 4,
+        "limiar": 0.65,
+        "metrica": "cosine",
+        "colecao": "goodwe_kb"
+      },
+      "embeddings": {
+        "modelo": "nomic-embed-text",
+        "host": "http://127.0.0.1:11434",
+        "provedor": "local",
+        "dimensoes": 768,
+        "prefixos": true
+      },
+      "chunking": {
+        "splitter": "RecursiveCharacterTextSplitter",
+        "chunk_size": 1000,
+        "chunk_overlap": 150,
+        "separadores": [
+          "\n\n",
+          "\n",
+          ". ",
+          " ",
+          ""
+        ],
+        "unidade": "caracteres",
+        "fronteira": "pagina"
+      }
+    },
+    "duracao_s": 185.7
+  },
+  "resumo": {
+    "casos": 16,
+    "respondiveis": 14,
+    "recusas": 2,
+    "faithfulness": 0.9048,
+    "faithfulness_n": 14,
+    "answer_relevancy": 0.5941,
+    "fidelidade_manual": 1.0,
+    "relevancia_manual": 0.6786,
+    "taxa_resposta": 0.7857,
+    "taxa_citacao": 1.0,
+    "taxa_fonte_correta": 0.7143,
+    "recusa_correta": "2/2",
+    "citacoes_invalidas": 0,
+    "latencia_media_s": 0.68,
+    "tokens_entrada_medio": 858,
+    "tokens_saida_medio": 81
+  },
+  "casos": [
+    {
+      "id": "M01",
+      "categoria": "manual",
+      "pergunta": "Qual a potência nominal de saída do GW22K-HCA-20?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-datasheet.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ],
+      "resposta_referencia": "22.000 W (22 kW), segundo os dados técnicos do datasheet.",
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "rota": "recusa_llm",
+      "contextos": [
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 20]\n16\n03 Apresentação do produto\nGW7K-HCA-20\nGW11K-HCA-20 e GW22K-HCA-20\n(Opcional) Suporte\n1.300 mm\n185 mm\n185 mm\n250 mm\n250 mm\n120 mm\n60 mm\n55 mm\n115 mm\n4 * Φ 15 mm\nVista inferior do suporte\n1.300 mm\n180 mm\n60 mm\n185 mm\n185 mm\n250 mm\n250 mm\n55 mm\n115 mm",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 23]\n(Opcional) GW7K-HCA-20\n(Opcional) GW11K-HCA-20 e GW22K-HCA-20\n4 parafusos\nde expansão\nM12*100\n2 parafusos\nM4*10\n4 parafusos\nM4*10\n8\nparafusos\nM5*12\n1 quadro de\ndistribuição do RCBO\n1 medidor MID\n4 terminais de pino para\ncabo CA\n2 terminais de pino para",
+        "[regimento__condominio-modelo-recarga.pdf, página 1]\nGW22K-HCA-20 (trifásico, 22 kW).\nArt. 4º A potência efetivamente entregue ao veículo depende do carregador de bordo do veículo e do\ncontrole dinâmico de carga do prédio, que pode reduzir ou pausar a recarga em horários de maior consumo.",
+        "[manual__goodwe-hca-g2-datasheet.pdf, página 2]\nDados técnicos\nGW7K-HCA-20\nGW11K-HCA-20\nGW22K-HCA-20\nEntrada\nTensão Nominal de Entrada (V)\n220, L / N / PE\n380, 3L / N / PE\n380, 3L / N / PE\nCorrente nominal de entrada (A)\n32\n16\n32\nFrequência nominal da rede CA (Hz)\n50 / 60\nSaída CA"
+      ],
+      "fontes": [
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 20,
+          "score": 0.842,
+          "trecho": "16 03 Apresentação do produto GW7K-HCA-20 GW11K-HCA-20 e GW22K-HCA-20 (Opcional) Suporte 1.300 mm 185 mm 185 mm 250 mm 250 mm 120 mm 60 mm 55 mm 115 mm 4 * Φ 15 mm Vista inferior do suporte 1.300 mm 180 mm 60 mm 185 mm 185 mm 250 mm 250 mm …",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p20:c0",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 23,
+          "score": 0.836,
+          "trecho": "(Opcional) GW7K-HCA-20 (Opcional) GW11K-HCA-20 e GW22K-HCA-20 4 parafusos de expansão M12*100 2 parafusos M4*10 4 parafusos M4*10 8 parafusos M5*12 1 quadro de distribuição do RCBO 1 medidor MID 4 terminais de pino para cabo CA 2 terminais …",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p23:c3",
+          "categoria": "manual"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 1,
+          "score": 0.829,
+          "trecho": "GW22K-HCA-20 (trifásico, 22 kW). Art. 4º A potência efetivamente entregue ao veículo depende do carregador de bordo do veículo e do controle dinâmico de carga do prédio, que pode reduzir ou pausar a recarga em horários de maior consumo.",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p1:c6",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-datasheet.pdf",
+          "pagina": 2,
+          "score": 0.826,
+          "trecho": "Dados técnicos GW7K-HCA-20 GW11K-HCA-20 GW22K-HCA-20 Entrada Tensão Nominal de Entrada (V) 220, L / N / PE 380, 3L / N / PE 380, 3L / N / PE Corrente nominal de entrada (A) 32 16 32 Frequência nominal da rede CA (Hz) 50 / 60 Saída CA",
+          "chunk_id": "manual__goodwe-hca-g2-datasheet.pdf:p2:c0",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": true,
+      "citou_fonte": false,
+      "fonte_correta": false,
+      "recusa_correta": null,
+      "latencia_s": 0.62,
+      "tokens_entrada": 986,
+      "tokens_saida": 46,
+      "fidelidade_manual": null,
+      "relevancia_manual": 0.0,
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0
+    },
+    {
+      "id": "M02",
+      "categoria": "manual",
+      "pergunta": "Qual o grau de proteção IP do carregador HCA G2 e do plugue de carregamento?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf",
+        "manual__goodwe-hca-g2-datasheet.pdf",
+        "faq__recarga-condominio.pdf"
+      ],
+      "resposta_referencia": "O carregador é IP66 e o plugue de carregamento é IP55.",
+      "resposta": "O plugue de carregamento tem grau de proteção IP55 (fonte: faq__recarga-condominio.pdf, página 2). O grau de proteção do carregador HCA G2 não está informado nos documentos fornecidos.",
+      "rota": "rag",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 2]\ncarregamento, porque isso reduz a proteção e cria risco de choque elétrico. O carregador também só pode\nser usado para carregar veículos elétricos, nenhum outro aparelho. (Manual HCA G2, seção 2.2.)",
+        "[faq__recarga-condominio.pdf, página 2]\nMorador não deve abrir o carregador nem o quadro de proteção. (Manual HCA G2, seção 2.3.)\nO carregador tem botão de emergência? Sim, o HCA G2 tem desligamento de emergência integrado",
+        "[faq__recarga-condominio.pdf, página 2]\ne o plugue de carregamento, IP55, com recursos antipoeira e à prova d'água, e pode ser operado em áreas\nexternas. (Manual HCA G2, seção 3.5; Datasheet HCA G2.)\nPosso usar extensão ou adaptador no cabo de recarga? Não. O manual proíbe estender o cabo de",
+        "[faq__recarga-condominio.pdf, página 1]\nHCA G2. A página do manual de origem está indicada em cada resposta. Regras de uso da vaga e valores\ncobrados estão no Regimento de Recarga e na Tabela Tarifária do condomínio de demonstração.\n1. Luzes e estado do carregador"
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 2,
+          "score": 0.849,
+          "trecho": "carregamento, porque isso reduz a proteção e cria risco de choque elétrico. O carregador também só pode ser usado para carregar veículos elétricos, nenhum outro aparelho. (Manual HCA G2, seção 2.2.)",
+          "chunk_id": "faq__recarga-condominio.pdf:p2:c6",
+          "categoria": "faq"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 2,
+          "score": 0.831,
+          "trecho": "Morador não deve abrir o carregador nem o quadro de proteção. (Manual HCA G2, seção 2.3.) O carregador tem botão de emergência? Sim, o HCA G2 tem desligamento de emergência integrado",
+          "chunk_id": "faq__recarga-condominio.pdf:p2:c9",
+          "categoria": "faq"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 2,
+          "score": 0.821,
+          "trecho": "e o plugue de carregamento, IP55, com recursos antipoeira e à prova d'água, e pode ser operado em áreas externas. (Manual HCA G2, seção 3.5; Datasheet HCA G2.) Posso usar extensão ou adaptador no cabo de recarga? Não. O manual proíbe estend…",
+          "chunk_id": "faq__recarga-condominio.pdf:p2:c5",
+          "categoria": "faq"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.819,
+          "trecho": "HCA G2. A página do manual de origem está indicada em cada resposta. Regras de uso da vaga e valores cobrados estão no Regimento de Recarga e na Tabela Tarifária do condomínio de demonstração. 1. Luzes e estado do carregador",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c2",
+          "categoria": "faq"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: faq__recarga-condominio.pdf, página 2)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.91,
+      "tokens_entrada": 823,
+      "tokens_saida": 165,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 0.5,
+      "faithfulness": 0.6667,
+      "answer_relevancy": 0.6761
+    },
+    {
+      "id": "M03",
+      "categoria": "manual",
+      "pergunta": "Qual a corrente nominal de entrada do modelo GW11K-HCA-20?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-datasheet.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ],
+      "resposta_referencia": "16 A.",
+      "resposta": "A corrente nominal de entrada do modelo GW11K‑HCA‑20 é 16 A (fonte: manual__goodwe-hca-g2-datasheet.pdf, página 2; fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 67).",
+      "rota": "rag",
+      "contextos": [
+        "[manual__goodwe-hca-g2-datasheet.pdf, página 2]\nDados técnicos\nGW7K-HCA-20\nGW11K-HCA-20\nGW22K-HCA-20\nEntrada\nTensão Nominal de Entrada (V)\n220, L / N / PE\n380, 3L / N / PE\n380, 3L / N / PE\nCorrente nominal de entrada (A)\n32\n16\n32\nFrequência nominal da rede CA (Hz)\n50 / 60\nSaída CA",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 10]\nModelo\nDescrição do modelo\nEsse manual se aplica aos carregadores listados abaixo:\n• GW7K-HCA-20\n• GW11K-HCA-20\n• GW22K-HCA-20\nGW11K-HCA-20",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 31]\nGW11K-\nHCA-20\n25 A\nCA 400 V\n(4P)\nGW22K-\nHCA-20\n40 A\nCA 400 V\n(4P)\nEspecificações de fiação\nModelo\nCabo\nEspecificação\nGW7K-HCA-20\nCabo AC externo\nde três núcleos\ncom múltiplos fios\n• Cobre, 105 ℃, 1.000 V\n• Diâmetro externo: 13 a 14 mm",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 67]\n63\n10 Parâmetros técnicos\n10 Parâmetros técnicos\nDados técnicos\nGW7K-HCA-20\nGW11K-\nHCA-20\nGW22K-HCA-20\nEntrada\nTensão nominal de entrada\n(V)\n230*3, L/N/PE\n400*3, 3L/N/PE\n400*3, 3L/N/PE\nCorrente nominal de entrada\n(A)\n32\n16\n32\nFrequência nominal da rede"
+      ],
+      "fontes": [
+        {
+          "documento": "manual__goodwe-hca-g2-datasheet.pdf",
+          "pagina": 2,
+          "score": 0.863,
+          "trecho": "Dados técnicos GW7K-HCA-20 GW11K-HCA-20 GW22K-HCA-20 Entrada Tensão Nominal de Entrada (V) 220, L / N / PE 380, 3L / N / PE 380, 3L / N / PE Corrente nominal de entrada (A) 32 16 32 Frequência nominal da rede CA (Hz) 50 / 60 Saída CA",
+          "chunk_id": "manual__goodwe-hca-g2-datasheet.pdf:p2:c0",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 10,
+          "score": 0.855,
+          "trecho": "Modelo Descrição do modelo Esse manual se aplica aos carregadores listados abaixo: • GW7K-HCA-20 • GW11K-HCA-20 • GW22K-HCA-20 GW11K-HCA-20",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p10:c5",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 31,
+          "score": 0.846,
+          "trecho": "GW11K- HCA-20 25 A CA 400 V (4P) GW22K- HCA-20 40 A CA 400 V (4P) Especificações de fiação Modelo Cabo Especificação GW7K-HCA-20 Cabo AC externo de três núcleos com múltiplos fios • Cobre, 105 ℃, 1.000 V • Diâmetro externo: 13 a 14 mm",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p31:c1",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 67,
+          "score": 0.835,
+          "trecho": "63 10 Parâmetros técnicos 10 Parâmetros técnicos Dados técnicos GW7K-HCA-20 GW11K- HCA-20 GW22K-HCA-20 Entrada Tensão nominal de entrada (V) 230*3, L/N/PE 400*3, 3L/N/PE 400*3, 3L/N/PE Corrente nominal de entrada (A) 32 16 32 Frequência nom…",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p67:c0",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-datasheet.pdf, página 2)",
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 67)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.66,
+      "tokens_entrada": 968,
+      "tokens_saida": 104,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.867
+    },
+    {
+      "id": "M04",
+      "categoria": "manual",
+      "pergunta": "Com que frequência o botão de parada de emergência deve ser testado na manutenção de rotina?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-manual-usuario.pdf",
+        "faq__recarga-condominio.pdf"
+      ],
+      "resposta_referencia": "Uma vez a cada 6 meses, ligando e desligando o botão três vezes consecutivas.",
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "rota": "recusa_llm",
+      "contextos": [
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 40]\n• Pressione o botão de parada de emergência para desconectar a fonte de alimentação\nquando ocorrer uma anormalidade durante o carregamento.\n• Não carregue em dias de chuva e com trovões. Verifique se o plugue de carregamento e a",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 64]\nposteriormente, certifique-se de que as condições de armazenamento atendam aos requisitos.\n9.4 Manutenção de rotina\nItem de manutenção\nMétodo de manutenção\nPeríodo de manutenção\nBotão de parada de\nemergência\nLigue e desligue o EMS três vezes",
+        "[faq__recarga-condominio.pdf, página 2]\n(botão de parada de emergência). Se a falha \"Parada de emergência\" aparecer, é porque o botão está\npressionado; a solução indicada é soltar o botão. (Datasheet HCA G2; Manual HCA G2, seção 9.5.)\n5. Falhas comuns",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 12]\n•\nA porta de saída é usada para conectar com o plugue de carregamento.\n•\nParada de emergência se refere ao botão de parada de emergência."
+      ],
+      "fontes": [
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 40,
+          "score": 0.771,
+          "trecho": "• Pressione o botão de parada de emergência para desconectar a fonte de alimentação quando ocorrer uma anormalidade durante o carregamento. • Não carregue em dias de chuva e com trovões. Verifique se o plugue de carregamento e a",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p40:c1",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 64,
+          "score": 0.765,
+          "trecho": "posteriormente, certifique-se de que as condições de armazenamento atendam aos requisitos. 9.4 Manutenção de rotina Item de manutenção Método de manutenção Período de manutenção Botão de parada de emergência Ligue e desligue o EMS três veze…",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p64:c4",
+          "categoria": "manual"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 2,
+          "score": 0.762,
+          "trecho": "(botão de parada de emergência). Se a falha \"Parada de emergência\" aparecer, é porque o botão está pressionado; a solução indicada é soltar o botão. (Datasheet HCA G2; Manual HCA G2, seção 9.5.) 5. Falhas comuns",
+          "chunk_id": "faq__recarga-condominio.pdf:p2:c10",
+          "categoria": "faq"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 12,
+          "score": 0.754,
+          "trecho": "• A porta de saída é usada para conectar com o plugue de carregamento. • Parada de emergência se refere ao botão de parada de emergência.",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p12:c6",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": true,
+      "citou_fonte": false,
+      "fonte_correta": false,
+      "recusa_correta": null,
+      "latencia_s": 0.6,
+      "tokens_entrada": 807,
+      "tokens_saida": 66,
+      "fidelidade_manual": null,
+      "relevancia_manual": 0.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0
+    },
+    {
+      "id": "M05",
+      "categoria": "manual",
+      "pergunta": "Qual é a velocidade (baud rate) da comunicação Modbus serial do HCA G2?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "manual__goodwe-hca-g2-modbus-resumo.pdf"
+      ],
+      "resposta_referencia": "9600, com 8 bits de dados, 1 bit de parada e sem paridade.",
+      "resposta": "A velocidade (baud rate) da comunicação serial Modbus do carregador GoodWe HCA G2 é 9600 (fonte: manual__goodwe-hca-g2-modbus-resumo.pdf, página 1).",
+      "rota": "rag",
+      "contextos": [
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 1]\n1. Comunicação Modbus do HCA G2\nParâmetros da comunicação serial do carregador GoodWe HCA G2: velocidade (baud rate) 9600, 8 bits de dados,\n1 bit de parada, sem paridade (N).",
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 3]\nagendamento válido.\n7. Modos de recarga e limites de potência do HCA G2 (registradores 10027 a 10039)\nRegistrador 10032 — Modo de recarga avançado atual (leitura e escrita). 0: recarga rápida; 1: recarga com",
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 3]\nGoodWe HCA G2 — Mapa Modbus (resumo operacional em português) · derivado do protocolo oficial V1.0.15 · elaborado pelo grupo\npág. 3\nRegistrador 10000 — Despacho de energia pelo EMS (leitura e escrita). 1: reduzir a potência do carregador",
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 4]\nGoodWe HCA G2 — Mapa Modbus (resumo operacional em português) · derivado do protocolo oficial V1.0.15 · elaborado pelo grupo\npág. 4\nRegistrador 10076 — Modo de início da recarga (somente leitura). 0: cartão de autenticação; 1: início pelo"
+      ],
+      "fontes": [
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 1,
+          "score": 0.925,
+          "trecho": "1. Comunicação Modbus do HCA G2 Parâmetros da comunicação serial do carregador GoodWe HCA G2: velocidade (baud rate) 9600, 8 bits de dados, 1 bit de parada, sem paridade (N).",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p1:c8",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 3,
+          "score": 0.764,
+          "trecho": "agendamento válido. 7. Modos de recarga e limites de potência do HCA G2 (registradores 10027 a 10039) Registrador 10032 — Modo de recarga avançado atual (leitura e escrita). 0: recarga rápida; 1: recarga com",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p3:c8",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 3,
+          "score": 0.763,
+          "trecho": "GoodWe HCA G2 — Mapa Modbus (resumo operacional em português) · derivado do protocolo oficial V1.0.15 · elaborado pelo grupo pág. 3 Registrador 10000 — Despacho de energia pelo EMS (leitura e escrita). 1: reduzir a potência do carregador",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p3:c0",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 4,
+          "score": 0.758,
+          "trecho": "GoodWe HCA G2 — Mapa Modbus (resumo operacional em português) · derivado do protocolo oficial V1.0.15 · elaborado pelo grupo pág. 4 Registrador 10076 — Modo de início da recarga (somente leitura). 0: cartão de autenticação; 1: início pelo",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p4:c0",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-modbus-resumo.pdf, página 1)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.63,
+      "tokens_entrada": 868,
+      "tokens_saida": 72,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8502
+    },
+    {
+      "id": "F01",
+      "categoria": "faq",
+      "pergunta": "O que significa a luz azul acesa no carregador?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ],
+      "resposta_referencia": "Que o carregador está carregando.",
+      "resposta": "A luz azul acesa indica que o carregador está carregando (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 43).",
+      "rota": "rag",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 1]\nLuz azul acesa: o carregador está carregando. Luz vermelha acesa: ocorreu uma falha. (Manual HCA G2,\nseção 3.6.3 e 8.1.)\nA luz vermelha acendeu por 2 segundos quando encostei o cartão RFID. O que aconteceu? Significa",
+        "[faq__recarga-condominio.pdf, página 1]\n1. Luzes e estado do carregador\nO que significa cada cor da luz indicadora (LED) do carregador HCA G2? Luz verde acesa: o\ncarregador está em modo de espera. Luz verde piscando: o sistema do carregador está sendo atualizado.",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 43]\nPisca em verde\nO sistema do carregador está sendo atualizado.\nAzul LIGADO\nO carregador está carregando.\nVermelho LIGADO\nOcorreu uma falha.\nStatus da luz indicadora quando a ativação do carregamento por cartão RFID está\nanormal\nLuz vermelha acesa",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 43]\nanormal\nLuz vermelha acesa\npor 2 segundos\nEncoste o cartão antes de conectar o plugue de\ncarregamento ao veículo elétrico.\nLuz vermelha pisca\nduas vezes\nO carregador e o cartão não correspondem.\n8.2.1 Download e instalação do aplicativo"
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.84,
+          "trecho": "Luz azul acesa: o carregador está carregando. Luz vermelha acesa: ocorreu uma falha. (Manual HCA G2, seção 3.6.3 e 8.1.) A luz vermelha acendeu por 2 segundos quando encostei o cartão RFID. O que aconteceu? Significa",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c4",
+          "categoria": "faq"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.828,
+          "trecho": "1. Luzes e estado do carregador O que significa cada cor da luz indicadora (LED) do carregador HCA G2? Luz verde acesa: o carregador está em modo de espera. Luz verde piscando: o sistema do carregador está sendo atualizado.",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c3",
+          "categoria": "faq"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 43,
+          "score": 0.779,
+          "trecho": "Pisca em verde O sistema do carregador está sendo atualizado. Azul LIGADO O carregador está carregando. Vermelho LIGADO Ocorreu uma falha. Status da luz indicadora quando a ativação do carregamento por cartão RFID está anormal Luz vermelha …",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p43:c1",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 43,
+          "score": 0.765,
+          "trecho": "anormal Luz vermelha acesa por 2 segundos Encoste o cartão antes de conectar o plugue de carregamento ao veículo elétrico. Luz vermelha pisca duas vezes O carregador e o cartão não correspondem. 8.2.1 Download e instalação do aplicativo",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p43:c2",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 43)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.66,
+      "tokens_entrada": 853,
+      "tokens_saida": 65,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.5508
+    },
+    {
+      "id": "F02",
+      "categoria": "faq",
+      "pergunta": "Encostei o cartão e a luz vermelha acendeu por 2 segundos. O que fiz de errado?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ],
+      "resposta_referencia": "O cartão foi encostado antes de conectar o plugue ao veículo; primeiro conecte o plugue e depois encoste o cartão.",
+      "resposta": "A luz vermelha acesa por 2 segundos indica que o cartão deve ser encostado antes de conectar o plugue de carregamento ao veículo elétrico (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 43). (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 21)",
+      "rota": "rag",
+      "contextos": [
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 43]\nanormal\nLuz vermelha acesa\npor 2 segundos\nEncoste o cartão antes de conectar o plugue de\ncarregamento ao veículo elétrico.\nLuz vermelha pisca\nduas vezes\nO carregador e o cartão não correspondem.\n8.2.1 Download e instalação do aplicativo",
+        "[faq__recarga-condominio.pdf, página 1]\nseções 3.6.3 e 7.3.4.)\nA luz vermelha piscou duas vezes quando encostei o cartão RFID. O que aconteceu? Significa que o\ncarregador e o cartão não correspondem: o cartão não está vinculado àquele carregador. Peça à",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 21]\nOcorreu uma falha.\nStatus da luz indicadora quando a ativação do carregamento por cartão RFID está\nanormal\nLuz vermelha acesa\npor 2 segundos\nEncoste o cartão antes de conectar o plugue de\ncarregamento ao veículo elétrico.\nLuz vermelha pisca\nduas vezes",
+        "[faq__recarga-condominio.pdf, página 1]\nLuz azul acesa: o carregador está carregando. Luz vermelha acesa: ocorreu uma falha. (Manual HCA G2,\nseção 3.6.3 e 8.1.)\nA luz vermelha acendeu por 2 segundos quando encostei o cartão RFID. O que aconteceu? Significa"
+      ],
+      "fontes": [
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 43,
+          "score": 0.804,
+          "trecho": "anormal Luz vermelha acesa por 2 segundos Encoste o cartão antes de conectar o plugue de carregamento ao veículo elétrico. Luz vermelha pisca duas vezes O carregador e o cartão não correspondem. 8.2.1 Download e instalação do aplicativo",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p43:c2",
+          "categoria": "manual"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.803,
+          "trecho": "seções 3.6.3 e 7.3.4.) A luz vermelha piscou duas vezes quando encostei o cartão RFID. O que aconteceu? Significa que o carregador e o cartão não correspondem: o cartão não está vinculado àquele carregador. Peça à",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c6",
+          "categoria": "faq"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 21,
+          "score": 0.788,
+          "trecho": "Ocorreu uma falha. Status da luz indicadora quando a ativação do carregamento por cartão RFID está anormal Luz vermelha acesa por 2 segundos Encoste o cartão antes de conectar o plugue de carregamento ao veículo elétrico. Luz vermelha pisca…",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p21:c1",
+          "categoria": "manual"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.776,
+          "trecho": "Luz azul acesa: o carregador está carregando. Luz vermelha acesa: ocorreu uma falha. (Manual HCA G2, seção 3.6.3 e 8.1.) A luz vermelha acendeu por 2 segundos quando encostei o cartão RFID. O que aconteceu? Significa",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c4",
+          "categoria": "faq"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 43)",
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 21)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.91,
+      "tokens_entrada": 872,
+      "tokens_saida": 147,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 0.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.4502
+    },
+    {
+      "id": "F03",
+      "categoria": "faq",
+      "pergunta": "Meu carro só aceita recarga monofásica. Quanto de potência ele recebe no carregador trifásico?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ],
+      "resposta_referencia": "No máximo 1/3 da potência nominal do carregador trifásico.",
+      "resposta": "Ele receberá até 1/3 da potência nominal do carregador trifásico (potência máxima de carregamento para veículos monofásicos). (fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 14) (fonte: faq__recarga-condominio.pdf, página 1)",
+      "rota": "rag",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 1]\ncarregador de 22 kW, o carro só recebe a potência que o seu carregador de bordo aceita. (Manual HCA G2,\nseção 3.5.)\nMeu carro só aceita recarga monofásica. Quanto ele recebe num carregador trifásico? Quando um",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 14]\n• Os carregadores trifásicos aceitam carregamento monofásico, bifásico e trifásico, mas a\npotência real de carregamento é influenciada pelo OBC. Quando um carregador trifásico",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 14]\ncarrega um veículo que só aceita carregamento monofásico, sua potência máxima de\ncarregamento é 1/3 da potência nominal do carregador. Quando um carregador trifásico\ncarrega um veículo que só aceita carregamento bifásico, sua potência máxima de",
+        "[faq__recarga-condominio.pdf, página 1]\ncarregador trifásico carrega um veículo que só aceita carregamento monofásico, a potência máxima é 1/3 da\npotência nominal do carregador. Se o veículo só aceita carregamento bifásico, a potência máxima é 2/3 da"
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.886,
+          "trecho": "carregador de 22 kW, o carro só recebe a potência que o seu carregador de bordo aceita. (Manual HCA G2, seção 3.5.) Meu carro só aceita recarga monofásica. Quanto ele recebe num carregador trifásico? Quando um",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c17",
+          "categoria": "faq"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 14,
+          "score": 0.877,
+          "trecho": "• Os carregadores trifásicos aceitam carregamento monofásico, bifásico e trifásico, mas a potência real de carregamento é influenciada pelo OBC. Quando um carregador trifásico",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p14:c2",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 14,
+          "score": 0.873,
+          "trecho": "carrega um veículo que só aceita carregamento monofásico, sua potência máxima de carregamento é 1/3 da potência nominal do carregador. Quando um carregador trifásico carrega um veículo que só aceita carregamento bifásico, sua potência máxim…",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p14:c3",
+          "categoria": "manual"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.865,
+          "trecho": "carregador trifásico carrega um veículo que só aceita carregamento monofásico, a potência máxima é 1/3 da potência nominal do carregador. Se o veículo só aceita carregamento bifásico, a potência máxima é 2/3 da",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c18",
+          "categoria": "faq"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: manual__goodwe-hca-g2-manual-usuario.pdf, página 14)",
+        "(fonte: faq__recarga-condominio.pdf, página 1)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.76,
+      "tokens_entrada": 827,
+      "tokens_saida": 122,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8391
+    },
+    {
+      "id": "F04",
+      "categoria": "faq",
+      "pergunta": "Posso usar uma extensão no cabo do carregador para alcançar minha vaga?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "faq__recarga-condominio.pdf",
+        "manual__goodwe-hca-g2-manual-usuario.pdf"
+      ],
+      "resposta_referencia": "Não. O manual proíbe estender o cabo de carregamento, por risco de choque e redução da proteção.",
+      "resposta": "Não, é proibido usar extensões, adaptadores ou cabos que não sejam o cabo original do carregador (fonte: regimento__condominio-modelo-recarga.pdf, página 2).",
+      "rota": "rag",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 2]\nO que fazer com o cabo depois de usar? Cubra o plugue de carregamento e enrole o cabo ao redor do\ncarregador. O cabo não deve ser dobrado, espremido ou emaranhado. (Manual HCA G2, seção 2.2.)",
+        "[regimento__condominio-modelo-recarga.pdf, página 2]\nCapítulo VI — Segurança\nArt. 17 É proibido usar extensões, adaptadores ou cabos que não sejam o cabo original do carregador. O\nmanual do fabricante proíbe estender o cabo de carregamento.",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 21]\n17\n03 Apresentação do produto\nIndicador\nCor\nExplicação\nVerde LIGADO\nO carregador está em modo de espera.\nPisca em verde\nO sistema do carregador está sendo atualizado.\nAzul LIGADO\nO carregador está carregando.\nVermelho LIGADO\nOcorreu uma falha.",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 40]\nporta de carregamento do EV estejam secos se precisar carregar.\n• Mantenha as crianças longe do carregador. Não é permitido que crianças usem o\ncarregador.\n• É proibido carregar o EV quando ocorreu uma falha ou o cabo está quebrado.\nAVISO"
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 2,
+          "score": 0.783,
+          "trecho": "O que fazer com o cabo depois de usar? Cubra o plugue de carregamento e enrole o cabo ao redor do carregador. O cabo não deve ser dobrado, espremido ou emaranhado. (Manual HCA G2, seção 2.2.)",
+          "chunk_id": "faq__recarga-condominio.pdf:p2:c7",
+          "categoria": "faq"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 2,
+          "score": 0.78,
+          "trecho": "Capítulo VI — Segurança Art. 17 É proibido usar extensões, adaptadores ou cabos que não sejam o cabo original do carregador. O manual do fabricante proíbe estender o cabo de carregamento.",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p2:c2",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 21,
+          "score": 0.769,
+          "trecho": "17 03 Apresentação do produto Indicador Cor Explicação Verde LIGADO O carregador está em modo de espera. Pisca em verde O sistema do carregador está sendo atualizado. Azul LIGADO O carregador está carregando. Vermelho LIGADO Ocorreu uma fal…",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p21:c0",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 40,
+          "score": 0.767,
+          "trecho": "porta de carregamento do EV estejam secos se precisar carregar. • Mantenha as crianças longe do carregador. Não é permitido que crianças usem o carregador. • É proibido carregar o EV quando ocorreu uma falha ou o cabo está quebrado. AVISO",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p40:c2",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: regimento__condominio-modelo-recarga.pdf, página 2)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": false,
+      "recusa_correta": null,
+      "latencia_s": 0.67,
+      "tokens_entrada": 834,
+      "tokens_saida": 85,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.7601
+    },
+    {
+      "id": "R01",
+      "categoria": "regimento",
+      "pergunta": "Por quanto tempo posso reservar a vaga de recarga do condomínio?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "regimento__condominio-modelo-recarga.pdf"
+      ],
+      "resposta_referencia": "No máximo 4 horas por reserva, com até 2 reservas ativas por unidade.",
+      "resposta": "Cada reserva tem duração máxima de 4 (quatro) horas (fonte: regimento__condominio-modelo-recarga.pdf, página 1).",
+      "rota": "rag",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 3]\nQuanto custa recarregar no condomínio? O valor por kWh e a forma de cobrança estão na Tabela\nTarifária de Recarga do condomínio de demonstração. As regras de reserva, tempo de uso e penalidades\nestão no Regimento de Recarga.",
+        "[regimento__condominio-modelo-recarga.pdf, página 1]\ndo condomínio.\nArt. 9º Cada reserva tem duração máxima de 4 (quatro) horas. Cada unidade pode ter no máximo 2 (duas)\nreservas ativas ao mesmo tempo.\nArt. 10 A tolerância de atraso é de 15 (quinze) minutos. Passado esse prazo sem que o veículo esteja",
+        "[faq__recarga-condominio.pdf, página 1]\nCharging) pelos aplicativos SolarGo ou SEMS Portal (seção 7.3.2). No condomínio de demonstração, as\nvagas compartilhadas são reservadas pela administração, conforme o Regimento de Recarga.\n3. Potência e tempo de recarga",
+        "[regimento__condominio-modelo-recarga.pdf, página 1]\nArt. 1º Este regimento disciplina o uso das vagas de recarga compartilhada de veículos elétricos e híbridos\nplug-in do Condomínio de Demonstração ChargeOps."
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 3,
+          "score": 0.848,
+          "trecho": "Quanto custa recarregar no condomínio? O valor por kWh e a forma de cobrança estão na Tabela Tarifária de Recarga do condomínio de demonstração. As regras de reserva, tempo de uso e penalidades estão no Regimento de Recarga.",
+          "chunk_id": "faq__recarga-condominio.pdf:p3:c0",
+          "categoria": "faq"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 1,
+          "score": 0.793,
+          "trecho": "do condomínio. Art. 9º Cada reserva tem duração máxima de 4 (quatro) horas. Cada unidade pode ter no máximo 2 (duas) reservas ativas ao mesmo tempo. Art. 10 A tolerância de atraso é de 15 (quinze) minutos. Passado esse prazo sem que o veícu…",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p1:c11",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 1,
+          "score": 0.782,
+          "trecho": "Charging) pelos aplicativos SolarGo ou SEMS Portal (seção 7.3.2). No condomínio de demonstração, as vagas compartilhadas são reservadas pela administração, conforme o Regimento de Recarga. 3. Potência e tempo de recarga",
+          "chunk_id": "faq__recarga-condominio.pdf:p1:c15",
+          "categoria": "faq"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 1,
+          "score": 0.777,
+          "trecho": "Art. 1º Este regimento disciplina o uso das vagas de recarga compartilhada de veículos elétricos e híbridos plug-in do Condomínio de Demonstração ChargeOps.",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p1:c3",
+          "categoria": "regimento"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: regimento__condominio-modelo-recarga.pdf, página 1)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.59,
+      "tokens_entrada": 804,
+      "tokens_saida": 55,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.6445
+    },
+    {
+      "id": "R02",
+      "categoria": "regimento",
+      "pergunta": "Quanto tempo de tolerância tenho se me atrasar para a minha reserva?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "regimento__condominio-modelo-recarga.pdf"
+      ],
+      "resposta_referencia": "15 minutos; depois disso a reserva é cancelada e a vaga liberada.",
+      "resposta": "A tolerância de atraso é de 15 (quinze) minutos. (fonte: regimento__condominio-modelo-recarga.pdf, página 1)",
+      "rota": "rag",
+      "contextos": [
+        "[regimento__condominio-modelo-recarga.pdf, página 1]\ndo condomínio.\nArt. 9º Cada reserva tem duração máxima de 4 (quatro) horas. Cada unidade pode ter no máximo 2 (duas)\nreservas ativas ao mesmo tempo.\nArt. 10 A tolerância de atraso é de 15 (quinze) minutos. Passado esse prazo sem que o veículo esteja",
+        "[regimento__condominio-modelo-recarga.pdf, página 1]\nem até 30 (trinta) minutos. A permanência além desse prazo está sujeita à taxa de ocupação prevista na\nTabela Tarifária de Recarga.\nArt. 12 É proibido estacionar veículo que não esteja recarregando nas vagas de recarga, inclusive veículo a\ncombustão.",
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 3]\nas outras cargas da residência continuam podendo usar a energia da bateria. O registrador 10037 define o\nmesmo valor para a recarga agendada.\nRegistrador 10031 — Tempo de conclusão (leitura e escrita). Unidade: horas, faixa 0 a 10. É o tempo mínimo",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 6]\nmoderados.\nAVISO\nDestaca e complementa os textos. Ou habilidades e métodos para resolver problemas\nrelacionados ao produto para economizar tempo."
+      ],
+      "fontes": [
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 1,
+          "score": 0.787,
+          "trecho": "do condomínio. Art. 9º Cada reserva tem duração máxima de 4 (quatro) horas. Cada unidade pode ter no máximo 2 (duas) reservas ativas ao mesmo tempo. Art. 10 A tolerância de atraso é de 15 (quinze) minutos. Passado esse prazo sem que o veícu…",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p1:c11",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 1,
+          "score": 0.715,
+          "trecho": "em até 30 (trinta) minutos. A permanência além desse prazo está sujeita à taxa de ocupação prevista na Tabela Tarifária de Recarga. Art. 12 É proibido estacionar veículo que não esteja recarregando nas vagas de recarga, inclusive veículo a …",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p1:c13",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 3,
+          "score": 0.705,
+          "trecho": "as outras cargas da residência continuam podendo usar a energia da bateria. O registrador 10037 define o mesmo valor para a recarga agendada. Registrador 10031 — Tempo de conclusão (leitura e escrita). Unidade: horas, faixa 0 a 10. É o temp…",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p3:c14",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 6,
+          "score": 0.704,
+          "trecho": "moderados. AVISO Destaca e complementa os textos. Ou habilidades e métodos para resolver problemas relacionados ao produto para economizar tempo.",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p6:c2",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: regimento__condominio-modelo-recarga.pdf, página 1)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.62,
+      "tokens_entrada": 828,
+      "tokens_saida": 63,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.7483
+    },
+    {
+      "id": "R03",
+      "categoria": "regimento",
+      "pergunta": "Quantos carregadores o condomínio tem e de quais modelos?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "regimento__condominio-modelo-recarga.pdf"
+      ],
+      "resposta_referencia": "6 pontos: 5 GW7K-HCA-20 (7 kW, monofásicos) e 1 GW22K-HCA-20 (22 kW, trifásico).",
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "rota": "recusa_llm",
+      "contextos": [
+        "[regimento__condominio-modelo-recarga.pdf, página 2]\ncondomínio, com ART ou TRT.\nArt. 19 Em caso de fumaça, faísca, cheiro de queimado ou choque elétrico, o morador deve se afastar,\nacionar o botão de parada de emergência do carregador apenas se for seguro, avisar a portaria",
+        "[regimento__condominio-modelo-recarga.pdf, página 2]\nArt. 22 O condômino que quiser instalar carregador particular em sua vaga privativa deve apresentar à\nadministração pedido por escrito, com projeto elétrico e ART ou TRT de profissional habilitado, e informação\nsobre a medição do consumo.",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 22]\noutros sinais de danos ao equipamento. Não retire a embalagem e entre em contato com o\nfornecedor o mais rápido possível se encontrar algum dano.\n2. Verifique o modelo do carregador. Se o modelo do carregador não for o que você solicitou,",
+        "[regimento__condominio-modelo-recarga.pdf, página 1]\nO condomínio não garante potência mínima ao morador.\nCapítulo III — Cadastro e acesso\nArt. 5º O uso das vagas depende de cadastro prévio na administração, com unidade, placa e modelo do\nveículo."
+      ],
+      "fontes": [
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 2,
+          "score": 0.8,
+          "trecho": "condomínio, com ART ou TRT. Art. 19 Em caso de fumaça, faísca, cheiro de queimado ou choque elétrico, o morador deve se afastar, acionar o botão de parada de emergência do carregador apenas se for seguro, avisar a portaria",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p2:c4",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 2,
+          "score": 0.799,
+          "trecho": "Art. 22 O condômino que quiser instalar carregador particular em sua vaga privativa deve apresentar à administração pedido por escrito, com projeto elétrico e ART ou TRT de profissional habilitado, e informação sobre a medição do consumo.",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p2:c7",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 22,
+          "score": 0.799,
+          "trecho": "outros sinais de danos ao equipamento. Não retire a embalagem e entre em contato com o fornecedor o mais rápido possível se encontrar algum dano. 2. Verifique o modelo do carregador. Se o modelo do carregador não for o que você solicitou,",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p22:c1",
+          "categoria": "manual"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 1,
+          "score": 0.797,
+          "trecho": "O condomínio não garante potência mínima ao morador. Capítulo III — Cadastro e acesso Art. 5º O uso das vagas depende de cadastro prévio na administração, com unidade, placa e modelo do veículo.",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p1:c7",
+          "categoria": "regimento"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": true,
+      "citou_fonte": false,
+      "fonte_correta": false,
+      "recusa_correta": null,
+      "latencia_s": 0.6,
+      "tokens_entrada": 805,
+      "tokens_saida": 39,
+      "fidelidade_manual": null,
+      "relevancia_manual": 0.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0
+    },
+    {
+      "id": "T01",
+      "categoria": "tarifa",
+      "pergunta": "Qual o valor do kWh cobrado na recarga do condomínio?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "tarifa__condominio-demonstracao.pdf"
+      ],
+      "resposta_referencia": "R$ 2,10 por kWh, igual em todos os carregadores e horários.",
+      "resposta": "O valor cobrado por kWh na recarga do condomínio é R$ 2,10 (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "rota": "rag",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 3]\nQuanto custa recarregar no condomínio? O valor por kWh e a forma de cobrança estão na Tabela\nTarifária de Recarga do condomínio de demonstração. As regras de reserva, tempo de uso e penalidades\nestão no Regimento de Recarga.",
+        "[regimento__condominio-modelo-recarga.pdf, página 2]\nArt. 14 A energia consumida em cada sessão é medida por sessão e cobrada da unidade pelo valor por\nkWh da Tabela Tarifária de Recarga vigente.\nArt. 15 Os valores das sessões do mês são lançados no boleto condominial do mês seguinte, com o extrato",
+        "[tarifa__condominio-demonstracao.pdf, página 1]\nnão há\nO valor por kWh é o mesmo em todos os carregadores (GW7K-HCA-20 de 7 kW e GW22K-HCA-20 de 22\nkW) e em qualquer horário.\n3. Como o valor é calculado\nValor da sessão = energia medida na sessão (kWh) × R$ 2,10.\nExemplos de cálculo:\nEnergia\nrecarregada",
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 4]\nkWh.\nRegistrador 10174 — Índice do registro de recarga atual (somente leitura).\nRegistrador 10176 — Indicador de zeragem da energia da recarga atual (somente leitura). Valor 1: a energia\nda recarga atual foi zerada."
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 3,
+          "score": 0.909,
+          "trecho": "Quanto custa recarregar no condomínio? O valor por kWh e a forma de cobrança estão na Tabela Tarifária de Recarga do condomínio de demonstração. As regras de reserva, tempo de uso e penalidades estão no Regimento de Recarga.",
+          "chunk_id": "faq__recarga-condominio.pdf:p3:c0",
+          "categoria": "faq"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 2,
+          "score": 0.811,
+          "trecho": "Art. 14 A energia consumida em cada sessão é medida por sessão e cobrada da unidade pelo valor por kWh da Tabela Tarifária de Recarga vigente. Art. 15 Os valores das sessões do mês são lançados no boleto condominial do mês seguinte, com o e…",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p2:c0",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "tarifa__condominio-demonstracao.pdf",
+          "pagina": 1,
+          "score": 0.792,
+          "trecho": "não há O valor por kWh é o mesmo em todos os carregadores (GW7K-HCA-20 de 7 kW e GW22K-HCA-20 de 22 kW) e em qualquer horário. 3. Como o valor é calculado Valor da sessão = energia medida na sessão (kWh) × R$ 2,10. Exemplos de cálculo: Ener…",
+          "chunk_id": "tarifa__condominio-demonstracao.pdf:p1:c4",
+          "categoria": "tarifa"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 4,
+          "score": 0.784,
+          "trecho": "kWh. Registrador 10174 — Índice do registro de recarga atual (somente leitura). Registrador 10176 — Indicador de zeragem da energia da recarga atual (somente leitura). Valor 1: a energia da recarga atual foi zerada.",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p4:c9",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.65,
+      "tokens_entrada": 859,
+      "tokens_saida": 67,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9813
+    },
+    {
+      "id": "T02",
+      "categoria": "tarifa",
+      "pergunta": "Quanto vou pagar por uma recarga de 30 kWh?",
+      "deve_recusar": false,
+      "fontes_aceitas": [
+        "tarifa__condominio-demonstracao.pdf"
+      ],
+      "resposta_referencia": "R$ 63,00 (30 kWh × R$ 2,10).",
+      "resposta": "Você pagará R$ 63,00 por uma recarga de 30 kWh (30 kWh × R$ 2,10/kWh) (fonte: tarifa__condominio-demonstracao.pdf, página 1). (fonte: tarifa__condominio-demonstracao.pdf, página 1).",
+      "rota": "rag",
+      "contextos": [
+        "[tarifa__condominio-demonstracao.pdf, página 1]\nEnergia\nrecarregada\nValor da sessão\n10 kWh\nR$ 21,00\n20 kWh\nR$ 42,00\n30 kWh\nR$ 63,00\n40 kWh\nR$ 84,00\n50 kWh\nR$ 105,00\nExemplo com taxa de ocupação: uma sessão de 20 kWh (R$ 42,00) em que o veículo ficou 1 hora e 10",
+        "[manual__goodwe-hca-g2-modbus-resumo.pdf, página 3]\nkW a 11 kW. Trifásico de 22 kW: 4,2 kW a 22 kW.\nRegistrador 10027 e 10028 — Energia máxima e energia mínima de recarga (leitura e escrita). Ganho 10,\nunidade kWh, faixa 0 a 2000. Os registradores 10034 e 10035 definem os mesmos limites para a recarga",
+        "[tarifa__condominio-demonstracao.pdf, página 1]\n1. Vigência\nTabela válida de 01/10/2026 a 30/09/2027, aprovada em assembleia, conforme o Regimento de Recarga.\n2. Valores\nItem\nValor\nEnergia recarregada\nR$ 2,10 por kWh",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 51]\npode reduzir temporariamente o consumo máximo de energia\ncomprada na rede de cargas controláveis para 4,2 kW. Se apenas\nfor necessário usar DI4 - EnWG 14a, outras portas DI não precisam\nser cabeadas."
+      ],
+      "fontes": [
+        {
+          "documento": "tarifa__condominio-demonstracao.pdf",
+          "pagina": 1,
+          "score": 0.8,
+          "trecho": "Energia recarregada Valor da sessão 10 kWh R$ 21,00 20 kWh R$ 42,00 30 kWh R$ 63,00 40 kWh R$ 84,00 50 kWh R$ 105,00 Exemplo com taxa de ocupação: uma sessão de 20 kWh (R$ 42,00) em que o veículo ficou 1 hora e 10",
+          "chunk_id": "tarifa__condominio-demonstracao.pdf:p1:c5",
+          "categoria": "tarifa"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-modbus-resumo.pdf",
+          "pagina": 3,
+          "score": 0.799,
+          "trecho": "kW a 11 kW. Trifásico de 22 kW: 4,2 kW a 22 kW. Registrador 10027 e 10028 — Energia máxima e energia mínima de recarga (leitura e escrita). Ganho 10, unidade kWh, faixa 0 a 2000. Os registradores 10034 e 10035 definem os mesmos limites para…",
+          "chunk_id": "manual__goodwe-hca-g2-modbus-resumo.pdf:p3:c12",
+          "categoria": "manual"
+        },
+        {
+          "documento": "tarifa__condominio-demonstracao.pdf",
+          "pagina": 1,
+          "score": 0.777,
+          "trecho": "1. Vigência Tabela válida de 01/10/2026 a 30/09/2027, aprovada em assembleia, conforme o Regimento de Recarga. 2. Valores Item Valor Energia recarregada R$ 2,10 por kWh",
+          "chunk_id": "tarifa__condominio-demonstracao.pdf:p1:c2",
+          "categoria": "tarifa"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 51,
+          "score": 0.766,
+          "trecho": "pode reduzir temporariamente o consumo máximo de energia comprada na rede de cargas controláveis para 4,2 kW. Se apenas for necessário usar DI4 - EnWG 14a, outras portas DI não precisam ser cabeadas.",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p51:c5",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)",
+        "(fonte: tarifa__condominio-demonstracao.pdf, página 1)"
+      ],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": false,
+      "citou_fonte": true,
+      "fonte_correta": true,
+      "recusa_correta": null,
+      "latencia_s": 0.82,
+      "tokens_entrada": 902,
+      "tokens_saida": 134,
+      "fidelidade_manual": 1.0,
+      "relevancia_manual": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9505
+    },
+    {
+      "id": "X01",
+      "categoria": "recusa",
+      "pergunta": "Qual a previsão do tempo para amanhã em São Paulo?",
+      "deve_recusar": true,
+      "fontes_aceitas": [],
+      "resposta_referencia": "Não encontrei essa informação nos documentos fornecidos.",
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "rota": "recusa_llm",
+      "contextos": [
+        "[faq__recarga-condominio.pdf, página 2]\n5. Falhas comuns\nApareceu \"tempo limite de preparação\". O que fazer? A causa é a comunicação do sinal CP que não foi\nbem-sucedida. Verifique se o veículo já está totalmente carregado e reconecte o conector depois de deixá-lo",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 8]\n• Apenas profissionais qualificados ou pessoal treinado estão autorizados a instalar, operar,\nrealizar manutenção e substituir o equipamento ou peças.",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 8]\nMarcação CE.\nMarcação RCM.\nMarca ANATEL do Brasil.\n2.3 Requisitos de pessoal\nAVISO\n• O pessoal que instala ou realiza a manutenção do equipamento deve ser rigorosamente\ntreinado, e aprender sobre as precauções de segurança e as operações corretas.",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 6]\nmoderados.\nAVISO\nDestaca e complementa os textos. Ou habilidades e métodos para resolver problemas\nrelacionados ao produto para economizar tempo."
+      ],
+      "fontes": [
+        {
+          "documento": "faq__recarga-condominio.pdf",
+          "pagina": 2,
+          "score": 0.715,
+          "trecho": "5. Falhas comuns Apareceu \"tempo limite de preparação\". O que fazer? A causa é a comunicação do sinal CP que não foi bem-sucedida. Verifique se o veículo já está totalmente carregado e reconecte o conector depois de deixá-lo",
+          "chunk_id": "faq__recarga-condominio.pdf:p2:c11",
+          "categoria": "faq"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 8,
+          "score": 0.693,
+          "trecho": "• Apenas profissionais qualificados ou pessoal treinado estão autorizados a instalar, operar, realizar manutenção e substituir o equipamento ou peças.",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p8:c5",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 8,
+          "score": 0.69,
+          "trecho": "Marcação CE. Marcação RCM. Marca ANATEL do Brasil. 2.3 Requisitos de pessoal AVISO • O pessoal que instala ou realiza a manutenção do equipamento deve ser rigorosamente treinado, e aprender sobre as precauções de segurança e as operações co…",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p8:c4",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 6,
+          "score": 0.685,
+          "trecho": "moderados. AVISO Destaca e complementa os textos. Ou habilidades e métodos para resolver problemas relacionados ao produto para economizar tempo.",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p6:c2",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": true,
+      "citou_fonte": false,
+      "fonte_correta": null,
+      "recusa_correta": true,
+      "latencia_s": 0.53,
+      "tokens_entrada": 772,
+      "tokens_saida": 27
+    },
+    {
+      "id": "X02",
+      "categoria": "recusa",
+      "pergunta": "Qual a tarifa de energia da Enel SP em 2026?",
+      "deve_recusar": true,
+      "fontes_aceitas": [],
+      "resposta_referencia": "Não encontrei essa informação nos documentos fornecidos.",
+      "resposta": "Não encontrei essa informação nos documentos fornecidos.",
+      "rota": "recusa_llm",
+      "contextos": [
+        "[tarifa__condominio-demonstracao.pdf, página 1]\n6. Reajuste\nA tarifa é revista uma vez por ano pela assembleia, considerando a tarifa da distribuidora de energia e os\ncustos de manutenção dos carregadores. Esta tabela não informa a tarifa da distribuidora de energia.",
+        "[regimento__condominio-modelo-recarga.pdf, página 2]\ndas sessões (data, carregador, energia em kWh e valor).\nArt. 16 A tarifa é revista uma vez por ano pela assembleia, com base na tarifa da distribuidora de energia e\nnos custos de manutenção dos carregadores.\nCapítulo VI — Segurança",
+        "[manual__goodwe-hca-g2-datasheet.pdf, página 2]\nEmissão de ruído (dB)\n<20\nConsumo de energia (W)\n<6.5\nGrau de Proteção IP\nIP66\n*2\nCabo de saída e conector\n6m de cabo (7.5m opcional)\nIEC Tipo 2\nAcessórios\nCartão RFID × 2\nInstalação\nInterior ou exterior\nProtocolos de comunicação\nModbus TCP\nProteção",
+        "[manual__goodwe-hca-g2-manual-usuario.pdf, página 69]\nEmissão de ruído (dB)\n< 20\n< 20\n< 20\nPotência em espera\n(W)\n< 6.5\n< 6.5\n< 6.5\nClassificação de\nproteção de entrada\nIP66*2\nIP66*2\nIP66*2\nCabo de saída e\nconector\nCabo de 6 m (7,5 m\nopcional)\nIEC Tipo 2\nCabo de 6 m (7,5 m\nopcional)\nIEC Tipo 2"
+      ],
+      "fontes": [
+        {
+          "documento": "tarifa__condominio-demonstracao.pdf",
+          "pagina": 1,
+          "score": 0.77,
+          "trecho": "6. Reajuste A tarifa é revista uma vez por ano pela assembleia, considerando a tarifa da distribuidora de energia e os custos de manutenção dos carregadores. Esta tabela não informa a tarifa da distribuidora de energia.",
+          "chunk_id": "tarifa__condominio-demonstracao.pdf:p1:c9",
+          "categoria": "tarifa"
+        },
+        {
+          "documento": "regimento__condominio-modelo-recarga.pdf",
+          "pagina": 2,
+          "score": 0.763,
+          "trecho": "das sessões (data, carregador, energia em kWh e valor). Art. 16 A tarifa é revista uma vez por ano pela assembleia, com base na tarifa da distribuidora de energia e nos custos de manutenção dos carregadores. Capítulo VI — Segurança",
+          "chunk_id": "regimento__condominio-modelo-recarga.pdf:p2:c1",
+          "categoria": "regimento"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-datasheet.pdf",
+          "pagina": 2,
+          "score": 0.742,
+          "trecho": "Emissão de ruído (dB) <20 Consumo de energia (W) <6.5 Grau de Proteção IP IP66 *2 Cabo de saída e conector 6m de cabo (7.5m opcional) IEC Tipo 2 Acessórios Cartão RFID × 2 Instalação Interior ou exterior Protocolos de comunicação Modbus TCP…",
+          "chunk_id": "manual__goodwe-hca-g2-datasheet.pdf:p2:c6",
+          "categoria": "manual"
+        },
+        {
+          "documento": "manual__goodwe-hca-g2-manual-usuario.pdf",
+          "pagina": 69,
+          "score": 0.734,
+          "trecho": "Emissão de ruído (dB) < 20 < 20 < 20 Potência em espera (W) < 6.5 < 6.5 < 6.5 Classificação de proteção de entrada IP66*2 IP66*2 IP66*2 Cabo de saída e conector Cabo de 6 m (7,5 m opcional) IEC Tipo 2 Cabo de 6 m (7,5 m opcional) IEC Tipo 2",
+          "chunk_id": "manual__goodwe-hca-g2-manual-usuario.pdf:p69:c1",
+          "categoria": "manual"
+        }
+      ],
+      "descartados": [],
+      "citacoes": [],
+      "citacao_adicionada": false,
+      "citacoes_invalidas": [],
+      "recusou": true,
+      "citou_fonte": false,
+      "fonte_correta": null,
+      "recusa_correta": true,
+      "latencia_s": 0.58,
+      "tokens_entrada": 914,
+      "tokens_saida": 45
+    }
+  ]
+}

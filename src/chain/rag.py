@@ -65,7 +65,7 @@ from langchain_core.runnables import (Runnable, RunnableBranch, RunnableConfig, 
 
 from src.chain.builder import limpar_saida
 from src.chain.llm import descrever as descrever_llm
-from src.chain.llm import get_llm_robusto
+from src.chain.llm import get_llm, get_llm_robusto
 from src.chain.prompts import CANARIO
 from src.guardrails.moderation import moderar, normalizar
 from src.guardrails.scope_validator import (EMERGENCIA, JURIDICO, RESPOSTAS, validar_escopo,
@@ -111,6 +111,12 @@ class ChatbotRAG:
         self.recuperador = recuperador or Recuperador()
         self.llm = llm or get_llm_robusto(PERFIL_LLM, papel=papel, model=model)
         self.chain_resposta = montar_chain_resposta(versao_prompt, self.llm)
+        # Streaming (interface): o fallback de `get_llm_robusto` acumula a resposta
+        # inteira antes de devolver (a checagem de conteúdo vazio precisa do texto
+        # completo), então a tela ficaria parada. A interface usa o LLM simples e
+        # cai na chain robusta só se o stream vier vazio. Mesmo perfil "rag".
+        llm_stream = llm or get_llm(PERFIL_LLM, papel=papel, model=model)
+        self.chain_stream = prompt_rag.montar_template(versao_prompt) | llm_stream | StrOutputParser()
         self.pipeline = self._montar_pipeline()
 
     # ------------------------------------------------------------------ #
@@ -224,6 +230,41 @@ class ChatbotRAG:
         entrada = sum(u.get("input_tokens", 0) for u in uso.usage_metadata.values())
         saida = sum(u.get("output_tokens", 0) for u in uso.usage_metadata.values())
         return r.model_copy(update={"tokens_servidor_entrada": entrada, "tokens_servidor_saida": saida})
+
+    def responder_stream(self, pergunta: str):
+        """
+        Mesmo pipeline do `responder`, com a parte do modelo em streaming (Aula 08).
+
+        Gera ("parcial", texto_acumulado) enquanto o modelo escreve e termina com
+        ("final", RespostaRAG). Guardrails, retriever e pós-processamento são os
+        mesmos métodos do `responder`, na mesma ordem: a tela mostra o texto
+        parcial cru, e o texto final (recusa normalizada, citação conferida) o
+        substitui. Por isso a interface nunca entrega uma resposta que o eval não
+        mediria.
+        """
+        x = self._etapa_guardrails({"pergunta": pergunta})
+        if x["guardrail"] is not None:
+            yield "final", self._etapa_resposta_fixa(x)
+            return
+        x["trechos"] = self._etapa_busca(x)
+        if not x["trechos"]["usados"]:
+            yield "final", self._etapa_sem_contexto(x)
+            return
+
+        usados = x["trechos"]["usados"]
+        entrada = {"pergunta": pergunta, "contexto": prompt_rag.formatar_contexto(usados)}
+        uso = UsageMetadataCallbackHandler()
+        parcial = ""
+        for pedaco in self.chain_stream.stream(entrada, config={"callbacks": [uso]}):
+            parcial += pedaco
+            yield "parcial", parcial
+        texto = limpar_saida(parcial) if parcial.strip() else self.chain_resposta.invoke(entrada)
+        r = self._pos_processar(texto, usados, x["trechos"]["descartados"], pergunta,
+                                x["trechos"].get("injecao", []))
+        entrada_tok = sum(u.get("input_tokens", 0) for u in uso.usage_metadata.values())
+        saida_tok = sum(u.get("output_tokens", 0) for u in uso.usage_metadata.values())
+        yield "final", r.model_copy(update={"tokens_servidor_entrada": entrada_tok,
+                                            "tokens_servidor_saida": saida_tok})
 
     def descrever(self) -> dict:
         """Todos os parâmetros do experimento juntos — cabeçalho de todo eval (bloco C)."""

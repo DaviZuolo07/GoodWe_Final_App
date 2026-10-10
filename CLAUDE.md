@@ -22,7 +22,7 @@ em LCEL) → **Sprint 04 (RAG medido, com interface)**.
 | Kayo Henderson | 570706 |
 
 **Execução:** o Davi faz todo o código, sozinho e em sequência. O plano dia a dia, os
-gates de cada fase e a ordem de corte de escopo estão em **`ROADMAP_SOLO.md`** — leia
+gates de cada fase e a ordem de corte de escopo estão em **`docs/briefs/ROADMAP_SOLO.md`** — leia
 antes de propor trabalho novo. Conteúdo e relatórios ficam com o resto do grupo.
 
 ---
@@ -58,7 +58,7 @@ mesmo que o código funcione.
   observabilidade antes dos obrigatórios estarem verdes e medidos.** O §3 marca todos
   como NÃO OBRIGATÓRIOS. Valem 0 ponto de rubrica.
 - **Não avance para a fase seguinte sem passar o gate da fase atual.** Os gates estão no
-  brief de cada fase e no `ROADMAP_SOLO.md`. Trabalhando sozinho não há quem revise — o
+  brief de cada fase e no `docs/briefs/ROADMAP_SOLO.md`. Trabalhando sozinho não há quem revise — o
   gate é a revisão.
 - **Não faça trabalho de outra fase porque "já que estamos aqui".** O cronograma não tem
   folga e cada fase cabe numa sessão. Achou algo fora do escopo da fase? Registre na seção
@@ -66,7 +66,10 @@ mesmo que o código funcione.
 - Não apague nem reescreva `evals/baseline_sprint3/`. É a coluna "antes" do relatório,
   congelada e medida com modelo real.
 - Não altere `src/guardrails/` sem ler a seção 6 deste arquivo.
-- Não troque os modelos configurados no `.env` por outros.
+- Não troque os modelos configurados no `.env` por outros. (10/10/2026: o grupo escolheu
+  `kimi-k2.6`, mas a conta Ollama Cloud responde "not included in your free usage"; as
+  medições usam `gpt-oss:120b` + `gemma4:31b`. Com créditos, troque `OLLAMA_MODEL` e
+  reexecute as DUAS iterações.)
 
 ---
 
@@ -184,7 +187,7 @@ positivo).
 ## 7. Comandos
 
 ```bash
-python -m pytest tests -q              # testes offline, não chamam modelo — 111 passando
+python -m pytest tests -q              # testes offline, não chamam modelo
 python -m evals.guardrails_eval        # 39/39 ataques, 0 falso positivo
 python -m src.teste_auth               # confere chave, host e modelos do Ollama Cloud
 python -m src.app --detalhes           # conversar pelo terminal
@@ -198,11 +201,15 @@ python -m src.chain.rag "pergunta"            # uma pergunta, com fontes, scores
 python -m src.chain.rag --detalhes            # modo conversa
 ```
 
-A criar nesta sprint:
+Avaliação e interface (Sprint 04, Python 3.13 — o `ragas` não instala no 3.14):
 
 ```bash
-python -m evals.ragas_eval --iteracao 1       # mede faithfulness e answer_relevancy
+python -m evals.ragas_eval --iteracao 1 --prompt v1 --separadores aula   # iteração 1 (linha de base)
+python -m evals.ragas_eval --iteracao 2 --prompt v2                      # iteração 2 (config padrão)
+python -m evals.recall_retriever              # recall do retriever por chunk_size x k, sem LLM
+python -m src.chain.multi_provider "pergunta" --rag --modelos gpt-oss:120b,gemma4:31b,local:qwen3.5:4b
 python app/main.py                            # sobe a interface Gradio
+python -m src.ferramentas.md_para_pdf relatorio   # docs/relatorio_evolucao.md -> PDF (≤5 págs.)
 ```
 
 ---

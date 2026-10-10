@@ -1,0 +1,80 @@
+iteração 2a-repeticao: prompt v1, chunk 1000/150 (estrutura), k 4, limiar 0.65, juiz gpt-oss:120b
+  [M01] rag             0.6s  'A potência nominal de saída do GW22K‑HCA‑20 é 22\u202f000\u202fW (fonte: manual__goodwe-hca-g2-datas'
+  [M02] rag             0.6s  'O carregador HCA\u202fG2 possui grau de proteção IP66 e o plugue de carregamento tem grau IP55 '
+  [M03] rag             0.6s  'A corrente nominal de entrada do modelo GW11K‑HCA‑20 é 16\u202fA (fonte: manual__goodwe-hca-g2-'
+  [M04] rag             0.7s  'O botão de parada de emergência deve ser testado ligando e desligando o EMS três vezes con'
+  [M05] rag             0.7s  'A velocidade da comunicação serial Modbus do HCA\u202fG2 é 9600\u202fbaud (9600\u202fbps). (fonte: manual'
+  [F01] rag             0.6s  'A luz azul acesa indica que o carregador está carregando. (fonte: faq__recarga-condominio.'
+  [F02] rag             0.8s  'A luz vermelha acendeu por 2\u202fsegundos indica que o cartão RFID foi encostado antes de cone'
+  [F03] rag             0.8s  'Quando um carregador trifásico alimenta um veículo que só aceita recarga monofásica, a pot'
+  [F04] rag             0.7s  'Não. O manual proíbe estender o cabo de carregamento, pois isso reduz a proteção e cria ri'
+  [R01] rag             0.6s  'Cada reserva tem duração máxima de 4 (quatro) horas (fonte: regimento__condominio-modelo-r'
+  [R02] rag             0.6s  'A tolerância de atraso para a reserva é de 15\u202fminutos (fonte: regimento__condominio-modelo'
+  [R03] rag             0.8s  'O condomínio possui 6 pontos de recarga: 5 carregadores modelo GW7K‑HCA‑20 (monofásicos, 7'
+  [T01] rag             0.7s  'O valor cobrado por kWh na recarga do condomínio é de R$\u202f2,10 (fonte: tarifa__condominio-d'
+  [T02] rag             0.6s  'R$\u202f63,00 (fonte: tarifa__condominio-demonstracao.pdf, página 1).'
+  [X01] recusa_llm      0.5s  'Não encontrei essa informação nos documentos fornecidos.'
+  [X02] recusa_llm      0.6s  'Não encontrei essa informação nos documentos fornecidos.'
+  rubrica manual: ok
+  RAGAS: ok
+
+{
+  "casos": 16,
+  "respondiveis": 14,
+  "recusas": 2,
+  "faithfulness": 0.9762,
+  "faithfulness_n": 14,
+  "answer_relevancy": 0.7415,
+  "fidelidade_manual": 1.0,
+  "relevancia_manual": 1.0,
+  "taxa_resposta": 1.0,
+  "taxa_citacao": 1.0,
+  "taxa_fonte_correta": 1.0,
+  "recusa_correta": "2/2",
+  "citacoes_invalidas": 0,
+  "latencia_media_s": 0.66,
+  "tokens_entrada_medio": 1378,
+  "tokens_saida_medio": 80
+}
+
+gravado em evals\resultados\ragas_2a-repeticao_20261010_003646.json
+iteração modeloB-gemma4: prompt v1, chunk 1000/150 (estrutura), k 4, limiar 0.65, juiz gpt-oss:120b
+  [M01] rag             0.7s  'A potência nominal de saída do GW22K-HCA-20 é de 22.000 W (fonte: manual__goodwe-hca-g2-da'
+  [M02] rag             0.6s  'O carregador HCA G2 possui grau de proteção IP66 e o plugue de carregamento possui IP55 (f'
+  [M03] rag             0.8s  'A corrente nominal de entrada do modelo GW11K-HCA-20 é de 16 A (fonte: manual__goodwe-hca-'
+  [M04] rag             0.8s  'O botão de parada de emergência deve ser testado uma vez a cada 6 meses (fonte: manual__go'
+  [M05] rag             0.6s  'A velocidade (baud rate) da comunicação serial do carregador GoodWe HCA G2 é 9600 (fonte: '
+  [F01] rag             0.6s  'A luz azul acesa significa que o carregador está carregando (fonte: faq__recarga-condomini'
+  [F02] rag             0.6s  'Isso significa que o cartão foi encostado antes de o plugue de carregamento ser conectado '
+  [F03] rag             0.6s  'Quando um carregador trifásico carrega um veículo que só aceita carregamento monofásico, a'
+  [F04] rag             0.6s  'Não, é proibido usar extensões, adaptadores ou cabos que não sejam o cabo original do carr'
+  [R01] rag             0.8s  'Cada reserva de vaga de recarga tem duração máxima de 4 (quatro) horas (fonte: regimento__'
+  [R02] rag             0.7s  'A tolerância de atraso é de 15 (quinze) minutos (fonte: regimento__condominio-modelo-recar'
+  [R03] rag             0.8s  'O condomínio dispõe de 6 (seis) pontos de recarga compartilhada no subsolo 1 (fonte: regim'
+  [T01] rag             0.7s  'No condomínio de demonstração, a tarifa de energia recarregada é de R$ 2,10 por kWh (fonte'
+  [T02] rag             0.6s  'Para uma recarga de 30 kWh, o valor da sessão é de R$ 63,00 (fonte: tarifa__condominio-dem'
+  [X01] recusa_llm      0.6s  'Não encontrei essa informação nos documentos fornecidos.'
+  [X02] recusa_llm      0.5s  'Não encontrei essa informação nos documentos fornecidos.'
+  rubrica manual: ok
+  RAGAS: ok
+
+{
+  "casos": 16,
+  "respondiveis": 14,
+  "recusas": 2,
+  "faithfulness": 0.9643,
+  "faithfulness_n": 14,
+  "answer_relevancy": 0.7427,
+  "fidelidade_manual": 1.0,
+  "relevancia_manual": 1.0,
+  "taxa_resposta": 1.0,
+  "taxa_citacao": 1.0,
+  "taxa_fonte_correta": 1.0,
+  "recusa_correta": "2/2",
+  "citacoes_invalidas": 0,
+  "latencia_media_s": 0.66,
+  "tokens_entrada_medio": 1441,
+  "tokens_saida_medio": 70
+}
+
+gravado em evals\resultados\ragas_modeloB-gemma4_20261010_003837.json

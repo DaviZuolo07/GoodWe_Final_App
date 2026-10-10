@@ -92,4 +92,6 @@ chroma_db/
 .pytest_cache/
 docs/modelos_disponiveis.json
 .gradio/
-evals/resultados/
+# evals/resultados/ é VERSIONADO desde 10/10/2026: os JSONs do RAGAS são a evidência
+# medida das iterações (§7, bloco C/D). Só o rascunho de depuração fica de fora.
+evals/resultados/ragas_debug_*
