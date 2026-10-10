@@ -311,8 +311,16 @@ def chat(mensagem: str, _historico_tela: list, session_id: str):
 
 
 def nova_conversa(session_id: str):
+    """Zera as TRÊS cópias do histórico, não só a da tela.
+
+    O `gr.ChatInterface` (Gradio 6) não lê o `Chatbot` visível ao enviar: ele lê
+    um `gr.State` interno (`chatbot_state`) e o sincroniza depois. Limpar só o
+    `Chatbot` apagava a tela, mas a próxima mensagem ou exemplo clicado
+    re-renderizava a conversa antiga a partir desse estado. Por isso a saída
+    inclui `chatbot_state` e `chatbot_value`, além do `store` da memória RAG.
+    """
     store.pop(session_id, None)
-    return [], painel_fontes(None), str(uuid.uuid4())
+    return [], [], [], painel_fontes(None), str(uuid.uuid4())
 
 
 # --------------------------------------------------------------------------- #
@@ -419,7 +427,7 @@ def montar_interface() -> gr.Blocks:
                                                  "Pergunte sobre o carregador GoodWe HCA G2, a recarga, "
                                                  "o regimento ou a tarifa do condomínio.<br>"
                                                  "Toda resposta vem com a fonte: documento e página.</div>")
-                gr.ChatInterface(
+                conversa = gr.ChatInterface(
                     fn=chat,
                     chatbot=chatbot,
                     textbox=gr.Textbox(placeholder="Pergunte sobre o carregador, a recarga, o regimento ou a tarifa...",
@@ -439,7 +447,9 @@ def montar_interface() -> gr.Blocks:
                 painel.render()
         gr.HTML('<footer class="rodape">EV Challenge 2026 · FIAP × GoodWe Brasil · '
                 'documentos de condomínio fictício de demonstração · a chave do modelo nunca sai do servidor</footer>')
-        limpar.click(nova_conversa, inputs=[sid], outputs=[chatbot, painel, sid])
+        limpar.click(nova_conversa, inputs=[sid],
+                     outputs=[chatbot, conversa.chatbot_state, conversa.chatbot_value, painel, sid],
+                     queue=False)
     return demo
 
 

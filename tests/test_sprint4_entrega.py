@@ -83,6 +83,20 @@ def test_sessoes_nao_compartilham_historico():
     assert app.historico("aba-1").messages == []
 
 
+def test_nova_conversa_zera_o_estado_interno_do_chatinterface():
+    """Regressão: limpar só o Chatbot visível fazia a conversa antiga voltar na
+    próxima mensagem, porque o ChatInterface envia a partir do `chatbot_state`."""
+    demo = app.montar_interface()
+    deps = list(demo.fns.values())
+    # o estado de onde o envio lê o histórico: 2ª entrada do `_submit_fn` do ChatInterface
+    envio = [d for d in deps if getattr(d.fn, "__name__", "") == "_submit_fn"]
+    assert envio
+    estados_de_envio = {d.inputs[1]._id for d in envio}
+    limpeza = [d for d in deps if d.fn is app.nova_conversa][0]
+    saidas = {o._id for o in limpeza.outputs}
+    assert estados_de_envio <= saidas
+
+
 # --------------------------------------------------------------------------- #
 # base expandida e eval set
 # --------------------------------------------------------------------------- #

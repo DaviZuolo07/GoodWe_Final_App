@@ -1,5 +1,39 @@
 # Changelog — Sprint 04
 
+## Fase 7.1 — "Nova conversa" não limpava de verdade (10/10/2026)
+
+Relato de teste manual: depois de "Nova conversa · limpa a memória desta sessão", a tela
+esvaziava, mas a próxima mensagem (ou um exemplo clicado) trazia a conversa antiga de volta.
+
+### Causa
+- O `gr.ChatInterface` do Gradio 6.28 não envia a partir do `Chatbot` visível: o
+  `_submit_fn` recebe o histórico de um `gr.State` interno (`chatbot_state`,
+  `gradio/chat_interface.py:567`) e só o sincroniza com a tela depois. O `nova_conversa`
+  zerava o `Chatbot`, o `store` da memória RAG e o `session_id`, mas não esse estado. A
+  memória RAG estava limpa; o que voltava era a conversa desenhada na tela.
+
+### Corrigido
+- `app/main.py`: `nova_conversa` também zera `chatbot_state` e `chatbot_value` do
+  ChatInterface (`queue=False`, como os eventos internos dele).
+- `tests/test_sprint4_entrega.py`: teste de regressão que confere se o estado lido pelo
+  envio está entre as saídas do botão. Falha com o `app/main.py` anterior e passa com o novo.
+
+### Verificação
+- `python -m pytest tests -q`: **178 passed**.
+- Navegador real (Edge via Playwright, interface subida com `launch`, bot falso no lugar do
+  modelo): enviar 2 perguntas → limpar → enviar → limpar → clicar exemplo.
+  - Código anterior: `apos nova msg: 6 | antigo voltou: True`, `apos clicar exemplo: 8 |
+    voltou: True` → **FALHOU** (reproduz o relato).
+  - Código novo: `logo apos limpar: 0`, `apos nova msg: 2 | antigo voltou: False`,
+    `apos clicar exemplo: 2 | voltou: False`, memória RAG da sessão com 2 mensagens → **OK**.
+
+### Em aberto
+- Clicar em "Nova conversa" **durante** uma resposta em streaming não a cancela. Pela
+  leitura do `chat_interface.py`, o envio já capturou o histórico anterior, então ao
+  terminar ele deve redesenhar a conversa antiga (não testado). A memória RAG não vaza:
+  fica no `session_id` antigo, já descartado. Contorno: parar com o botão ■ antes de
+  limpar. O ChatInterface não expõe os eventos de envio para `cancels=`.
+
 ## Fase 7 — Busca híbrida (iteração 3), apresentação e interface SEMS+ (10/10/2026)
 
 Motivada por teste manual na interface: "Qual a potência do GW22K-HCA-20" e "Do que se
