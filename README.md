@@ -12,12 +12,15 @@ toda resposta, e recusando o que a base não tem.
 
 ## Integrantes
 
-| Nome | RM |
-|---|---|
-| Davi Q. Zuolo | 571669 |
-| Gustavo Zagato | 569420 |
-| Daniel Vilela Mana | 571632 |
-| Kayo Henderson | 570706 |
+| Nome | RM | Sprint 04 |
+|---|---|---|
+| Davi Q. Zuolo | 571669 | responsável: todo o código, relatórios e commits |
+| Gustavo Zagato | 569420 | auditoria da Sprint 04 |
+| Daniel Vilela Mana | 571632 | auditoria da Sprint 04 |
+| Kayo Henderson | 570706 | auditoria da Sprint 04 |
+
+O grupo divide o trabalho por sprint: cada integrante é responsável por duas sprints do
+Challenge. A Sprint 04 ficou com o Davi; os demais fizeram a auditoria.
 
 ## Resultado medido (Sprint 04)
 

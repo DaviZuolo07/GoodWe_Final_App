@@ -53,9 +53,9 @@ O "antes" foi medido em 09/09/2026 com o mesmo `gpt-oss:120b`, no eval set da Sp
 
 | Integrante | RM | Tarefa principal |
 |---|---|---|
-| Davi Q. Zuolo | 571669 | código da Sprint 04 inteiro (pipeline RAG, base de conhecimento, interface, avaliação RAGAS, guardrails) e relatórios; todos os commits do repositório |
-| Gustavo Zagato | 569420 | *(a preencher pelo grupo)* |
-| Daniel Vilela Mana | 571632 | *(a preencher pelo grupo)* |
-| Kayo Henderson | 570706 | *(a preencher pelo grupo)* |
+| Davi Q. Zuolo | 571669 | responsável pela Sprint 04: todo o código (pipeline RAG, base de conhecimento, interface, avaliação RAGAS, guardrails), os relatórios e todos os commits desta sprint |
+| Gustavo Zagato | 569420 | auditoria da Sprint 04 |
+| Daniel Vilela Mana | 571632 | auditoria da Sprint 04 |
+| Kayo Henderson | 570706 | auditoria da Sprint 04 |
 
-O histórico do Git (`git shortlog -sn`) registra os commits; a divisão acima segue o que ele mostra.
+**Como o grupo divide o trabalho.** As tarefas são divididas por sprint: cada integrante é responsável por duas sprints do Challenge. A Sprint 04 ficou com o Davi, que fez todo o trabalho dela; Gustavo, Daniel e Kayo fizeram a auditoria da entrega. Por isso o histórico do Git desta sprint (`git shortlog -sn`) tem só commits do Davi.
